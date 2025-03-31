@@ -4,8 +4,10 @@ __pycache__/
 *.pyc
 
 # 環境変数系
+
 .env
-.env.*
+.env.production
+.env.local
 
 # OSごとの不要ファイル
 .DS_Store
