@@ -1,0 +1,14 @@
+# node_modules など重いものを除外
+node_modules/
+__pycache__/
+*.pyc
+
+# 環境変数系
+.env
+.env.*
+
+# OSごとの不要ファイル
+.DS_Store
+
+# Docker関連
+*.log
