@@ -1,0 +1,524 @@
+🚀 Starting FULL deployment [v20250330-0458]
+
+==> 🔧 Deploying Frontend...
+🚀 Frontend deployment [v20250330-0458]
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 403B 0.0s done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node:18
+#2 ...
+
+#3 [auth] library/node:pull token for registry-1.docker.io
+#3 DONE 0.0s
+
+#4 [internal] load metadata for docker.io/library/node:18-slim
+#4 DONE 1.6s
+
+#2 [internal] load metadata for docker.io/library/node:18
+#2 DONE 1.6s
+
+#5 [internal] load .dockerignore
+#5 transferring context: 2B done
+#5 DONE 0.0s
+
+#6 [internal] load build context
+#6 DONE 0.0s
+
+#7 [stage-1 1/4] FROM docker.io/library/node:18-slim@sha256:3197eb4d1d37f37cc2217dc1a5c01f5d61d840e6299185e72e66fd2a6a698127
+#7 resolve docker.io/library/node:18-slim@sha256:3197eb4d1d37f37cc2217dc1a5c01f5d61d840e6299185e72e66fd2a6a698127 0.0s done
+#7 DONE 0.0s
+
+#8 [builder 1/5] FROM docker.io/library/node:18@sha256:3c56248510700ddb4861bd478ea2ced828793fd5388a21adc5270cdbbf7b7919
+#8 resolve docker.io/library/node:18@sha256:3c56248510700ddb4861bd478ea2ced828793fd5388a21adc5270cdbbf7b7919 0.0s done
+#8 DONE 0.0s
+
+#6 [internal] load build context
+#6 transferring context: 1.25MB 1.7s done
+#6 DONE 1.7s
+
+#9 [stage-1 2/4] WORKDIR /app
+#9 CACHED
+
+#10 [builder 4/5] RUN npm install
+#10 CACHED
+
+#11 [stage-1 3/4] COPY --from=builder /app .
+#11 CACHED
+
+#12 [builder 2/5] WORKDIR /app
+#12 CACHED
+
+#13 [builder 3/5] COPY . .
+#13 CACHED
+
+#14 [builder 5/5] RUN npm run build
+#14 CACHED
+
+#15 [stage-1 4/4] RUN npm install --omit=dev
+#15 CACHED
+
+#16 exporting to image
+#16 exporting layers done
+#16 exporting manifest sha256:2eff175d95966e929eb6cbe69e69bac2ad45cc7eca35ea5998e15181a4c68df8 done
+#16 exporting config sha256:2ad7826eeeeb211b16dc0a1770391fc37f053bc1ec7d7e24f6dec1eaceb7b5b9 done
+#16 exporting attestation manifest sha256:4f2f8643b029b53d66f1d8251136cc0026c447175773b4ca0fbe3e0bb692bf02 0.0s done
+#16 exporting manifest list sha256:7a5950cb6608e2d25e939ea9d1ecdddfb1a205cff6689a26617ca42e76dbf76e
+#16 exporting manifest list sha256:7a5950cb6608e2d25e939ea9d1ecdddfb1a205cff6689a26617ca42e76dbf76e 0.0s done
+#16 naming to wildcats9999.azurecr.io/frontend:v20250330-0458 done
+#16 unpacking to wildcats9999.azurecr.io/frontend:v20250330-0458 0.0s done
+#16 DONE 0.1s
+The push refers to repository [wildcats9999.azurecr.io/frontend]
+27d5a0bd3399: Waiting
+3a2c05976db1: Waiting
+6e909acdb790: Waiting
+299adf5d5dfe: Waiting
+167b9e996842: Waiting
+dfff7234394f: Waiting
+381a30f59f24: Waiting
+904f050805d5: Waiting
+8e2e563a4bb7: Waiting
+27d5a0bd3399: Waiting
+3a2c05976db1: Waiting
+6e909acdb790: Waiting
+299adf5d5dfe: Waiting
+167b9e996842: Waiting
+dfff7234394f: Waiting
+381a30f59f24: Waiting
+904f050805d5: Waiting
+8e2e563a4bb7: Waiting
+dfff7234394f: Layer already exists
+904f050805d5: Waiting
+8e2e563a4bb7: Layer already exists
+167b9e996842: Waiting
+3a2c05976db1: Layer already exists
+6e909acdb790: Layer already exists
+299adf5d5dfe: Layer already exists
+27d5a0bd3399: Layer already exists
+904f050805d5: Layer already exists
+167b9e996842: Waiting
+167b9e996842: Waiting
+381a30f59f24: Pushed
+167b9e996842: Waiting
+167b9e996842: Waiting
+167b9e996842: Waiting
+167b9e996842: Waiting
+167b9e996842: Waiting
+167b9e996842: Waiting
+167b9e996842: Waiting
+167b9e996842: Waiting
+167b9e996842: Waiting
+167b9e996842: Waiting
+167b9e996842: Waiting
+167b9e996842: Waiting
+167b9e996842: Waiting
+167b9e996842: Waiting
+167b9e996842: Waiting
+167b9e996842: Waiting
+167b9e996842: Waiting
+167b9e996842: Waiting
+167b9e996842: Waiting
+167b9e996842: Waiting
+167b9e996842: Waiting
+167b9e996842: Waiting
+167b9e996842: Waiting
+167b9e996842: Waiting
+167b9e996842: Waiting
+167b9e996842: Waiting
+167b9e996842: Waiting
+167b9e996842: Waiting
+167b9e996842: Waiting
+167b9e996842: Waiting
+167b9e996842: Waiting
+167b9e996842: Waiting
+167b9e996842: Waiting
+167b9e996842: Waiting
+167b9e996842: Waiting
+167b9e996842: Waiting
+167b9e996842: Waiting
+167b9e996842: Layer already exists
+v20250330-0458: digest: sha256:7a5950cb6608e2d25e939ea9d1ecdddfb1a205cff6689a26617ca42e76dbf76e size: 856
+WARNING: The behavior of this command has been altered by the following extension: containerapp
+/ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..[K{
+  "id": "/subscriptions/2d8cc7a9-24c6-4c3b-9086-d5a7b036937a/resourceGroups/myResourceGroup/providers/Microsoft.App/containerapps/frontend-container",
+  "identity": {
+    "type": "None"
+  },
+  "location": "Japan East",
+  "name": "frontend-container",
+  "properties": {
+    "configuration": {
+      "activeRevisionsMode": "Single",
+      "dapr": null,
+      "identitySettings": [],
+      "ingress": {
+        "additionalPortMappings": null,
+        "allowInsecure": false,
+        "clientCertificateMode": null,
+        "corsPolicy": null,
+        "customDomains": null,
+        "exposedPort": 0,
+        "external": true,
+        "fqdn": "frontend-container.wittycliff-38392d32.japaneast.azurecontainerapps.io",
+        "ipSecurityRestrictions": null,
+        "stickySessions": null,
+        "targetPort": 3000,
+        "targetPortHttpScheme": null,
+        "traffic": [
+          {
+            "latestRevision": true,
+            "weight": 100
+          }
+        ],
+        "transport": "Auto"
+      },
+      "maxInactiveRevisions": 100,
+      "registries": [
+        {
+          "identity": "",
+          "passwordSecretRef": "wildcats9999azurecrio-wildcats9999",
+          "server": "wildcats9999.azurecr.io",
+          "username": "wildcats9999"
+        }
+      ],
+      "revisionTransitionThreshold": null,
+      "runtime": null,
+      "secrets": [
+        {
+          "name": "wildcats9999azurecrio-wildcats9999"
+        }
+      ],
+      "service": null,
+      "targetLabel": ""
+    },
+    "customDomainVerificationId": "9AB9A27993A09C541B2749BA4B0AAAFAD884A6DD26698A6CE576A7CB3AA90CF9",
+    "delegatedIdentities": [],
+    "environmentId": "/subscriptions/2d8cc7a9-24c6-4c3b-9086-d5a7b036937a/resourceGroups/myResourceGroup/providers/Microsoft.App/managedEnvironments/myContainerEnv",
+    "eventStreamEndpoint": "https://japaneast.azurecontainerapps.dev/subscriptions/2d8cc7a9-24c6-4c3b-9086-d5a7b036937a/resourceGroups/myResourceGroup/containerApps/frontend-container/eventstream",
+    "latestReadyRevisionName": "frontend-container--t9qn8o1",
+    "latestRevisionFqdn": "frontend-container--q782q1k.wittycliff-38392d32.japaneast.azurecontainerapps.io",
+    "latestRevisionName": "frontend-container--q782q1k",
+    "managedEnvironmentId": "/subscriptions/2d8cc7a9-24c6-4c3b-9086-d5a7b036937a/resourceGroups/myResourceGroup/providers/Microsoft.App/managedEnvironments/myContainerEnv",
+    "outboundIpAddresses": [
+      "20.18.118.34",
+      "20.18.117.222",
+      "20.18.118.37",
+      "20.18.118.36",
+      "20.18.118.32",
+      "20.18.116.214",
+      "20.18.118.33",
+      "20.18.117.223",
+      "20.18.118.35",
+      "20.18.232.213",
+      "20.48.86.170",
+      "20.48.86.160",
+      "20.48.86.154",
+      "20.48.86.165",
+      "48.218.81.17",
+      "48.218.80.248",
+      "48.218.80.238",
+      "48.218.81.11",
+      "48.218.81.1",
+      "48.218.80.246",
+      "4.216.133.30",
+      "20.243.233.234",
+      "20.243.233.244",
+      "20.243.233.253",
+      "20.243.234.117",
+      "20.243.234.1",
+      "20.243.234.5",
+      "20.243.234.50",
+      "20.243.233.204",
+      "20.243.235.3",
+      "20.210.72.88",
+      "20.210.72.103",
+      "20.210.72.109",
+      "20.210.72.73",
+      "48.218.158.62",
+      "48.218.158.84",
+      "48.218.158.83",
+      "48.218.158.66",
+      "48.218.158.55",
+      "48.218.158.81",
+      "48.218.80.11"
+    ],
+    "patchingMode": "Automatic",
+    "provisioningState": "Succeeded",
+    "runningStatus": "Running",
+    "template": {
+      "containers": [
+        {
+          "env": [
+            {
+              "name": "NEXT_PUBLIC_API_URL"
+            }
+          ],
+          "image": "wildcats9999.azurecr.io/frontend:v20250330-0458",
+          "imageType": "ContainerImage",
+          "name": "frontend-container",
+          "resources": {
+            "cpu": 0.5,
+            "ephemeralStorage": "2Gi",
+            "memory": "1Gi"
+          }
+        }
+      ],
+      "initContainers": null,
+      "revisionSuffix": "",
+      "scale": {
+        "cooldownPeriod": 300,
+        "maxReplicas": 10,
+        "minReplicas": null,
+        "pollingInterval": 30,
+        "rules": null
+      },
+      "serviceBinds": null,
+      "terminationGracePeriodSeconds": null,
+      "volumes": null
+    },
+    "workloadProfileName": "Consumption"
+  },
+  "resourceGroup": "myResourceGroup",
+  "systemData": {
+    "createdAt": "2025-03-29T14:16:35.362858",
+    "createdBy": "toru09may@gmail.com",
+    "createdByType": "User",
+    "lastModifiedAt": "2025-03-29T19:58:22.9532981",
+    "lastModifiedBy": "toru09may@gmail.com",
+    "lastModifiedByType": "User"
+  },
+  "type": "Microsoft.App/containerApps"
+}
+✅ Frontend updated successfully!
+
+==> 🔧 Deploying Backend...
+🚀 Backend deployment [v20250330-0458]
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 407B done
+#1 DONE 0.0s
+
+#2 [auth] library/python:pull token for registry-1.docker.io
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/python:3.10
+#3 DONE 1.2s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 2B done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 431B done
+#5 DONE 0.0s
+
+#6 [1/5] FROM docker.io/library/python:3.10@sha256:8ad0e578e1b733f2a496b41f179175679374191a9c7ab8c63156446094a9cda8
+#6 resolve docker.io/library/python:3.10@sha256:8ad0e578e1b733f2a496b41f179175679374191a9c7ab8c63156446094a9cda8 0.0s done
+#6 DONE 0.0s
+
+#7 [4/5] RUN pip install --no-cache-dir -r requirements.txt
+#7 CACHED
+
+#8 [2/5] WORKDIR /app
+#8 CACHED
+
+#9 [3/5] COPY requirements.txt .
+#9 CACHED
+
+#10 [5/5] COPY . .
+#10 CACHED
+
+#11 exporting to image
+#11 exporting layers done
+#11 exporting manifest sha256:c8e41a32aa9934ad77ca42e1a8ee2ebb35c84d9c06ae2eb59ca3c90481767168 done
+#11 exporting config sha256:2e2a177604b5c2ce75de6767a19e844e3b753ca7884419b5be213edbfa83c0ee done
+#11 exporting attestation manifest sha256:8352befda7008090fa539048303e2465dd6b7fd913243f971262ee023e351819 0.0s done
+#11 exporting manifest list sha256:bfa768a981f76232199484c6db885ce9d4be08bdfe0962e8f005edf70878b906
+#11 exporting manifest list sha256:bfa768a981f76232199484c6db885ce9d4be08bdfe0962e8f005edf70878b906 0.0s done
+#11 naming to wildcats9999.azurecr.io/backend:v20250330-0458 done
+#11 unpacking to wildcats9999.azurecr.io/backend:v20250330-0458 0.0s done
+#11 DONE 0.1s
+The push refers to repository [wildcats9999.azurecr.io/backend]
+e9c22688316f: Waiting
+d97fb5cc3a3b: Waiting
+57161121b343: Waiting
+255774e0027b: Waiting
+39b470c52f7f: Waiting
+a90d73ac0e51: Waiting
+091eb8249475: Waiting
+7cd785773db4: Waiting
+2285646bcf6f: Waiting
+3aec56e5b68b: Waiting
+353e14e5cc47: Waiting
+0c64566c7562: Waiting
+091eb8249475: Layer already exists
+7cd785773db4: Layer already exists
+2285646bcf6f: Waiting
+3aec56e5b68b: Layer already exists
+353e14e5cc47: Layer already exists
+0c64566c7562: Layer already exists
+39b470c52f7f: Layer already exists
+a90d73ac0e51: Layer already exists
+e9c22688316f: Layer already exists
+d97fb5cc3a3b: Layer already exists
+57161121b343: Layer already exists
+255774e0027b: Layer already exists
+2285646bcf6f: Pushed
+v20250330-0458: digest: sha256:bfa768a981f76232199484c6db885ce9d4be08bdfe0962e8f005edf70878b906 size: 856
+WARNING: The behavior of this command has been altered by the following extension: containerapp
+/ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..[K{
+  "id": "/subscriptions/2d8cc7a9-24c6-4c3b-9086-d5a7b036937a/resourceGroups/myResourceGroup/providers/Microsoft.App/containerapps/backend-container",
+  "identity": {
+    "type": "None"
+  },
+  "location": "Japan East",
+  "name": "backend-container",
+  "properties": {
+    "configuration": {
+      "activeRevisionsMode": "Single",
+      "dapr": null,
+      "identitySettings": [],
+      "ingress": {
+        "additionalPortMappings": null,
+        "allowInsecure": false,
+        "clientCertificateMode": null,
+        "corsPolicy": null,
+        "customDomains": null,
+        "exposedPort": 0,
+        "external": false,
+        "fqdn": "backend-container.internal.wittycliff-38392d32.japaneast.azurecontainerapps.io",
+        "ipSecurityRestrictions": null,
+        "stickySessions": null,
+        "targetPort": 8000,
+        "targetPortHttpScheme": null,
+        "traffic": [
+          {
+            "latestRevision": true,
+            "weight": 100
+          }
+        ],
+        "transport": "Auto"
+      },
+      "maxInactiveRevisions": null,
+      "registries": [
+        {
+          "identity": "",
+          "passwordSecretRef": "wildcats9999azurecrio-wildcats9999",
+          "server": "wildcats9999.azurecr.io",
+          "username": "wildcats9999"
+        }
+      ],
+      "revisionTransitionThreshold": null,
+      "runtime": null,
+      "secrets": [
+        {
+          "name": "wildcats9999azurecrio-wildcats9999"
+        }
+      ],
+      "service": null,
+      "targetLabel": ""
+    },
+    "customDomainVerificationId": "9AB9A27993A09C541B2749BA4B0AAAFAD884A6DD26698A6CE576A7CB3AA90CF9",
+    "delegatedIdentities": [],
+    "environmentId": "/subscriptions/2d8cc7a9-24c6-4c3b-9086-d5a7b036937a/resourceGroups/myResourceGroup/providers/Microsoft.App/managedEnvironments/myContainerEnv",
+    "eventStreamEndpoint": "https://japaneast.azurecontainerapps.dev/subscriptions/2d8cc7a9-24c6-4c3b-9086-d5a7b036937a/resourceGroups/myResourceGroup/containerApps/backend-container/eventstream",
+    "latestReadyRevisionName": "backend-container--m8wxu1m",
+    "latestRevisionFqdn": "backend-container--fdqm1j3.internal.wittycliff-38392d32.japaneast.azurecontainerapps.io",
+    "latestRevisionName": "backend-container--fdqm1j3",
+    "managedEnvironmentId": "/subscriptions/2d8cc7a9-24c6-4c3b-9086-d5a7b036937a/resourceGroups/myResourceGroup/providers/Microsoft.App/managedEnvironments/myContainerEnv",
+    "outboundIpAddresses": [
+      "20.18.118.34",
+      "20.18.117.222",
+      "20.18.118.37",
+      "20.18.118.36",
+      "20.18.118.32",
+      "20.18.116.214",
+      "20.18.118.33",
+      "20.18.117.223",
+      "20.18.118.35",
+      "20.18.232.213",
+      "20.48.86.170",
+      "20.48.86.160",
+      "20.48.86.154",
+      "20.48.86.165",
+      "48.218.81.17",
+      "48.218.80.248",
+      "48.218.80.238",
+      "48.218.81.11",
+      "48.218.81.1",
+      "48.218.80.246",
+      "4.216.133.30",
+      "20.243.233.234",
+      "20.243.233.244",
+      "20.243.233.253",
+      "20.243.234.117",
+      "20.243.234.1",
+      "20.243.234.5",
+      "20.243.234.50",
+      "20.243.233.204",
+      "20.243.235.3",
+      "20.210.72.88",
+      "20.210.72.103",
+      "20.210.72.109",
+      "20.210.72.73",
+      "48.218.158.62",
+      "48.218.158.84",
+      "48.218.158.83",
+      "48.218.158.66",
+      "48.218.158.55",
+      "48.218.158.81",
+      "48.218.80.11"
+    ],
+    "patchingMode": "Automatic",
+    "provisioningState": "Succeeded",
+    "runningStatus": "Running",
+    "template": {
+      "containers": [
+        {
+          "env": [
+            {
+              "name": "DATABASE_URL"
+            }
+          ],
+          "image": "wildcats9999.azurecr.io/backend:v20250330-0458",
+          "imageType": "ContainerImage",
+          "name": "backend-container",
+          "resources": {
+            "cpu": 0.5,
+            "ephemeralStorage": "2Gi",
+            "memory": "1Gi"
+          }
+        }
+      ],
+      "initContainers": null,
+      "revisionSuffix": "",
+      "scale": {
+        "cooldownPeriod": 300,
+        "maxReplicas": 10,
+        "minReplicas": null,
+        "pollingInterval": 30,
+        "rules": null
+      },
+      "serviceBinds": null,
+      "terminationGracePeriodSeconds": null,
+      "volumes": null
+    },
+    "workloadProfileName": "Consumption"
+  },
+  "resourceGroup": "myResourceGroup",
+  "systemData": {
+    "createdAt": "2025-03-29T07:21:12.1935701",
+    "createdBy": "toru09may@gmail.com",
+    "createdByType": "User",
+    "lastModifiedAt": "2025-03-29T19:58:41.9819538",
+    "lastModifiedBy": "toru09may@gmail.com",
+    "lastModifiedByType": "User"
+  },
+  "type": "Microsoft.App/containerApps"
+}
+✅ Backend updated successfully!
+
+✅ Full deployment completed! [v20250330-0458]
