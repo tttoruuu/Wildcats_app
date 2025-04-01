@@ -62,9 +62,17 @@ Wildcats_app/
 📄 ライセンス
 MIT License
 
-yaml
-コピーする
-編集する
+
+### 🗃 5. データベースの初期データについて
+
+初回起動時、MySQLのデータベースには自動的に初期データ（`users` テーブルとサンプルユーザー）が登録されます。  
+これらの初期データは `db/init/init.sql` に定義されています。
+
+```sql
+-- 初期データ例
+INSERT INTO users (name, email) VALUES
+('山田 太郎', 'yamada@example.com'),
+('佐藤 花子', 'sato@example.com');
 
 ---
 
