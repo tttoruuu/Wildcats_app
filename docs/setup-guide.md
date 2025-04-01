@@ -40,6 +40,12 @@ cp db/.env.example db/.env
 docker compose up --build
 初回はビルドに数分かかることがあります
 
+ --いつbuild する？
+　Dockerfile を変更したとき（例：パッケージ追加など）
+　requirements.txt や package.json を変更したとき
+　.dockerignore を追加・編集したとき
+　＊コード変更のみならリアルタイムで反映されている
+
 起動後、自動的に以下のURLにアクセスできます：
 
 サービス名	アクセスURL
@@ -63,4 +69,16 @@ docker compose down
 🎉 お疲れさまでした！
 以上でセットアップは完了です！何か分からないことがあれば、チームに気軽に聞いてください。
 
+## 8. データベースの中身を確認したいとき
+
+MySQLに入ってテーブルやデータを直接確認することもできます。
+
+# コンテナに入る
+docker exec -it mysql-db mysql -u root -p
+# パスワードは .env で設定した MYSQL_ROOT_PASSWORD（例: rootpass）
+
+# 中に入ったら以下のように操作できます
+USE app_db;
+SHOW TABLES;
+SELECT * FROM users;
 

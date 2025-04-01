@@ -10,15 +10,20 @@ services:
       MYSQL_DATABASE: testdb
       MYSQL_USER: user
       MYSQL_PASSWORD: password
+      MYSQL_CHARSET: utf8mb4
+      MYSQL_COLLATION: utf8mb4_unicode_ci
     ports:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+      - ./db/init:/docker-entrypoint-initdb.d
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 30s
 
   backend:
     build: ./backend
@@ -27,13 +32,13 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     environment:
-      DATABASE_URL: mysql+pymysql://user:password@mysql:3306/testdb
+      DATABASE_URL: mysql+pymysql://user:password@mysql:3306/testdb?charset=utf8mb4
     volumes:
       - ./backend:/app
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-
 
   frontend:
     build: ./frontend
@@ -44,13 +49,12 @@ services:
     depends_on:
       - backend
     volumes:
-      - ./frontend:/app        # ← コード変更を即反映！
-      - /app/node_modules      # ← node_modules は除外しておく
+      - ./frontend:/app
+      - /app/node_modules
     working_dir: /app
-    command: npm run dev       # ← Next.jsを開発モードで起動！
+    command: npm run dev
     environment:
-      - NEXT_PUBLIC_API_URL=http://backend:8000
-
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
 
 volumes:
   mysql_data:
