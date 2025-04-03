@@ -1,18 +1,29 @@
-# 開発ビルドステージ
-FROM node:18 AS builder
+# ビルドステージ
+FROM node:18-alpine AS builder
 WORKDIR /app
 
-ARG NEXT_PUBLIC_API_URL
-RUN echo "NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL" > .env.production
+COPY package*.json ./
+RUN npm install
 
 COPY . .
-RUN npm install
 RUN npm run build
 
 # 本番ランタイムステージ
-FROM node:18-slim
+FROM node:18-alpine
 WORKDIR /app
-COPY --from=builder /app .
-RUN npm install --omit=dev
+
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/node_modules ./node_modules
+
+ENV NODE_ENV=production
 EXPOSE 3000
+
 CMD ["npm", "start"]
+
+# 開発環境用の設定
+ENV NODE_ENV=development
+
+# 開発サーバーを起動
+CMD ["npm", "run", "dev"]
