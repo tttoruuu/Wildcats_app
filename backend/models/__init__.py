@@ -1,3 +1,4 @@
-from .user import Base, User
+from .user import User
+from . import schemas, auth
 
-__all__ = ['Base', 'User'] 
+__all__ = ['User', 'schemas', 'auth'] 

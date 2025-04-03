@@ -18,4 +18,4 @@ ENV FRONTEND_ORIGIN=http://localhost:3000
 COPY . .
 
 # アプリ起動コマンド
-CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
