@@ -14,23 +14,17 @@ env_path = current_dir / ".env"
 # .envファイルを読み込み
 load_dotenv(dotenv_path=env_path)
 
-DATABASE_URL = os.getenv("DATABASE_URL")
-if not DATABASE_URL:
-    print("環境変数DATABASE_URLが設定されていません")
-    print(f"環境変数を探しているパス: {env_path}")
-    print(f"現在の環境変数: {os.environ}")
-    raise ValueError("DATABASE_URL is not set in environment variables")
+# データベース接続設定
+SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "mysql+pymysql://root:password@db:3306/testdb")
 
-engine = create_engine(
-    DATABASE_URL,
-    echo=True,
-    pool_pre_ping=True,
-    pool_recycle=3600
-)
+# エンジン作成とセッションの設定
+engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+# モデル定義用のベースクラス
 Base = declarative_base()
 
+# データベースセッションの依存関係
 def get_db():
     db = SessionLocal()
     try:

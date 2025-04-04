@@ -12,22 +12,26 @@ export default function Header() {
 
     const fetchUser = async () => {
       try {
+        console.log('Fetching user with token:', token);
         const response = await axios.get('http://localhost:8000/me', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setUser(response.data);
+        console.log('User data fetched successfully:', response.data);
       } catch (err) {
         console.error('ユーザー情報の取得に失敗しました。', err);
         // 認証エラー（401）の場合はトークンをクリア
         if (err.response && err.response.status === 401) {
           console.log('認証エラー: トークンが無効または期限切れです。');
           localStorage.removeItem('token');
+          // ログインページにリダイレクト
+          router.push('/auth/login');
         }
       }
     };
 
     fetchUser();
-  }, []);
+  }, [router]);
 
   if (!user) return null;
 

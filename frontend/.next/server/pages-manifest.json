@@ -2,6 +2,7 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/": "pages/index.js",
-  "/auth/login": "pages/auth/login.js"
+  "/conversation": "pages/conversation.js",
+  "/conversation/register": "pages/conversation/register.js",
+  "/conversation/partners": "pages/conversation/partners.js"
 }
