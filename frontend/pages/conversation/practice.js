@@ -5,7 +5,7 @@ import Layout from '../../components/Layout';
 
 export default function ConversationPractice() {
   const router = useRouter();
-  const { partnerId } = router.query;
+  const { partnerId, meetingCount, scenario } = router.query;
   const [partner, setPartner] = useState(null);
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
@@ -31,11 +31,30 @@ export default function ConversationPractice() {
 
         setPartner(response.data);
         
-        // 初期メッセージを追加
+        // 初期メッセージを追加（シナリオと会合回数に基づく）
+        let initialMessage = 'こんにちは！今日はどんなことについて話しましょうか？';
+        
+        if (meetingCount === 'first') {
+          initialMessage = 'はじめまして！お会いできて嬉しいです。';
+        } else if (meetingCount === '2-3') {
+          initialMessage = 'また会えましたね！前回はとても楽しかったです。';
+        } else if (meetingCount === 'more') {
+          initialMessage = 'いつもお会いできて嬉しいです。最近どうでしたか？';
+        }
+
+        // シナリオに応じてメッセージを追加
+        if (scenario === '自己紹介') {
+          initialMessage += ' まずは、自己紹介からお願いします。';
+        } else if (scenario === '休日の過ごし方や趣味について') {
+          initialMessage += ' 休日はどのように過ごしていますか？';
+        } else if (scenario === '仕事や学びについて') {
+          initialMessage += ' お仕事や最近学んでいることについて教えてください。';
+        }
+        
         setMessages([
           {
             sender: 'partner',
-            text: 'こんにちは！今日はどんなことについて話しましょうか？',
+            text: initialMessage,
           },
         ]);
       } catch (err) {
@@ -53,7 +72,7 @@ export default function ConversationPractice() {
     };
 
     fetchPartner();
-  }, [partnerId, router]);
+  }, [partnerId, router, meetingCount, scenario]);
 
   // ダミーデータ（バックエンドAPI実装までの仮実装）
   useEffect(() => {
@@ -70,17 +89,37 @@ export default function ConversationPractice() {
       const foundPartner = dummyPartners.find(p => p.id === partnerId);
       if (foundPartner) {
         setPartner(foundPartner);
-        // 初期メッセージを追加
+        
+        // 初期メッセージを追加（シナリオと会合回数に基づく）
+        let initialMessage = 'こんにちは！今日はどんなことについて話しましょうか？';
+        
+        if (meetingCount === 'first') {
+          initialMessage = 'はじめまして！お会いできて嬉しいです。';
+        } else if (meetingCount === '2-3') {
+          initialMessage = 'また会えましたね！前回はとても楽しかったです。';
+        } else if (meetingCount === 'more') {
+          initialMessage = 'いつもお会いできて嬉しいです。最近どうでしたか？';
+        }
+
+        // シナリオに応じてメッセージを追加
+        if (scenario === '自己紹介') {
+          initialMessage += ' まずは、自己紹介からお願いします。';
+        } else if (scenario === '休日の過ごし方や趣味について') {
+          initialMessage += ' 休日はどのように過ごしていますか？';
+        } else if (scenario === '仕事や学びについて') {
+          initialMessage += ' お仕事や最近学んでいることについて教えてください。';
+        }
+        
         setMessages([
           {
             sender: 'partner',
-            text: 'こんにちは！今日はどんなことについて話しましょうか？',
+            text: initialMessage,
           },
         ]);
       }
       setLoading(false);
     }
-  }, [partnerId, loading, partner]);
+  }, [partnerId, loading, partner, meetingCount, scenario]);
 
   // スクロールを最下部に自動調整
   useEffect(() => {
@@ -99,16 +138,48 @@ export default function ConversationPractice() {
       setInputMessage('');
 
       // 実際の実装では、APIを呼び出してChatGPTからの応答を取得
-      // ここではシンプルな応答をシミュレート
+      // ここではシナリオに応じた応答をシミュレート
       setTimeout(() => {
-        const partnerResponses = [
-          'なるほど、それは興味深いですね。もう少し詳しく教えてもらえますか？',
-          'それについては私も考えたことがあります。私の意見としては...',
-          'そうなんですね！私も似たような経験があります。',
-          'それは素晴らしいですね。他にはどんなことに興味がありますか？',
-          'そのテーマについて、もう少し違う視点から考えてみるのはどうでしょう？',
-        ];
+        // シナリオに応じた応答を生成
+        let partnerResponses;
         
+        if (scenario === '自己紹介') {
+          partnerResponses = [
+            'ご自己紹介ありがとうございます！私も自己紹介させてください。',
+            'なるほど、趣味や好きなことについてもう少し教えていただけますか？',
+            'お仕事はどのようなことをされているんですか？',
+            '初めてのお見合いでも会話が弾んで嬉しいです。',
+            'そうなんですね。私も同じような経験があります。',
+          ];
+        } else if (scenario === '休日の過ごし方や趣味について') {
+          partnerResponses = [
+            'それは素敵な趣味ですね！私も休日は自然の中で過ごすことが多いです。',
+            '休日の過ごし方から、あなたの人柄が伝わってきます。',
+            'その趣味を始めたきっかけは何だったんですか？',
+            '私も実は同じことに興味があります。もっと詳しく教えてもらえますか？',
+            '休日の楽しみ方って大切ですよね。心がリフレッシュされます。',
+          ];
+        } else if (scenario === '仕事や学びについて') {
+          partnerResponses = [
+            'そのお仕事、とても興味深いですね。大変なこともあるのではないですか？',
+            'キャリアについての考え方が素敵です。私も参考にしたいです。',
+            '最近、新しく学んでいることはありますか？',
+            'お仕事での経験が人生観にも影響していそうですね。',
+            '私も実は似たような分野に興味があります。何かアドバイスがあれば聞きたいです。',
+          ];
+        } else {
+          // デフォルトの応答
+          partnerResponses = [
+            'なるほど、それは興味深いですね。もう少し詳しく教えていただけますか？',
+            'それについては私も考えたことがあります。私の意見としては...',
+            'そうなんですね！私も似たような経験があります。',
+            'それは素晴らしいですね。他にはどんなことに興味がありますか？',
+            'そのテーマについて、もう少し違う視点から考えてみるのはどうでしょう？',
+          ];
+        }
+        
+        // 会話の流れを考慮して適切な応答を選択
+        // 単純な実装ではランダムに選択
         const randomResponse = partnerResponses[Math.floor(Math.random() * partnerResponses.length)];
         const partnerMessage = { sender: 'partner', text: randomResponse };
         
@@ -128,6 +199,8 @@ export default function ConversationPractice() {
         'http://localhost:8000/conversation',
         {
           partnerId,
+          meetingCount,
+          scenario,
           message: inputMessage.trim(),
         },
         {
