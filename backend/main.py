@@ -5,9 +5,13 @@ from datetime import timedelta
 import shutil
 import os
 from dotenv import load_dotenv
-from database import SessionLocal, engine, Base
+from database import SessionLocal, engine, Base, get_db
 from models.user import User
-from models import schemas, auth
+from models.conversation_partner import ConversationPartner
+from models import schemas
+from auth.password import get_password_hash, verify_password
+from auth.jwt import create_access_token, get_current_user
+from routers import conversation_partners
 
 # データベースのテーブルを作成
 Base.metadata.create_all(bind=engine)
@@ -29,6 +33,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# 会話相手APIルーターの追加
+app.include_router(conversation_partners.router)
 
 # データベースセッションの依存関係
 def get_db():
@@ -76,7 +83,7 @@ def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
     if db_user:
         raise HTTPException(status_code=400, detail="Username already registered")
     
-    hashed_password = auth.get_password_hash(user.password)
+    hashed_password = get_password_hash(user.password)
     db_user = User(
         username=user.username,
         password_hash=hashed_password,
@@ -95,23 +102,23 @@ def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
 @app.post("/login", response_model=schemas.Token)
 def login(user_data: schemas.UserLogin, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.username == user_data.username).first()
-    if not user or not auth.verify_password(user_data.password, user.password_hash):
+    if not user or not verify_password(user_data.password, user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    access_token = auth.create_access_token(data={"sub": user.username})
+    access_token = create_access_token(data={"sub": user.username})
     return {"access_token": access_token, "token_type": "bearer"}
 
 @app.get("/me", response_model=schemas.UserResponse)
-def read_users_me(current_user: User = Depends(auth.get_current_user)):
+def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
 
 @app.post("/upload-profile-image")
 def upload_profile_image(
     file: UploadFile = File(...),
-    current_user: User = Depends(auth.get_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     # ファイルの拡張子を取得

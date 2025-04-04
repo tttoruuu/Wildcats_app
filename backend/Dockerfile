@@ -15,7 +15,12 @@ ENV ENV=production
 ENV FRONTEND_ORIGIN=http://localhost:3000
 
 # アプリのコードをすべてコピー
-COPY . .
+COPY ./models ./models
+COPY ./routers ./routers
+COPY ./schemas ./schemas
+COPY ./auth ./auth
+COPY ./main.py ./
+COPY ./database.py ./
 
 # アプリ起動コマンド
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

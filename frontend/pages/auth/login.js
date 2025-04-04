@@ -15,9 +15,13 @@ export default function Login() {
 
   const onSubmit = async (data) => {
     try {
+      console.log('ログイン開始:', data.username);
       const response = await axios.post('http://localhost:8000/login', data);
+      console.log('ログイン応答:', response.data);
+      
       if (response.data.access_token) {
         localStorage.setItem('token', response.data.access_token);
+        console.log('トークンをローカルストレージに保存:', response.data.access_token);
         setShowSuccessPopup(true);
         // 3秒後にホーム画面にリダイレクト
         setTimeout(() => {
@@ -25,6 +29,7 @@ export default function Login() {
         }, 3000);
       }
     } catch (err) {
+      console.error('ログインエラー:', err);
       setError('ログインに失敗しました。ユーザー名とパスワードを確認してください。');
     }
   };
