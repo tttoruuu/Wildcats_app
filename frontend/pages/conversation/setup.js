@@ -1,0 +1,227 @@
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
+import Layout from '../../components/Layout';
+
+export default function ConversationSetup() {
+  const router = useRouter();
+  const { partnerId } = router.query;
+  
+  const [partner, setPartner] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [meetingCount, setMeetingCount] = useState('first');
+  const [scenario, setScenario] = useState('');
+  const [showScenarioOptions, setShowScenarioOptions] = useState(false);
+  
+  // シナリオオプション
+  const scenarioOptions = [
+    { value: '自己紹介', label: '自己紹介' },
+    { value: '休日の過ごし方や趣味について', label: '休日の過ごし方や趣味について' },
+    { value: '仕事や学びについて', label: '仕事や学びについて' },
+  ];
+
+  useEffect(() => {
+    if (!partnerId) return;
+    
+    const fetchPartnerData = () => {
+      try {
+        // ローカルストレージから会話相手のデータを取得
+        const storedPartners = JSON.parse(localStorage.getItem('conversationPartners') || '[]');
+        const selectedPartner = storedPartners.find(p => p.id === partnerId);
+        
+        if (selectedPartner) {
+          setPartner(selectedPartner);
+        } else {
+          // パートナーが見つからない場合、サンプルデータから検索
+          const samplePartners = [
+            { id: '1', name: 'あいさん', age: 37, hometown: '東京都', hobbies: '料理、旅行', dailyRoutine: '公園を散歩したり、カフェでのんびり過ごします' },
+            { id: '2', name: 'ゆうりさん', age: 37, hometown: '北海道', hobbies: '読書、映画鑑賞', dailyRoutine: '図書館で過ごすことが多いです' },
+            { id: '3', name: 'しおりさん', age: 37, hometown: '大阪府', hobbies: 'ヨガ、料理', dailyRoutine: '朝は早起きしてヨガをしています' },
+            { id: '4', name: 'かおりさん', age: 37, hometown: '愛知県', hobbies: 'ガーデニング、写真撮影', dailyRoutine: '植物の手入れをしたり、近所を散策します' },
+          ];
+          
+          const samplePartner = samplePartners.find(p => p.id === partnerId);
+          if (samplePartner) {
+            setPartner(samplePartner);
+          } else {
+            // それでも見つからない場合はエラー
+            console.error('パートナーが見つかりません');
+          }
+        }
+      } catch (error) {
+        console.error('パートナーデータの取得に失敗しました:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPartnerData();
+  }, [partnerId]);
+
+  const handleMeetingCountChange = (value) => {
+    setMeetingCount(value);
+  };
+
+  const toggleScenarioDropdown = () => {
+    setShowScenarioOptions(!showScenarioOptions);
+  };
+
+  const selectScenario = (scenarioValue) => {
+    setScenario(scenarioValue);
+    setShowScenarioOptions(false);
+  };
+
+  const handleStartPractice = () => {
+    if (!scenario) {
+      alert('シナリオを選択してください');
+      return;
+    }
+    
+    // 会話練習ページに遷移
+    router.push({
+      pathname: '/conversation/practice',
+      query: { 
+        partnerId,
+        meetingCount,
+        scenario 
+      }
+    });
+  };
+
+  return (
+    <Layout title="会話設定">
+      <div className="flex flex-col items-center min-h-screen bg-gray-800 text-white p-4 pb-20">
+        <div className="max-w-md w-full">
+          <h1 className="text-2xl font-bold mt-8 mb-6 text-center">どのように会話練習をしますか？</h1>
+          
+          {/* イラスト */}
+          <div className="flex justify-center mb-8">
+            <img 
+              src="/conversation-illust.png" 
+              alt="会話練習" 
+              className="w-32 h-32"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23333'/%3E%3Ctext x='50' y='50' font-family='Arial' font-size='12' fill='%23FFF' text-anchor='middle' alignment-baseline='middle'%3E会話%3C/text%3E%3C/svg%3E";
+              }}
+            />
+          </div>
+          
+          {loading ? (
+            <div className="text-center py-4">読み込み中...</div>
+          ) : (
+            <>
+              {/* 誰と話すか */}
+              <div className="mb-6">
+                <label className="block text-sm mb-2">誰と話しますか？</label>
+                <input
+                  type="text"
+                  value={partner?.name || ''}
+                  className="w-full p-4 rounded-full bg-white text-gray-800 focus:outline-none"
+                  readOnly
+                />
+              </div>
+              
+              {/* 何回目の会合か */}
+              <div className="mb-6">
+                <label className="block text-sm mb-2">何回目のお見合いですか？</label>
+                <div className="bg-white rounded-full p-1 flex">
+                  <button
+                    className={`flex-1 py-2 px-3 rounded-full ${meetingCount === 'first' ? 'bg-orange-300 text-white' : 'text-gray-800'}`}
+                    onClick={() => handleMeetingCountChange('first')}
+                  >
+                    初めて
+                  </button>
+                  <button
+                    className={`flex-1 py-2 px-3 rounded-full ${meetingCount === '2-3' ? 'bg-orange-300 text-white' : 'text-gray-800'}`}
+                    onClick={() => handleMeetingCountChange('2-3')}
+                  >
+                    2〜3回
+                  </button>
+                  <button
+                    className={`flex-1 py-2 px-3 rounded-full ${meetingCount === 'more' ? 'bg-orange-300 text-white' : 'text-gray-800'}`}
+                    onClick={() => handleMeetingCountChange('more')}
+                  >
+                    それ以上
+                  </button>
+                </div>
+              </div>
+              
+              {/* シナリオ選択 */}
+              <div className="mb-8 relative">
+                <label className="block text-sm mb-2">シナリオを選択してください</label>
+                <div 
+                  className="w-full p-4 rounded-lg bg-white text-gray-800 focus:outline-none cursor-pointer flex justify-between items-center"
+                  onClick={toggleScenarioDropdown}
+                >
+                  <span>{scenario || '選択してください'}</span>
+                  <span className="text-xl">{showScenarioOptions ? '×' : '▼'}</span>
+                </div>
+                
+                {showScenarioOptions && (
+                  <div className="absolute w-full bg-white text-gray-800 rounded-lg mt-1 shadow-lg z-10">
+                    {scenarioOptions.map((option) => (
+                      <div 
+                        key={option.value}
+                        className="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-200"
+                        onClick={() => selectScenario(option.value)}
+                      >
+                        {option.label}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              
+              {/* 練習開始ボタン */}
+              <button
+                onClick={handleStartPractice}
+                className="w-full bg-orange-300 text-white rounded-full py-3 font-medium hover:bg-orange-400"
+              >
+                会話開始
+              </button>
+              
+              {/* 戻るボタン */}
+              <div className="text-center mt-4">
+                <button
+                  onClick={() => router.back()}
+                  className="text-gray-400 hover:text-white"
+                >
+                  戻る
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+        
+        {/* 画面下部のナビゲーション */}
+        <div className="fixed bottom-0 w-full max-w-md py-4 bg-gray-800 border-t border-gray-700">
+          <div className="flex justify-between px-12">
+            <button
+              onClick={() => router.push('/')}
+              className="text-orange-300 flex flex-col items-center"
+            >
+              <span className="text-2xl">⌂</span>
+              <span className="text-xs">Home</span>
+            </button>
+            
+            <button
+              onClick={() => router.push('/favorites')}
+              className="text-gray-400 flex flex-col items-center"
+            >
+              <span className="text-2xl">♡</span>
+              <span className="text-xs">いいね</span>
+            </button>
+            
+            <button
+              onClick={() => router.push('/profile')}
+              className="text-gray-400 flex flex-col items-center"
+            >
+              <span className="text-2xl">👤</span>
+              <span className="text-xs">Profile</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </Layout>
+  );
+} 

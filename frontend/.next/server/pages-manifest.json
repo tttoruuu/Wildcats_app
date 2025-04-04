@@ -3,6 +3,7 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/conversation": "pages/conversation.js",
-  "/conversation/register": "pages/conversation/register.js",
-  "/conversation/partners": "pages/conversation/partners.js"
+  "/conversation/setup": "pages/conversation/setup.js",
+  "/": "pages/index.js",
+  "/conversation/practice": "pages/conversation/practice.js"
 }

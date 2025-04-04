@@ -25,15 +25,15 @@ globalThis.__BUILD_MANIFEST = {
       "static/chunks/main.js",
       "static/chunks/pages/conversation.js"
     ],
-    "/conversation/partners": [
+    "/conversation/practice": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/conversation/partners.js"
+      "static/chunks/pages/conversation/practice.js"
     ],
-    "/conversation/register": [
+    "/conversation/setup": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/conversation/register.js"
+      "static/chunks/pages/conversation/setup.js"
     ]
   },
   "ampFirstPages": []

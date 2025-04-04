@@ -53,8 +53,8 @@ export default function ConversationIndex() {
 
   const handleNext = () => {
     if (selectedPartner) {
-      // 選択された相手のIDをクエリパラメータとして渡す
-      router.push(`/conversation/practice?partnerId=${selectedPartner}`);
+      // 選択された相手のIDをクエリパラメータとして渡し、セットアップページに遷移
+      router.push(`/conversation/setup?partnerId=${selectedPartner}`);
     }
   };
 
