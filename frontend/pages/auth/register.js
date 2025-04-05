@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { useForm } from 'react-hook-form';
-import axios from 'axios';
 import Link from 'next/link';
 import Layout from '../../components/Layout';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
+import apiService from '../../services/api';
 
 export default function Register() {
   const router = useRouter();
@@ -19,19 +19,22 @@ export default function Register() {
       const birthDate = new Date(data.birth_date);
       const formattedBirthDate = birthDate.toISOString().split('T')[0];
 
-      const response = await axios.post('http://localhost:8000/register', {
+      // apiService.auth.register()を使用してユーザー登録
+      const userData = {
         ...data,
         birth_date: formattedBirthDate
-      });
+      };
+      
+      const response = await apiService.auth.register(userData);
 
-      if (response.status === 200) {
-        setShowSuccessPopup(true);
-        // 3秒後にログイン画面にリダイレクト
-        setTimeout(() => {
-          router.push('/auth/login');
-        }, 3000);
-      }
+      // 登録成功時の処理
+      setShowSuccessPopup(true);
+      // 3秒後にログイン画面にリダイレクト
+      setTimeout(() => {
+        router.push('/auth/login');
+      }, 3000);
     } catch (err) {
+      console.error('登録エラー:', err);
       setError('登録に失敗しました。入力内容を確認してください。');
     }
   };

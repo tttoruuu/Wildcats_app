@@ -10,6 +10,11 @@ globalThis.__BUILD_MANIFEST = {
   "rootMainFiles": [],
   "rootMainFilesTree": {},
   "pages": {
+    "/": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/index.js"
+    ],
     "/_app": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
@@ -20,15 +25,20 @@ globalThis.__BUILD_MANIFEST = {
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
+    "/auth/login": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/auth/login.js"
+    ],
     "/conversation": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
       "static/chunks/pages/conversation.js"
     ],
-    "/conversation/practice": [
+    "/conversation/register": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/conversation/practice.js"
+      "static/chunks/pages/conversation/register.js"
     ],
     "/conversation/setup": [
       "static/chunks/webpack.js",

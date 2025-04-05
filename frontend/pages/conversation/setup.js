@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Layout from '../../components/Layout';
+import apiService from '../../services/api';
 
 export default function ConversationSetup() {
   const router = useRouter();
@@ -8,6 +9,7 @@ export default function ConversationSetup() {
   
   const [partner, setPartner] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [meetingCount, setMeetingCount] = useState('first');
   const [scenario, setScenario] = useState('');
   const [showScenarioOptions, setShowScenarioOptions] = useState(false);
@@ -22,40 +24,42 @@ export default function ConversationSetup() {
   useEffect(() => {
     if (!partnerId) return;
     
-    const fetchPartnerData = () => {
+    const fetchPartnerData = async () => {
       try {
-        // ローカルストレージから会話相手のデータを取得
-        const storedPartners = JSON.parse(localStorage.getItem('conversationPartners') || '[]');
-        const selectedPartner = storedPartners.find(p => p.id === partnerId);
-        
-        if (selectedPartner) {
-          setPartner(selectedPartner);
-        } else {
-          // パートナーが見つからない場合、サンプルデータから検索
-          const samplePartners = [
-            { id: '1', name: 'あいさん', age: 37, hometown: '東京都', hobbies: '料理、旅行', dailyRoutine: '公園を散歩したり、カフェでのんびり過ごします' },
-            { id: '2', name: 'ゆうりさん', age: 37, hometown: '北海道', hobbies: '読書、映画鑑賞', dailyRoutine: '図書館で過ごすことが多いです' },
-            { id: '3', name: 'しおりさん', age: 37, hometown: '大阪府', hobbies: 'ヨガ、料理', dailyRoutine: '朝は早起きしてヨガをしています' },
-            { id: '4', name: 'かおりさん', age: 37, hometown: '愛知県', hobbies: 'ガーデニング、写真撮影', dailyRoutine: '植物の手入れをしたり、近所を散策します' },
-          ];
-          
-          const samplePartner = samplePartners.find(p => p.id === partnerId);
-          if (samplePartner) {
-            setPartner(samplePartner);
-          } else {
-            // それでも見つからない場合はエラー
-            console.error('パートナーが見つかりません');
-          }
-        }
+        setLoading(true);
+        // APIから会話相手の詳細データを取得
+        const partnerData = await apiService.partners.getPartner(partnerId);
+        setPartner(partnerData);
+        setError(null);
       } catch (error) {
         console.error('パートナーデータの取得に失敗しました:', error);
+        setError('相手の情報を取得できませんでした。');
+        
+        // 認証エラーの場合はログイン画面にリダイレクト
+        if (error.response && error.response.status === 401) {
+          router.push('/auth/login');
+          return;
+        }
+        
+        // APIエラー時にフォールバックとしてサンプルデータを使用
+        const samplePartners = [
+          { id: '1', name: 'あいさん', age: 37, hometown: '東京都', hobbies: '料理、旅行', daily_routine: '公園を散歩したり、カフェでのんびり過ごします' },
+          { id: '2', name: 'ゆうりさん', age: 37, hometown: '北海道', hobbies: '読書、映画鑑賞', daily_routine: '図書館で過ごすことが多いです' },
+          { id: '3', name: 'しおりさん', age: 37, hometown: '大阪府', hobbies: 'ヨガ、料理', daily_routine: '朝は早起きしてヨガをしています' },
+          { id: '4', name: 'かおりさん', age: 37, hometown: '愛知県', hobbies: 'ガーデニング、写真撮影', daily_routine: '植物の手入れをしたり、近所を散策します' },
+        ];
+        
+        const samplePartner = samplePartners.find(p => p.id === partnerId);
+        if (samplePartner) {
+          setPartner(samplePartner);
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchPartnerData();
-  }, [partnerId]);
+  }, [partnerId, router]);
 
   const handleMeetingCountChange = (value) => {
     setMeetingCount(value);
@@ -108,6 +112,16 @@ export default function ConversationSetup() {
           
           {loading ? (
             <div className="text-center py-4">読み込み中...</div>
+          ) : error ? (
+            <div className="text-center py-4 text-red-300">
+              <p>{error}</p>
+              <button
+                onClick={() => router.push('/conversation')}
+                className="mt-4 text-white hover:text-gray-300"
+              >
+                会話相手選択に戻る
+              </button>
+            </div>
           ) : (
             <>
               {/* 誰と話すか */}

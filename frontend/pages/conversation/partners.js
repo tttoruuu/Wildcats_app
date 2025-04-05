@@ -1,36 +1,42 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Layout from '../../components/Layout';
+import apiService from '../../services/api';
 
 export default function PartnersList() {
   const router = useRouter();
   const [partners, setPartners] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchPartners = () => {
+    const fetchPartners = async () => {
       try {
-        // ローカルストレージから会話相手のデータを取得
-        const storedPartners = JSON.parse(localStorage.getItem('conversationPartners') || '[]');
+        setLoading(true);
+        // APIからデータを取得
+        const partnersData = await apiService.partners.getPartners();
         
-        if (storedPartners.length > 0) {
-          // 登録された会話相手がある場合はそれを使用
-          setPartners(storedPartners);
+        if (partnersData && partnersData.length > 0) {
+          setPartners(partnersData);
         } else {
-          // サンプルデータ（ローカルストレージに登録がない場合のみ表示）
-          setPartners([
-            { id: '1', name: 'あいさん', age: 37, hometown: '東京都', hobbies: '料理、旅行', dailyRoutine: '公園を散歩したり、カフェでのんびり過ごします' },
-            { id: '2', name: 'ゆうりさん', age: 37, hometown: '北海道', hobbies: '読書、映画鑑賞', dailyRoutine: '図書館で過ごすことが多いです' },
-            { id: '3', name: 'しおりさん', age: 37, hometown: '大阪府', hobbies: 'ヨガ、料理', dailyRoutine: '朝は早起きしてヨガをしています' },
-            { id: '4', name: 'かおりさん', age: 37, hometown: '愛知県', hobbies: 'ガーデニング、写真撮影', dailyRoutine: '植物の手入れをしたり、近所を散策します' },
-          ]);
+          // データが空の場合は空配列を設定
+          setPartners([]);
         }
+        setError(null);
       } catch (error) {
         console.error('会話相手データの取得に失敗しました:', error);
-        // エラー時はサンプルデータを使用
+        setError('会話相手の情報を取得できませんでした。');
+        
+        // 認証エラーの場合はログイン画面にリダイレクト
+        if (error.response && error.response.status === 401) {
+          router.push('/auth/login');
+          return;
+        }
+        
+        // APIエラー時にフォールバックとしてサンプルデータを表示
         setPartners([
-          { id: '1', name: 'あいさん', age: 37, hometown: '東京都', hobbies: '料理、旅行', dailyRoutine: '公園を散歩したり、カフェでのんびり過ごします' },
-          { id: '2', name: 'ゆうりさん', age: 37, hometown: '北海道', hobbies: '読書、映画鑑賞', dailyRoutine: '図書館で過ごすことが多いです' },
+          { id: '1', name: 'あいさん', age: 37, hometown: '東京都', hobbies: '料理、旅行', daily_routine: '公園を散歩したり、カフェでのんびり過ごします' },
+          { id: '2', name: 'ゆうりさん', age: 37, hometown: '北海道', hobbies: '読書、映画鑑賞', daily_routine: '図書館で過ごすことが多いです' },
         ]);
       } finally {
         setLoading(false);
@@ -38,23 +44,27 @@ export default function PartnersList() {
     };
 
     fetchPartners();
-  }, []);
+  }, [router]);
 
-  const handleDeletePartner = (id) => {
+  const handleDeletePartner = async (id) => {
     // 削除確認
     if (window.confirm('本当にこの相手をリストから削除しますか？')) {
       try {
-        // 現在のデータを取得
-        const currentPartners = JSON.parse(localStorage.getItem('conversationPartners') || '[]');
-        // 指定されたIDの相手を除外
-        const updatedPartners = currentPartners.filter(partner => partner.id !== id);
-        // 更新されたデータを保存
-        localStorage.setItem('conversationPartners', JSON.stringify(updatedPartners));
-        // 画面表示を更新
-        setPartners(updatedPartners);
+        // APIを使用して削除
+        await apiService.partners.deletePartner(id);
+        
+        // 削除成功後、リストを更新
+        setPartners(prevPartners => 
+          prevPartners.filter(partner => partner.id !== id)
+        );
       } catch (error) {
         console.error('会話相手の削除に失敗しました:', error);
         alert('削除に失敗しました。もう一度お試しください。');
+        
+        // 認証エラーの場合はログイン画面にリダイレクト
+        if (error.response && error.response.status === 401) {
+          router.push('/auth/login');
+        }
       }
     }
   };
@@ -74,6 +84,16 @@ export default function PartnersList() {
           
           {loading ? (
             <div className="text-center py-8">読み込み中...</div>
+          ) : error ? (
+            <div className="text-center py-8 text-red-300">
+              <p>{error}</p>
+              <button
+                onClick={() => router.push('/conversation/register')}
+                className="mt-4 bg-orange-300 text-white rounded-full py-2 px-6 hover:bg-orange-400"
+              >
+                新しく登録する
+              </button>
+            </div>
           ) : partners.length === 0 ? (
             <div className="text-center py-8">
               <p className="mb-4">登録されている会話相手がいません</p>
@@ -117,7 +137,7 @@ export default function PartnersList() {
                     <div className="mt-2">
                       <p className="text-sm">出身：{partner.hometown || '-'}</p>
                       <p className="text-sm">趣味：{partner.hobbies || '-'}</p>
-                      <p className="text-sm">休日の過ごし方：{partner.dailyRoutine || '-'}</p>
+                      <p className="text-sm">休日の過ごし方：{partner.daily_routine || '-'}</p>
                     </div>
                   </div>
                 );

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import axios from 'axios';
 import Layout from '../../components/Layout';
+import apiService from '../../services/api';
 
 export default function Profile() {
   const router = useRouter();
@@ -11,26 +11,19 @@ export default function Profile() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      router.push('/auth/login');
-      return;
-    }
-
     const fetchUser = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/me', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setUser(response.data);
+        // apiService.auth.getCurrentUser()を使用してユーザー情報を取得
+        const userData = await apiService.auth.getCurrentUser();
+        setUser(userData);
+        setError('');
       } catch (err) {
         console.error('ユーザー情報の取得に失敗しました。', err);
         setError('ユーザー情報の取得に失敗しました。');
         
-        // 認証エラー（401）の場合はトークンをクリアしてログイン画面にリダイレクト
+        // 認証エラー（401）の場合はログイン画面にリダイレクト
         if (err.response && err.response.status === 401) {
           console.log('認証エラー: トークンが無効または期限切れです。再ログインが必要です。');
-          localStorage.removeItem('token');
           router.push('/auth/login');
         }
       } finally {
@@ -38,11 +31,13 @@ export default function Profile() {
       }
     };
 
+    // ユーザー情報を取得
     fetchUser();
   }, [router]);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    // apiService.auth.logout()を使用してログアウト処理
+    apiService.auth.logout();
     router.push('/auth/login');
   };
 
@@ -71,7 +66,7 @@ export default function Profile() {
           <div className="flex items-center space-x-4 mb-6">
             {user.profile_image_url ? (
               <img
-                src={user.profile_image_url}
+                src={apiService.getImageUrl(user.profile_image_url)}
                 alt="プロフィール画像"
                 className="w-20 h-20 rounded-full object-cover"
               />

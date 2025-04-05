@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import axios from 'axios';
 import Layout from '../../components/Layout';
 import Button from '../../components/common/Button';
+import apiService from '../../services/api';
 
 export default function ProfileEdit() {
   const router = useRouter();
@@ -13,26 +13,19 @@ export default function ProfileEdit() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      router.push('/auth/login');
-      return;
-    }
-
     const fetchUser = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/me', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setUser(response.data);
+        // apiService.auth.getCurrentUser()を使用してユーザー情報を取得
+        const userData = await apiService.auth.getCurrentUser();
+        setUser(userData);
+        setError('');
       } catch (err) {
         setError('ユーザー情報の取得に失敗しました。');
         console.error('ユーザー情報の取得に失敗しました。', err);
         
-        // 認証エラー（401）の場合はトークンをクリアしてログイン画面にリダイレクト
+        // 認証エラー（401）の場合はログイン画面にリダイレクト
         if (err.response && err.response.status === 401) {
           console.log('認証エラー: トークンが無効または期限切れです。再ログインが必要です。');
-          localStorage.removeItem('token');
           router.push('/auth/login');
         }
       } finally {
@@ -50,27 +43,15 @@ export default function ProfileEdit() {
   const handleUpload = async () => {
     if (!selectedFile) return;
 
-    const formData = new FormData();
-    formData.append('file', selectedFile);
-
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        router.push('/auth/login');
-        return;
-      }
+      // apiService.profile.uploadProfileImage()を使用して画像をアップロード
+      await apiService.profile.uploadProfileImage(selectedFile);
       
-      await axios.post('http://localhost:8000/upload-profile-image', formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      // ユーザー情報を更新（プロフィール画像URLを取得するため）
+      const updatedUser = await apiService.auth.getCurrentUser();
+      setUser(updatedUser);
       
-      const response = await axios.get('http://localhost:8000/me', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setUser(response.data);
+      // 成功メッセージを表示
       setSelectedFile(null);
       setSuccess('プロフィール画像が更新されました');
       setTimeout(() => setSuccess(''), 3000);
@@ -78,10 +59,9 @@ export default function ProfileEdit() {
       setError('画像のアップロードに失敗しました。');
       console.error('画像のアップロードに失敗しました。', err);
       
-      // 認証エラー（401）の場合はトークンをクリアしてログイン画面にリダイレクト
+      // 認証エラー（401）の場合はログイン画面にリダイレクト
       if (err.response && err.response.status === 401) {
         console.log('認証エラー: トークンが無効または期限切れです。再ログインが必要です。');
-        localStorage.removeItem('token');
         router.push('/auth/login');
       }
     }
@@ -128,7 +108,7 @@ export default function ProfileEdit() {
             <div className="flex items-center mb-4">
               {user.profile_image_url ? (
                 <img
-                  src={user.profile_image_url}
+                  src={apiService.getImageUrl(user.profile_image_url)}
                   alt="プロフィール画像"
                   className="w-32 h-32 rounded-full object-cover"
                 />

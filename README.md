@@ -1,89 +1,152 @@
-# Wildcats App 🐾
+# お見合い会話練習アプリ
 
-このアプリは、Next.js（フロントエンド）、FastAPI（バックエンド）、MySQL（データベース）を使用したフルスタックアプリケーションです。Dockerで簡単に環境構築できます。
+## 📝 プロジェクト概要
 
----
+このプロジェクトは、お見合いの際の会話を練習するためのWebアプリケーションです。ユーザーは架空の会話相手を登録し、様々なシナリオで会話練習を行うことができます。フロントエンドはNext.js、バックエンドはFastAPI、データベースはMySQLを使用しています。
 
-## 📦 技術スタック
+## 🛠️ システム構成
 
-- Frontend: [Next.js](https://nextjs.org/)
-- Backend: [FastAPI](https://fastapi.tiangolo.com/)
-- Database: MySQL
-- Container: Docker / Docker Compose
+```
+docker-next-fastapi-mysql/
+├── frontend/        # Next.jsフロントエンド
+├── backend/         # FastAPIバックエンド
+├── mysql/           # MySQLデータベース
+└── docker-compose.yml  # Docker設定
+```
 
----
+## 🚀 主要機能
 
-## 🛠 セットアップ手順（ローカル環境）
+1. **ユーザー管理**
+   - ユーザー登録・ログイン
+   - プロフィール管理
 
-### 🔗 前提条件
+2. **会話相手管理**
+   - 会話相手の登録
+   - 会話相手の一覧表示・削除
 
-- [Docker Desktop](https://www.docker.com/products/docker-desktop) をインストール済み
-- [Git](https://git-scm.com/) をインストール済み
+3. **会話練習**
+   - 会話シナリオの選択
+   - 会う回数の選択（初めて、2-3回目、それ以上）
+   - 会話シミュレーション
 
----
+## 🏁 クイックスタート
 
-### 🧾 1. リポジトリをクローン
+以下の手順で開発環境をセットアップできます：
 
-git clone https://github.com/tttoruuu/Wildcats_app.git
-cd Wildcats_app
+```bash
+# リポジトリのクローン
+git clone <repository-url>
+cd docker-next-fastapi-mysql
 
-### ⚙️ 2. 環境変数を設定
-各ディレクトリに .env.example ファイルが用意されています。以下のコマンドで .env を作成してください：
+# Dockerコンテナのビルドと起動
+docker compose up -d --build
 
-cp frontend/.env.example frontend/.env
-cp backend/.env.example backend/.env
-cp db/.env.example db/.env
-必要に応じて値を調整してください（例：データベースのパスワードなど）。
+# ログの確認
+docker compose logs -f
+```
 
-🐳 3. Dockerコンテナをビルド・起動
-docker compose up --build
-🌐 4. アプリにアクセス
-フロントエンド: http://localhost:3000
+セットアップ後に以下のURLでアクセスできます：
 
-バックエンド API: http://localhost:8000/docs（Swagger UI）
+- フロントエンド: http://localhost:3000
+- バックエンドAPI: http://localhost:8000
+- Swagger UI (API仕様書): http://localhost:8000/docs
 
-🧹 停止・クリーンアップ
+## 🧩 アーキテクチャ
+
+![システムアーキテクチャ](docs/architecture.png)
+
+- **フロントエンド**: Next.js + Tailwind CSS
+- **バックエンド**: FastAPI + SQLAlchemy
+- **データベース**: MySQL
+- **認証**: JWT (JSON Web Token)
+
+## 👥 開発ワークフロー
+
+1. **フロントエンド開発者**
+   - `frontend/`ディレクトリで作業
+   - APIクライアント（`frontend/services/api.js`）を使用してバックエンドと通信
+   - 詳細は`frontend/README.md`を参照
+
+2. **バックエンド開発者**
+   - `backend/`ディレクトリで作業
+   - APIエンドポイントを実装
+   - 詳細は`backend/README.md`を参照
+
+## 📡 API概要
+
+主要なAPIエンドポイント：
+
+| カテゴリ | エンドポイント | 説明 |
+|----------|--------------|------|
+| 認証 | `/register`, `/login` | ユーザー登録・ログイン |
+| ユーザー | `/me` | ユーザー情報取得 |
+| 会話相手 | `/conversation-partners` | 会話相手の管理 |
+| 会話 | `/conversation` | 会話シミュレーション |
+
+## ⚙️ 環境変数
+
+### バックエンド (`.env`ファイル)
+
+```
+ENV=development
+FRONTEND_ORIGIN=http://localhost:3000
+```
+
+### フロントエンド
+
+特に設定は不要ですが、APIのエンドポイントは`frontend/services/api.js`で定義されています。
+
+## 🐳 Docker環境
+
+- `docker-compose.yml`ファイルで定義された3つのコンテナ：
+  - `frontend`: Next.jsアプリケーション
+  - `backend`: FastAPIアプリケーション
+  - `db`: MySQLデータベース
+
+### コマンド
+
+```bash
+# コンテナの起動
+docker compose up -d
+
+# コンテナの停止
 docker compose down
 
-🧑‍🏫 初めてDockerを使う方へ
-docs/setup-guide.md にDockerの基本と開発環境の立ち上げ手順をわかりやすくまとめています。ぜひご覧ください。
+# コンテナのビルドと起動
+docker compose up -d --build
 
-📂 ディレクトリ構成（例）
-bash
-コピーする
-編集する
-Wildcats_app/
-├── frontend/           # Next.js
-├── backend/            # FastAPI
-├── db/                 # MySQL 初期設定など
-├── docker-compose.yml  # Docker全体構成
-├── .gitignore
-└── README.md
-📄 ライセンス
-MIT License
+# ログの表示
+docker compose logs -f [サービス名]
+```
 
+## 🔍 トラブルシューティング
 
-### 🗃 5. データベースの初期データについて
+- **フロントエンドが起動しない**: `docker compose logs frontend`でログを確認
+- **バックエンドが起動しない**: `docker compose logs backend`でログを確認
+- **APIエラー**: Swagger UI（http://localhost:8000/docs）でAPIを手動テスト
+- **データベース接続エラー**: 環境変数を確認
 
-初回起動時、MySQLのデータベースには自動的に初期データ（`users` テーブルとサンプルユーザー）が登録されます。  
-これらの初期データは `db/init/init.sql` に定義されています。
+## 🔗 参考リソース
 
-```sql
--- 初期データ例
-INSERT INTO users (name, email) VALUES
-('山田 太郎', 'yamada@example.com'),
-('佐藤 花子', 'sato@example.com');
+- [FastAPI公式ドキュメント](https://fastapi.tiangolo.com/)
+- [Next.js公式ドキュメント](https://nextjs.org/docs)
+- [Tailwind CSS公式ドキュメント](https://tailwindcss.com/docs)
+- [SQLAlchemyドキュメント](https://docs.sqlalchemy.org/)
 
----
+## 📦 ディレクトリ構造と役割
 
-## ✅ この後やると完璧なこと
-
-- `docs/setup-guide.md` の作成（Docker初心者向け）
-- ER図や機能設計書があれば `docs/` フォルダに追加
-- CI/CDや開発フローを後々追記
-
----
-
-このREADME、プロジェクトに合わせて調整もできます。  
-**気になるところやカスタマイズしたいところがあれば教えてください！**  
-→ そのまま `README.md` として保存してコミットできるように整えます👍
+```
+docker-next-fastapi-mysql/
+├── frontend/           # Next.jsフロントエンド
+│   ├── components/     # 共通コンポーネント
+│   ├── pages/          # ページコンポーネント
+│   ├── services/       # APIサービスクライアント
+│   └── styles/         # スタイルシート
+├── backend/            # FastAPIバックエンド
+│   ├── auth/           # 認証関連
+│   ├── models/         # データモデル
+│   ├── routers/        # APIルーター
+│   ├── schemas/        # データスキーマ
+│   └── main.py         # エントリーポイント
+└── docs/               # ドキュメント
+```
