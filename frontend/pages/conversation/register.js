@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
-import axios from 'axios';
 import Layout from '../../components/Layout';
+import apiService from '../../services/api';
 
 export default function RegisterPartner() {
   const router = useRouter();
@@ -10,7 +10,7 @@ export default function RegisterPartner() {
     age: '',
     hometown: '',
     hobbies: '',
-    dailyRoutine: '',
+    daily_routine: '', // バックエンドのスキーマに合わせてキー名を変更
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -29,30 +29,8 @@ export default function RegisterPartner() {
     setError('');
 
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        router.push('/auth/login');
-        return;
-      }
-
-      // バックエンドAPIが実装されるまで、ローカルストレージに保存
-      const partnersData = JSON.parse(localStorage.getItem('conversationPartners') || '[]');
-      const newPartner = {
-        id: Date.now().toString(), // 一意のIDを生成
-        ...formData
-      };
-      partnersData.push(newPartner);
-      localStorage.setItem('conversationPartners', JSON.stringify(partnersData));
-
-      /* コメントアウト：バックエンドAPIが実装されたら有効化
-      await axios.post(
-        'http://localhost:8000/conversation-partners',
-        formData,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      */
+      // APIサービスを使用して会話相手を登録
+      await apiService.partners.createPartner(formData);
 
       // 登録成功後、会話練習機能のトップ画面に遷移
       router.push('/conversation');
@@ -60,8 +38,9 @@ export default function RegisterPartner() {
       console.error('会話相手の登録に失敗しました', err);
       setError('会話相手の登録に失敗しました。もう一度お試しください。');
       
+      // 認証エラーの場合はログイン画面にリダイレクト
       if (err.response && err.response.status === 401) {
-        localStorage.removeItem('token');
+        apiService.auth.logout(); // ログアウト処理
         router.push('/auth/login');
       }
     } finally {
@@ -136,8 +115,8 @@ export default function RegisterPartner() {
           <div>
             <label className="block text-sm mb-2">休日はどのように過ごしていますか</label>
             <textarea
-              name="dailyRoutine"
-              value={formData.dailyRoutine}
+              name="daily_routine"
+              value={formData.daily_routine}
               onChange={handleChange}
               required
               className="w-full p-3 text-gray-800 bg-white rounded-md focus:outline-none"
