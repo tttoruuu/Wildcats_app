@@ -11,6 +11,7 @@ export default function ConversationSetup() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [meetingCount, setMeetingCount] = useState('first');
+  const [rallyCount, setRallyCount] = useState(8); // 会話ラリー数の初期値は8
   
   // シナリオオプション
   const scenarioOptions = [
@@ -63,13 +64,22 @@ export default function ConversationSetup() {
     setMeetingCount(value);
   };
 
+  const handleRallyCountChange = (e) => {
+    const value = parseInt(e.target.value);
+    // 5〜12の範囲内に制限
+    if (value >= 5 && value <= 12) {
+      setRallyCount(value);
+    }
+  };
+
   const handleStartPractice = () => {
-    // 会話練習ページに遷移（シナリオパラメータなし）
+    // 会話練習ページに遷移（ラリー数パラメータを追加）
     router.push({
       pathname: '/conversation/practice',
       query: { 
         partnerId,
-        meetingCount
+        meetingCount,
+        rallyCount // ラリー数を追加
       }
     });
   };
@@ -135,6 +145,27 @@ export default function ConversationSetup() {
                     2回目以降
                   </button>
                 </div>
+              </div>
+              
+              {/* 会話ラリー数設定 - 新規追加 */}
+              <div className="mb-6">
+                <label className="block text-sm mb-2">会話のラリー数 (5〜12回):</label>
+                <div className="flex items-center">
+                  <input
+                    type="range"
+                    min="5"
+                    max="12"
+                    value={rallyCount}
+                    onChange={handleRallyCountChange}
+                    className="w-full mr-4"
+                  />
+                  <span className="bg-white text-gray-800 rounded-full px-4 py-2 w-12 text-center">
+                    {rallyCount}
+                  </span>
+                </div>
+                <p className="text-xs text-gray-400 mt-1">
+                  ※設定した回数の会話が終わると自動的にフィードバック画面へ進みます
+                </p>
               </div>
               
               {/* 練習開始ボタン */}

@@ -6,7 +6,7 @@ import apiService from '../../services/api';
 
 export default function ConversationPractice() {
   const router = useRouter();
-  const { partnerId, meetingCount, scenario } = router.query;
+  const { partnerId, meetingCount, scenario, rallyCount } = router.query;
   const [partner, setPartner] = useState(null);
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
@@ -14,6 +14,18 @@ export default function ConversationPractice() {
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef(null);
   const [level, setLevel] = useState(1);
+  const [currentRallyCount, setCurrentRallyCount] = useState(0);
+  const [showFeedbackButton, setShowFeedbackButton] = useState(false);
+  const [maxRallyCount, setMaxRallyCount] = useState(8);
+
+  useEffect(() => {
+    if (rallyCount) {
+      const parsedRallyCount = parseInt(rallyCount);
+      if (!isNaN(parsedRallyCount) && parsedRallyCount >= 5 && parsedRallyCount <= 12) {
+        setMaxRallyCount(parsedRallyCount);
+      }
+    }
+  }, [rallyCount]);
 
   useEffect(() => {
     if (meetingCount) {
@@ -115,8 +127,31 @@ export default function ConversationPractice() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // ラリー数をカウントして制限に達したらフィードバックボタンを表示
+  useEffect(() => {
+    // ユーザーとパートナーのメッセージペアをカウント（初期メッセージは除く）
+    // ユーザーのメッセージ数をカウント（パートナーの初期メッセージ以外）
+    const userMessageCount = messages.filter(msg => msg.sender === 'user').length;
+    
+    // 最初のメッセージはカウントしない
+    if (userMessageCount > 0) {
+      // ラリー数 = ユーザーのメッセージ数（パートナーの応答があると仮定）
+      setCurrentRallyCount(userMessageCount);
+    }
+
+    // 設定されたラリー数に達したらフィードバックボタンを表示
+    if (userMessageCount >= maxRallyCount) {
+      setShowFeedbackButton(true);
+    }
+  }, [messages, maxRallyCount]);
+
   const handleSendMessage = async () => {
     if (!inputMessage.trim() || sending) return;
+    
+    // ラリー数が最大に達している場合は送信しない
+    if (currentRallyCount >= maxRallyCount) {
+      return;
+    }
 
     try {
       setSending(true);
@@ -218,6 +253,18 @@ export default function ConversationPractice() {
     }
   };
 
+  const handleGetFeedback = () => {
+    // フィードバックページに遷移
+    router.push({
+      pathname: '/conversation/feedback',
+      query: { 
+        partnerId,
+        meetingCount,
+        rallyCount: maxRallyCount
+      }
+    });
+  };
+
   if (loading) {
     return (
       <Layout title="会話練習">
@@ -287,6 +334,23 @@ export default function ConversationPractice() {
               </div>
             ))}
             <div ref={messagesEndRef} />
+            
+            {/* ラリー数表示 */}
+            <div className="text-center text-sm text-gray-400">
+              会話ラリー数: {currentRallyCount} / {maxRallyCount}
+            </div>
+            
+            {/* フィードバックボタン */}
+            {showFeedbackButton && (
+              <div className="flex justify-center mt-4">
+                <button
+                  onClick={handleGetFeedback}
+                  className="bg-green-500 text-white rounded-full py-2 px-6 hover:bg-green-600"
+                >
+                  フィードバックをもらう
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -297,15 +361,16 @@ export default function ConversationPractice() {
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="メッセージを入力..."
-              className="flex-grow bg-gray-700 text-white rounded-l-lg p-3 focus:outline-none"
+              placeholder={showFeedbackButton ? "ラリー数の上限に達しました" : "メッセージを入力..."}
+              className={`flex-grow bg-gray-700 text-white rounded-l-lg p-3 focus:outline-none ${showFeedbackButton ? 'opacity-50 cursor-not-allowed' : ''}`}
               rows="2"
+              disabled={showFeedbackButton}
             />
             <button
               onClick={handleSendMessage}
-              disabled={!inputMessage.trim() || sending}
+              disabled={!inputMessage.trim() || sending || showFeedbackButton}
               className={`bg-orange-500 text-white rounded-r-lg px-4 ${
-                !inputMessage.trim() || sending
+                !inputMessage.trim() || sending || showFeedbackButton
                   ? 'opacity-50 cursor-not-allowed'
                   : 'hover:bg-orange-600'
               }`}
