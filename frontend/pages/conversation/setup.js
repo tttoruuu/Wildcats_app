@@ -11,9 +11,15 @@ export default function ConversationSetup() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [meetingCount, setMeetingCount] = useState('first');
+  const [scenario, setScenario] = useState('');
+  const [showScenarioOptions, setShowScenarioOptions] = useState(false);
   
   // シナリオオプション
-
+  const scenarioOptions = [
+    { value: '自己紹介', label: '自己紹介' },
+    { value: '休日の過ごし方や趣味について', label: '休日の過ごし方や趣味について' },
+    { value: '仕事や学びについて', label: '仕事や学びについて' },
+  ];
 
   useEffect(() => {
     if (!partnerId) return;
@@ -59,15 +65,28 @@ export default function ConversationSetup() {
     setMeetingCount(value);
   };
 
-  // シナリオ関連の関数を削除
+  const toggleScenarioDropdown = () => {
+    setShowScenarioOptions(!showScenarioOptions);
+  };
+
+  const selectScenario = (scenarioValue) => {
+    setScenario(scenarioValue);
+    setShowScenarioOptions(false);
+  };
 
   const handleStartPractice = () => {
-    // 会話練習ページに遷移（シナリオパラメータなし）
+    if (!scenario) {
+      alert('シナリオを選択してください');
+      return;
+    }
+    
+    // 会話練習ページに遷移
     router.push({
       pathname: '/conversation/practice',
       query: { 
         partnerId,
-        meetingCount
+        meetingCount,
+        scenario 
       }
     });
   };
@@ -116,7 +135,7 @@ export default function ConversationSetup() {
                 />
               </div>
               
-              {/* 何回目の会合か（2つに減らす） */}
+              {/* 何回目の会合か */}
               <div className="mb-6">
                 <label className="block text-sm mb-2">何回目のお見合いですか？</label>
                 <div className="bg-white rounded-full p-1 flex">
@@ -127,20 +146,50 @@ export default function ConversationSetup() {
                     初めて
                   </button>
                   <button
-                    className={`flex-1 py-2 px-3 rounded-full ${meetingCount === 'other' ? 'bg-orange-300 text-white' : 'text-gray-800'}`}
-                    onClick={() => handleMeetingCountChange('other')}
+                    className={`flex-1 py-2 px-3 rounded-full ${meetingCount === '2-3' ? 'bg-orange-300 text-white' : 'text-gray-800'}`}
+                    onClick={() => handleMeetingCountChange('2-3')}
                   >
-                    それ以外
+                    2〜3回
+                  </button>
+                  <button
+                    className={`flex-1 py-2 px-3 rounded-full ${meetingCount === 'more' ? 'bg-orange-300 text-white' : 'text-gray-800'}`}
+                    onClick={() => handleMeetingCountChange('more')}
+                  >
+                    それ以上
                   </button>
                 </div>
               </div>
               
-              {/* シナリオ選択を削除 */}
+              {/* シナリオ選択 */}
+              <div className="mb-8 relative">
+                <label className="block text-sm mb-2">シナリオを選択してください</label>
+                <div 
+                  className="w-full p-4 rounded-lg bg-white text-gray-800 focus:outline-none cursor-pointer flex justify-between items-center"
+                  onClick={toggleScenarioDropdown}
+                >
+                  <span>{scenario || '選択してください'}</span>
+                  <span className="text-xl">{showScenarioOptions ? '×' : '▼'}</span>
+                </div>
+                
+                {showScenarioOptions && (
+                  <div className="absolute w-full bg-white text-gray-800 rounded-lg mt-1 shadow-lg z-10">
+                    {scenarioOptions.map((option) => (
+                      <div 
+                        key={option.value}
+                        className="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-200"
+                        onClick={() => selectScenario(option.value)}
+                      >
+                        {option.label}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
               
               {/* 練習開始ボタン */}
               <button
                 onClick={handleStartPractice}
-                className="w-full bg-orange-300 text-white rounded-full py-3 font-medium hover:bg-orange-400 mb-8"
+                className="w-full bg-orange-300 text-white rounded-full py-3 font-medium hover:bg-orange-400"
               >
                 会話開始
               </button>

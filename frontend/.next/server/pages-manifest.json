@@ -2,9 +2,7 @@
   "/_app": "pages/_app.js",
   "/_document": "pages/_document.js",
   "/_error": "pages/_error.js",
+  "/conversation/register": "pages/conversation/register.js",
   "/auth/login": "pages/auth/login.js",
-  "/conversation/setup": "pages/conversation/setup.js",
-  "/": "pages/index.js",
-  "/conversation/practice": "pages/conversation/practice.js",
   "/conversation": "pages/conversation.js"
 }
