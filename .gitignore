@@ -14,3 +14,5 @@ __pycache__/
 
 # Docker関連
 *.log
+
+frontend/.next
