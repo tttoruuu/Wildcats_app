@@ -10,3 +10,5 @@ pydantic==2.5.2
 email-validator>=2.0.0
 mysql-connector-python
 alembic
+openai==1.30.0
+httpx==0.24.1

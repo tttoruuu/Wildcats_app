@@ -13,6 +13,14 @@ export default function ConversationPractice() {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef(null);
+  const [level, setLevel] = useState(1);
+
+  useEffect(() => {
+    if (meetingCount) {
+      const newLevel = meetingCount === 'first' ? 1 : 2;
+      setLevel(newLevel);
+    }
+  }, [meetingCount]);
 
   useEffect(() => {
     if (!partnerId) return;
@@ -23,26 +31,19 @@ export default function ConversationPractice() {
         const partner = await apiService.partners.getPartner(partnerId);
         setPartner(partner);
         
-        // 初期メッセージを追加（シナリオと会合回数に基づく）
-        let initialMessage = 'こんにちは！今日はどんなことについて話しましょうか？';
+        // 初期メッセージを追加（会合回数とレベルに基づく）
+        let initialMessage = '';
         
         if (meetingCount === 'first') {
-          initialMessage = 'はじめまして！お会いできて嬉しいです。';
-        } else if (meetingCount === '2-3') {
-          initialMessage = 'また会えましたね！前回はとても楽しかったです。';
-        } else if (meetingCount === 'more') {
-          initialMessage = 'いつもお会いできて嬉しいです。最近どうでしたか？';
+          initialMessage = level === 1
+            ? 'はじめまして、初めてお会いできて嬉しいです。どうぞよろしくお願いします。😊'
+            : 'はじめまして、お会いできて嬉しいです。お互いのことを知っていければと思います。趣味や興味のあることなど、お話できたら嬉しいです。どうぞよろしくお願いします。😊';
+        } else {
+          initialMessage = level === 1
+            ? 'また会えて嬉しいです。最近はいかがお過ごしですか？'
+            : 'また会えて嬉しいです。前回はとても楽しかったです。今日はどんなお話ができるか楽しみにしていました。😊';
         }
 
-        // シナリオに応じてメッセージを追加
-        if (scenario === '自己紹介') {
-          initialMessage += ' まずは、自己紹介からお願いします。';
-        } else if (scenario === '休日の過ごし方や趣味について') {
-          initialMessage += ' 休日はどのように過ごしていますか？';
-        } else if (scenario === '仕事や学びについて') {
-          initialMessage += ' お仕事や最近学んでいることについて教えてください。';
-        }
-        
         setMessages([
           {
             sender: 'partner',
@@ -79,26 +80,19 @@ export default function ConversationPractice() {
       if (foundPartner) {
         setPartner(foundPartner);
         
-        // 初期メッセージを追加（シナリオと会合回数に基づく）
-        let initialMessage = 'こんにちは！今日はどんなことについて話しましょうか？';
+        // 初期メッセージを追加（会合回数とレベルに基づく）
+        let initialMessage = '';
         
         if (meetingCount === 'first') {
-          initialMessage = 'はじめまして！お会いできて嬉しいです。';
-        } else if (meetingCount === '2-3') {
-          initialMessage = 'また会えましたね！前回はとても楽しかったです。';
-        } else if (meetingCount === 'more') {
-          initialMessage = 'いつもお会いできて嬉しいです。最近どうでしたか？';
+          initialMessage = level === 1
+            ? 'はじめまして、初めてお会いできて嬉しいです。どうぞよろしくお願いします。😊'
+            : 'はじめまして、お会いできて嬉しいです。お互いのことを知っていければと思います。趣味や興味のあることなど、お話できたら嬉しいです。どうぞよろしくお願いします。😊';
+        } else {
+          initialMessage = level === 1
+            ? 'また会えて嬉しいです。最近はいかがお過ごしですか？'
+            : 'また会えて嬉しいです。前回はとても楽しかったです。今日はどんなお話ができるか楽しみにしていました。😊';
         }
 
-        // シナリオに応じてメッセージを追加
-        if (scenario === '自己紹介') {
-          initialMessage += ' まずは、自己紹介からお願いします。';
-        } else if (scenario === '休日の過ごし方や趣味について') {
-          initialMessage += ' 休日はどのように過ごしていますか？';
-        } else if (scenario === '仕事や学びについて') {
-          initialMessage += ' お仕事や最近学んでいることについて教えてください。';
-        }
-        
         setMessages([
           {
             sender: 'partner',
@@ -114,7 +108,7 @@ export default function ConversationPractice() {
       useDummyData();
       setLoading(false);
     }
-  }, [partnerId, router, meetingCount, scenario]);
+  }, [partnerId, router, meetingCount, level]);
 
   // スクロールを最下部に自動調整
   useEffect(() => {
@@ -133,66 +127,50 @@ export default function ConversationPractice() {
       setInputMessage('');
 
       try {
-        // APIを使用して会話レスポンスを取得
-        const response = await apiService.conversation.simulateConversation(
+        // トークンを取得
+        const token = localStorage.getItem('token');
+        
+        // 会話履歴をAPIで使用できる形式に変換
+        const formattedHistory = messages.map(msg => ({
+          role: msg.sender === 'user' ? 'user' : 'assistant',
+          content: msg.text
+        }));
+        
+        // ChatGPT APIを利用するエンドポイントを呼び出し
+        const response = await axios.post('/api/chat', {
+          userInput: inputMessage.trim(),
+          chatHistory: formattedHistory,
+          level,
           partnerId,
-          meetingCount,
-          scenario,
-          inputMessage.trim()
-        );
-        
-        const partnerMessage = { sender: 'partner', text: response.reply };
-        setMessages(prev => [...prev, partnerMessage]);
-      } catch (error) {
-        console.error('会話APIリクエストに失敗しました', error);
-        
-        // APIエラー時はシミュレーションで応答
-        setTimeout(() => {
-          // シナリオに応じた応答を生成
-          let partnerResponses;
-          
-          if (scenario === '自己紹介') {
-            partnerResponses = [
-              'ご自己紹介ありがとうございます！私も自己紹介させてください。',
-              'なるほど、趣味や好きなことについてもう少し教えていただけますか？',
-              'お仕事はどのようなことをされているんですか？',
-              '初めてのお見合いでも会話が弾んで嬉しいです。',
-              'そうなんですね。私も同じような経験があります。',
-            ];
-          } else if (scenario === '休日の過ごし方や趣味について') {
-            partnerResponses = [
-              'それは素敵な趣味ですね！私も休日は自然の中で過ごすことが多いです。',
-              '休日の過ごし方から、あなたの人柄が伝わってきます。',
-              'その趣味を始めたきっかけは何だったんですか？',
-              '私も実は同じことに興味があります。もっと詳しく教えてもらえますか？',
-              '休日の楽しみ方って大切ですよね。心がリフレッシュされます。',
-            ];
-          } else if (scenario === '仕事や学びについて') {
-            partnerResponses = [
-              'そのお仕事、とても興味深いですね。大変なこともあるのではないですか？',
-              'キャリアについての考え方が素敵です。私も参考にしたいです。',
-              '最近、新しく学んでいることはありますか？',
-              'お仕事での経験が人生観にも影響していそうですね。',
-              '私も実は似たような分野に興味があります。何かアドバイスがあれば聞きたいです。',
-            ];
-          } else {
-            // デフォルトの応答
-            partnerResponses = [
-              'なるほど、それは興味深いですね。もう少し詳しく教えていただけますか？',
-              'それについては私も考えたことがあります。私の意見としては...',
-              'そうなんですね！私も似たような経験があります。',
-              'それは素晴らしいですね。他にはどんなことに興味がありますか？',
-              'そのテーマについて、もう少し違う視点から考えてみるのはどうでしょう？',
-            ];
+          meetingCount
+        }, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
           }
-          
-          // 会話の流れを考慮して適切な応答を選択
-          // 単純な実装ではランダムに選択
-          const randomResponse = partnerResponses[Math.floor(Math.random() * partnerResponses.length)];
-          const partnerMessage = { sender: 'partner', text: randomResponse };
-          
+        });
+        
+        if (response.data.response) {
+          const partnerMessage = { sender: 'partner', text: response.data.response };
           setMessages(prev => [...prev, partnerMessage]);
-        }, 1000);
+        }
+      } catch (error) {
+        console.error('ChatGPT APIリクエストに失敗しました', error);
+        
+        // APIエラー時はシンプルな応答を返す
+        const simpleResponses = [
+          'なるほど、それは興味深いですね。もう少し詳しく教えていただけますか？',
+          'それは素敵ですね！私もそのような経験ができたらいいなと思います。',
+          'そうなんですね。その話を聞いて、私も色々考えさせられます。',
+          'それは印象的なお話です。他にも何か共有したいことはありますか？',
+          'あなたのお話はいつも興味深いです。ぜひ続きを聞かせてください。',
+          'なるほど。そのような視点は考えたことがありませんでした。とても参考になります。',
+          'それは素晴らしい考え方ですね。私も見習いたいと思います。'
+        ];
+        
+        const randomResponse = simpleResponses[Math.floor(Math.random() * simpleResponses.length)];
+        const partnerMessage = { sender: 'partner', text: randomResponse };
+        setMessages(prev => [...prev, partnerMessage]);
       } finally {
         setSending(false);
       }

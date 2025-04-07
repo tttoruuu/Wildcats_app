@@ -226,51 +226,137 @@ def simulate_conversation(
     - **認証**: Bearer トークン認証が必要
     - **入力データ**:
         - partnerId (str): 会話相手のID
-        - meetingCount (str): 会話回数 ('first', '2-3', 'more')
-        - scenario (str): 会話シナリオ
+        - meetingCount (str): 会話回数 ('first', 'other')
+        - level (int): 難易度レベル (1 または 2)
         - message (str): ユーザーからのメッセージ
+        - chatHistory (list): チャット履歴
     - **戻り値**: 会話相手からの応答メッセージ
     - **エラー**: 認証エラー (401)
     """
-    # メッセージの内容に応じて応答を生成
-    # 実際の実装ではここでChatGPT APIなどを呼び出す
-    scenario = data.get('scenario', '')
+    # パラメータの取得
+    partner_id = data.get('partnerId', '')
+    meeting_count = data.get('meetingCount', '')
+    level = data.get('level', 1)
     message = data.get('message', '')
+    chat_history = data.get('chatHistory', [])
     
-    # シナリオ別の応答テンプレート
-    responses = {
-        '自己紹介': [
-            'ご自己紹介ありがとうございます！私も自己紹介させてください。',
-            'なるほど、趣味や好きなことについてもう少し教えていただけますか？',
-            'お仕事はどのようなことをされているんですか？',
-            '初めてのお見合いでも会話が弾んで嬉しいです。',
-            'そうなんですね。私も同じような経験があります。',
-        ],
-        '休日の過ごし方や趣味について': [
-            'それは素敵な趣味ですね！私も休日は自然の中で過ごすことが多いです。',
-            '休日の過ごし方から、あなたの人柄が伝わってきます。',
-            'その趣味を始めたきっかけは何だったんですか？',
-            '私も実は同じことに興味があります。もっと詳しく教えてもらえますか？',
-            '休日の楽しみ方って大切ですよね。心がリフレッシュされます。',
-        ],
-        '仕事や学びについて': [
-            'そのお仕事、とても興味深いですね。大変なこともあるのではないですか？',
-            'キャリアについての考え方が素敵です。私も参考にしたいです。',
-            '最近、新しく学んでいることはありますか？',
-            'お仕事での経験が人生観にも影響していそうですね。',
-            '私も実は似たような分野に興味があります。何かアドバイスがあれば聞きたいです。',
-        ],
-        'default': [
-            'なるほど、それは興味深いですね。もう少し詳しく教えていただけますか？',
-            'それについては私も考えたことがあります。私の意見としては...',
-            'そうなんですね！私も似たような経験があります。',
-            'それは素晴らしいですね。他にはどんなことに興味がありますか？',
-            'そのテーマについて、もう少し違う視点から考えてみるのはどうでしょう？',
+    try:
+        import openai
+        import os
+        from dotenv import load_dotenv
+        
+        # .envファイルから環境変数を読み込む
+        load_dotenv()
+        
+        # OpenAI APIキーを設定
+        openai.api_key = os.getenv("OPENAI_API_KEY")
+        
+        if not openai.api_key:
+            raise ValueError("OpenAI APIキーが設定されていません")
+        
+        # 相手の情報を取得
+        partner_info = "あなたは日本人の女性です。"
+        try:
+            # partner_idから相手の情報を取得する処理
+            # 実際の実装ではデータベースから取得
+            pass
+        except:
+            # エラー時はデフォルト情報を使用
+            if partner_id == "1":
+                partner_info += "名前はあいさん、24歳、看護師、明るく社交的な性格です。"
+            elif partner_id == "2":
+                partner_info += "名前はゆうりさん、28歳、デザイナー、冷静で論理的な性格です。"
+            elif partner_id == "3":
+                partner_info += "名前はしおりさん、22歳、学生、好奇心旺盛な性格です。"
+            elif partner_id == "4":
+                partner_info += "名前はかおりさん、30歳、会社員、優しくて思いやりがある性格です。"
+            elif partner_id == "5":
+                partner_info += "名前はなつみさん、26歳、フリーランス、創造的で自由な発想の持ち主です。"
+            else:
+                partner_info += "名前はあいさん、24歳、看護師、明るく社交的な性格です。"
+        
+        # 会話の状況を設定
+        situation = ""
+        if meeting_count == "first":
+            situation = "これは初めてのお見合いです。"
+        else:
+            situation = "これは2回目以降のお見合いです。以前に一度会ったことがあります。"
+        
+        # 難易度レベルに応じたプロンプト設定
+        level_instruction = ""
+        if level == 1:
+            level_instruction = "簡単な日本語で話してください。長い文章は避け、シンプルな言葉を使ってください。"
+        else:
+            level_instruction = "自然な日本語で会話してください。より自然で流暢な表現を使ってください。"
+        
+        # システムプロンプトの構築
+        system_prompt = f"""
+あなたはお見合い相手のロールプレイを行います。以下の設定に基づいて応答してください。
+
+{partner_info}
+{situation}
+{level_instruction}
+
+- 優しく丁寧に、時に冗談を交えながら応答してください
+- 自然な会話の流れを意識してください
+- 質問には適切に答え、時には相手に質問を返してください
+- 絵文字を適度に使って、感情を表現してください
+- 回答は必ず日本語で行ってください
+- 長すぎる回答は避け、100文字程度を目安にしてください
+"""
+        
+        # 会話履歴の整形
+        messages = [{"role": "system", "content": system_prompt}]
+        
+        # チャット履歴を追加
+        for msg in chat_history:
+            role = msg.get("role", "")
+            content = msg.get("content", "")
+            if role and content:
+                messages.append({"role": role, "content": content})
+        
+        # 最新のユーザーメッセージを追加
+        messages.append({"role": "user", "content": message})
+        
+        # ChatGPT APIを呼び出して応答を生成
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=messages,
+            max_tokens=200,
+            temperature=0.7,
+        )
+        
+        # 応答を取得
+        ai_response = response.choices[0].message.content
+        
+        return {"response": ai_response}
+    
+    except Exception as e:
+        import traceback
+        print(f"ChatGPT API エラー: {str(e)}")
+        print(traceback.format_exc())
+        
+        # エラー時はフォールバックの応答を返す
+        import random
+        
+        if "こんにちは" in message or "はじめまして" in message:
+            return {"response": "こんにちは！お会いできて嬉しいです。どのようなことに興味がありますか？"}
+        
+        if "趣味" in message:
+            return {"response": "私の趣味は読書と料理です。特に推理小説が好きで、週末は新しいレシピに挑戦することが多いです。あなたはどんな趣味をお持ちですか？"}
+        
+        if "どこ" in message and ("住んで" in message or "住み" in message):
+            return {"response": "私は現在東京に住んでいます。以前は大阪に住んでいましたが、仕事の関係で引っ越してきました。東京の便利さにすっかり慣れましたが、たまに大阪の美味しい食べ物が恋しくなります。"}
+        
+        # 一般的な質問への応答
+        general_responses = [
+            "なるほど、それは興味深いですね。もう少し詳しく教えていただけますか？",
+            "それは素敵ですね！私もそのような経験ができたらいいなと思います。",
+            "そうなんですね。その話を聞いて、私も色々考えさせられます。",
+            "それは印象的なお話です。他にも何か共有したいことはありますか？",
+            f"{current_user.username}さんのお話はいつも興味深いです。ぜひ続きを聞かせてください。",
+            "なるほど。そのような視点は考えたことがありませんでした。とても参考になります。",
+            "それは素晴らしい考え方ですね。私も見習いたいと思います。"
         ]
-    }
-    
-    # 適切な応答を選択
-    response_list = responses.get(scenario, responses['default'])
-    reply = random.choice(response_list)
-    
-    return JSONResponse(content={"reply": reply})
+        
+        return {"response": random.choice(general_responses)}
