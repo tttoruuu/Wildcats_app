@@ -16,3 +16,6 @@ __pycache__/
 *.log
 
 frontend/.next
+
+# ZIPファイル（バックアップなど）
+*.zip
