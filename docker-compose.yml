@@ -8,7 +8,7 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
-      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_API_URL=http://backend:8000
     depends_on:
       - backend
 
@@ -20,6 +20,7 @@ services:
       - ./backend:/app
     environment:
       - DATABASE_URL=mysql+pymysql://root:password@db:3306/testdb
+      - OPENAI_API_KEY: ${OPENAI_API_KEY}
     depends_on:
       - db
 

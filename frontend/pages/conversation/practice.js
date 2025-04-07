@@ -129,12 +129,21 @@ export default function ConversationPractice() {
       try {
         // トークンを取得
         const token = localStorage.getItem('token');
+        console.log('認証トークン確認:', token ? `${token.substring(0, 10)}...` : 'トークンなし');
         
         // 会話履歴をAPIで使用できる形式に変換
         const formattedHistory = messages.map(msg => ({
           role: msg.sender === 'user' ? 'user' : 'assistant',
           content: msg.text
         }));
+        
+        console.log('API呼び出し準備:', { 
+          inputMessage: inputMessage.trim(),
+          historyLength: formattedHistory.length,
+          partnerId,
+          meetingCount,
+          level
+        });
         
         // ChatGPT APIを利用するエンドポイントを呼び出し
         const response = await axios.post('/api/chat', {
@@ -147,8 +156,11 @@ export default function ConversationPractice() {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
-          }
+          },
+          timeout: 30000 // タイムアウトを30秒に設定
         });
+        
+        console.log('API応答:', response.data);
         
         if (response.data.response) {
           const partnerMessage = { sender: 'partner', text: response.data.response };
@@ -157,20 +169,39 @@ export default function ConversationPractice() {
       } catch (error) {
         console.error('ChatGPT APIリクエストに失敗しました', error);
         
-        // APIエラー時はシンプルな応答を返す
-        const simpleResponses = [
-          'なるほど、それは興味深いですね。もう少し詳しく教えていただけますか？',
-          'それは素敵ですね！私もそのような経験ができたらいいなと思います。',
-          'そうなんですね。その話を聞いて、私も色々考えさせられます。',
-          'それは印象的なお話です。他にも何か共有したいことはありますか？',
-          'あなたのお話はいつも興味深いです。ぜひ続きを聞かせてください。',
-          'なるほど。そのような視点は考えたことがありませんでした。とても参考になります。',
-          'それは素晴らしい考え方ですね。私も見習いたいと思います。'
-        ];
+        // エラーメッセージを詳細に表示
+        let errorMsg = 'APIリクエストに失敗しました。';
         
-        const randomResponse = simpleResponses[Math.floor(Math.random() * simpleResponses.length)];
-        const partnerMessage = { sender: 'partner', text: randomResponse };
-        setMessages(prev => [...prev, partnerMessage]);
+        if (error.response) {
+          // サーバーからのレスポンスがある場合
+          const statusCode = error.response.status;
+          const errorDetail = error.response.data?.error || error.response.data?.detail || '';
+          
+          if (statusCode === 401) {
+            // 認証エラーの場合はログイン画面にリダイレクト
+            localStorage.removeItem('token');
+            router.push('/auth/login');
+            return;
+          }
+          
+          errorMsg = `エラー(${statusCode}): ${errorDetail}`;
+          console.error('詳細なエラー情報:', errorDetail);
+        } else if (error.request) {
+          // リクエストは送信されたがレスポンスがない場合
+          errorMsg = 'サーバーからの応答がありません。ネットワーク接続を確認してください。';
+          console.error('リクエストエラー:', error.request);
+        } else {
+          // リクエスト設定時のエラー
+          errorMsg = `リクエストエラー: ${error.message}`;
+          console.error('その他のエラー:', error.message);
+        }
+        
+        // エラーメッセージをシステムメッセージとして表示
+        const systemMessage = { 
+          sender: 'system', 
+          text: errorMsg
+        };
+        setMessages(prev => [...prev, systemMessage]);
       } finally {
         setSending(false);
       }
@@ -246,7 +277,9 @@ export default function ConversationPractice() {
                   className={`max-w-xs p-3 rounded-lg ${
                     message.sender === 'user'
                       ? 'bg-orange-500 text-white'
-                      : 'bg-gray-700 text-white'
+                      : message.sender === 'system'
+                        ? 'bg-red-500 text-white'
+                        : 'bg-gray-700 text-white'
                   }`}
                 >
                   {message.text}

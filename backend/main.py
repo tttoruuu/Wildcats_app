@@ -23,7 +23,12 @@ load_dotenv()  # .env読み込み
 ENV = os.getenv("ENV", "development")
 FRONTEND_ORIGIN = os.getenv("FRONTEND_ORIGIN", "http://localhost:3000")
 
-origins = [FRONTEND_ORIGIN]
+# CORS設定: 開発環境ではDockerネットワーク内の接続も許可
+origins = [
+    FRONTEND_ORIGIN,  # 標準の設定（http://localhost:3000）
+    "http://frontend:3000",  # Dockerネットワーク内
+    "http://localhost:3000",  # ホストマシンからの接続
+]
 
 app = FastAPI(
     title="お見合い会話練習API",
@@ -240,19 +245,43 @@ def simulate_conversation(
     message = data.get('message', '')
     chat_history = data.get('chatHistory', [])
     
+    # リクエストデータをデバッグ用に出力
+    print(f"会話シミュレーションリクエスト: partnerId={partner_id}, meetingCount={meeting_count}, level={level}")
+    print(f"ユーザーメッセージ: {message}")
+    print(f"チャット履歴: {len(chat_history)}件")
+    
     try:
         import openai
         import os
         from dotenv import load_dotenv
+        from openai import OpenAI
         
-        # .envファイルから環境変数を読み込む
+        # .envファイルから環境変数を読み込む（コンテナ内の環境変数が優先される）
         load_dotenv()
         
         # OpenAI APIキーを設定
-        openai.api_key = os.getenv("OPENAI_API_KEY")
+        api_key = os.environ.get("OPENAI_API_KEY")
         
-        if not openai.api_key:
-            raise ValueError("OpenAI APIキーが設定されていません")
+        # APIキー情報をデバッグ用に安全に出力
+        if api_key:
+            masked_key = api_key[:5] + "..." + api_key[-5:]
+            print(f"OpenAI APIキー: {masked_key}")
+        else:
+            print("OpenAI APIキーが設定されていません")
+            raise HTTPException(
+                status_code=500,
+                detail="サーバー設定エラー: OpenAI APIキーが設定されていません。サーバー管理者に連絡してください。"
+            )
+            
+        # OpenAIクライアントを初期化
+        try:
+            client = OpenAI(api_key=api_key)
+        except Exception as e:
+            print(f"OpenAIクライアント初期化エラー: {str(e)}")
+            raise HTTPException(
+                status_code=500,
+                detail=f"OpenAIクライアント初期化エラー: {str(e)}"
+            )
         
         # 相手の情報を取得
         partner_info = "あなたは日本人の女性です。"
@@ -302,7 +331,8 @@ def simulate_conversation(
 - 質問には適切に答え、時には相手に質問を返してください
 - 絵文字を適度に使って、感情を表現してください
 - 回答は必ず日本語で行ってください
-- 長すぎる回答は避け、100文字程度を目安にしてください
+- 一般的な知識や経験を交えて話し、より自然な人間らしい会話を心がけてください
+- 長すぎる回答は避け、80-120文字程度を目安にしてください
 """
         
         # 会話履歴の整形
@@ -319,44 +349,38 @@ def simulate_conversation(
         messages.append({"role": "user", "content": message})
         
         # ChatGPT APIを呼び出して応答を生成
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=messages,
-            max_tokens=200,
-            temperature=0.7,
-        )
-        
-        # 応答を取得
-        ai_response = response.choices[0].message.content
-        
-        return {"response": ai_response}
+        try:
+            print("OpenAI APIリクエスト開始...")
+            response = client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=messages,
+                max_tokens=200,
+                temperature=0.7,
+                timeout=30.0  # 30秒のタイムアウト設定
+            )
+            
+            # 応答を取得
+            ai_response = response.choices[0].message.content
+            print(f"OpenAI APIレスポンス: {ai_response[:50]}...")
+            
+            return {"response": ai_response}
+        except Exception as api_error:
+            # エラーの詳細情報を出力
+            error_message = f"OpenAI API呼び出しエラー: {type(api_error).__name__}: {str(api_error)}"
+            print(error_message)
+            # エラーメッセージをそのまま返す
+            raise HTTPException(
+                status_code=500, 
+                detail=error_message
+            )
     
     except Exception as e:
         import traceback
-        print(f"ChatGPT API エラー: {str(e)}")
+        print(f"会話シミュレーションエラー: {str(e)}")
         print(traceback.format_exc())
         
-        # エラー時はフォールバックの応答を返す
-        import random
-        
-        if "こんにちは" in message or "はじめまして" in message:
-            return {"response": "こんにちは！お会いできて嬉しいです。どのようなことに興味がありますか？"}
-        
-        if "趣味" in message:
-            return {"response": "私の趣味は読書と料理です。特に推理小説が好きで、週末は新しいレシピに挑戦することが多いです。あなたはどんな趣味をお持ちですか？"}
-        
-        if "どこ" in message and ("住んで" in message or "住み" in message):
-            return {"response": "私は現在東京に住んでいます。以前は大阪に住んでいましたが、仕事の関係で引っ越してきました。東京の便利さにすっかり慣れましたが、たまに大阪の美味しい食べ物が恋しくなります。"}
-        
-        # 一般的な質問への応答
-        general_responses = [
-            "なるほど、それは興味深いですね。もう少し詳しく教えていただけますか？",
-            "それは素敵ですね！私もそのような経験ができたらいいなと思います。",
-            "そうなんですね。その話を聞いて、私も色々考えさせられます。",
-            "それは印象的なお話です。他にも何か共有したいことはありますか？",
-            f"{current_user.username}さんのお話はいつも興味深いです。ぜひ続きを聞かせてください。",
-            "なるほど。そのような視点は考えたことがありませんでした。とても参考になります。",
-            "それは素晴らしい考え方ですね。私も見習いたいと思います。"
-        ]
-        
-        return {"response": random.choice(general_responses)}
+        # エラーメッセージを詳細に
+        raise HTTPException(
+            status_code=500, 
+            detail=f"会話処理エラー: {str(e)}"
+        )
