@@ -18,9 +18,11 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/app
+    env_file:
+      - .env
     environment:
       - DATABASE_URL=mysql+pymysql://root:password@db:3306/testdb
-      - OPENAI_API_KEY: ${OPENAI_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
     depends_on:
       - db
 

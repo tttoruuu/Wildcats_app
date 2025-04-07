@@ -264,7 +264,7 @@ def simulate_conversation(
         
         # APIキー情報をデバッグ用に安全に出力
         if api_key:
-            masked_key = api_key[:5] + "..." + api_key[-5:]
+            masked_key = api_key[:5] + "..." + api_key[-5:] if len(api_key) > 10 else "***" 
             print(f"OpenAI APIキー: {masked_key}")
         else:
             print("OpenAI APIキーが設定されていません")
