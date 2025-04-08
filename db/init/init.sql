@@ -23,7 +23,7 @@ CREATE INDEX idx_username ON users(username);
 CREATE INDEX idx_email ON users(email);
 
 -- サンプルデータ
-INSERT INTO users (name, email) VALUES
-('山田 太郎', 'yamada@example.com'),
-('佐藤 花子', 'sato@example.com');
+INSERT INTO users (username, password_hash, full_name, email, birth_date) VALUES
+('yamada', '$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', '山田 太郎', 'yamada@example.com', '1990-01-01'),
+('sato', '$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', '佐藤 花子', 'sato@example.com', '1992-05-15');
 
