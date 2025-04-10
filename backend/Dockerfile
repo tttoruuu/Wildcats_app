@@ -14,6 +14,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 ENV ENV=production
 ENV FRONTEND_ORIGIN=http://localhost:3000
 
+# SSL証明書をコピー
+COPY DigiCertGlobalRootCA.crt.pem .
+
 # アプリのコードをすべてコピー
 COPY ./models ./models
 COPY ./routers ./routers

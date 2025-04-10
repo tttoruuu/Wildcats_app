@@ -1,0 +1,176 @@
+🚀 Azure上への完全デプロイを開始します [v20250410-0934]
+
+==> 🔧 Azureリソースグループを作成中...
+🚀 Azureリソースグループとコンテナレジストリの作成を開始します...
+リソースグループを作成中: wildcats-resource-group
+{
+  "id": "/subscriptions/2d8cc7a9-24c6-4c3b-9086-d5a7b036937a/resourceGroups/wildcats-resource-group",
+  "location": "japaneast",
+  "managedBy": null,
+  "name": "wildcats-resource-group",
+  "properties": {
+    "provisioningState": "Succeeded"
+  },
+  "tags": null,
+  "type": "Microsoft.Resources/resourceGroups"
+}
+コンテナレジストリを作成中: wildcats9999
+{
+  "adminUserEnabled": false,
+  "anonymousPullEnabled": false,
+  "creationDate": "2025-04-10T00:34:33.182599+00:00",
+  "dataEndpointEnabled": false,
+  "dataEndpointHostNames": [],
+  "encryption": {
+    "keyVaultProperties": null,
+    "status": "disabled"
+  },
+  "id": "/subscriptions/2d8cc7a9-24c6-4c3b-9086-d5a7b036937a/resourceGroups/wildcats-resource-group/providers/Microsoft.ContainerRegistry/registries/wildcats9999",
+  "identity": null,
+  "location": "japaneast",
+  "loginServer": "wildcats9999.azurecr.io",
+  "metadataSearch": "Disabled",
+  "name": "wildcats9999",
+  "networkRuleBypassOptions": "AzureServices",
+  "networkRuleSet": null,
+  "policies": {
+    "azureAdAuthenticationAsArmPolicy": {
+      "status": "enabled"
+    },
+    "exportPolicy": {
+      "status": "enabled"
+    },
+    "quarantinePolicy": {
+      "status": "disabled"
+    },
+    "retentionPolicy": {
+      "days": 7,
+      "lastUpdatedTime": "2025-04-10T00:34:42.063264+00:00",
+      "status": "disabled"
+    },
+    "softDeletePolicy": {
+      "lastUpdatedTime": "2025-04-10T00:34:42.063315+00:00",
+      "retentionDays": 7,
+      "status": "disabled"
+    },
+    "trustPolicy": {
+      "status": "disabled",
+      "type": "Notary"
+    }
+  },
+  "privateEndpointConnections": [],
+  "provisioningState": "Succeeded",
+  "publicNetworkAccess": "Enabled",
+  "resourceGroup": "wildcats-resource-group",
+  "sku": {
+    "name": "Basic",
+    "tier": "Basic"
+  },
+  "status": null,
+  "systemData": {
+    "createdAt": "2025-04-10T00:34:33.182599+00:00",
+    "createdBy": "toru09may@gmail.com",
+    "createdByType": "User",
+    "lastModifiedAt": "2025-04-10T00:34:33.182599+00:00",
+    "lastModifiedBy": "toru09may@gmail.com",
+    "lastModifiedByType": "User"
+  },
+  "tags": {},
+  "type": "Microsoft.ContainerRegistry/registries",
+  "zoneRedundancy": "Disabled"
+}
+コンテナレジストリにログイン中...
+Login Succeeded
+Container Apps環境を作成中: wildcats-environment
+WARNING: The behavior of this command has been altered by the following extension: containerapp
+WARNING: No Log Analytics workspace provided.
+WARNING: Generating a Log Analytics workspace with name "workspace-wildcatsresourcegroupSact"
+/ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..[KWARNING: 
+Container Apps environment created. To deploy a container app, use: az containerapp create --help
+
+{
+  "id": "/subscriptions/2d8cc7a9-24c6-4c3b-9086-d5a7b036937a/resourceGroups/wildcats-resource-group/providers/Microsoft.App/managedEnvironments/wildcats-environment",
+  "location": "Japan East",
+  "name": "wildcats-environment",
+  "properties": {
+    "appInsightsConfiguration": null,
+    "appLogsConfiguration": {
+      "destination": "log-analytics",
+      "logAnalyticsConfiguration": {
+        "customerId": "492b3267-2653-4ca8-a39a-44575bbea4cc",
+        "dynamicJsonColumns": false,
+        "sharedKey": null
+      }
+    },
+    "availabilityZones": null,
+    "customDomainConfiguration": {
+      "certificateKeyVaultProperties": null,
+      "certificatePassword": null,
+      "certificateValue": null,
+      "customDomainVerificationId": "9AB9A27993A09C541B2749BA4B0AAAFAD884A6DD26698A6CE576A7CB3AA90CF9",
+      "dnsSuffix": null,
+      "expirationDate": null,
+      "subjectName": null,
+      "thumbprint": null
+    },
+    "daprAIConnectionString": null,
+    "daprAIInstrumentationKey": null,
+    "daprConfiguration": {
+      "version": "1.13.6-msft.2"
+    },
+    "defaultDomain": "nicemushroom-7b4094ef.japaneast.azurecontainerapps.io",
+    "diskEncryptionConfiguration": null,
+    "eventStreamEndpoint": "https://japaneast.azurecontainerapps.dev/subscriptions/2d8cc7a9-24c6-4c3b-9086-d5a7b036937a/resourceGroups/wildcats-resource-group/managedEnvironments/wildcats-environment/eventstream",
+    "infrastructureResourceGroup": null,
+    "kedaConfiguration": {
+      "version": "2.16.1"
+    },
+    "openTelemetryConfiguration": null,
+    "peerAuthentication": {
+      "mtls": {
+        "enabled": false
+      }
+    },
+    "peerTrafficConfiguration": {
+      "encryption": {
+        "enabled": false
+      }
+    },
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": "Enabled",
+    "staticIp": "135.149.85.141",
+    "vnetConfiguration": null,
+    "workloadProfiles": [
+      {
+        "enableFips": false,
+        "name": "Consumption",
+        "workloadProfileType": "Consumption"
+      }
+    ],
+    "zoneRedundant": false
+  },
+  "resourceGroup": "wildcats-resource-group",
+  "systemData": {
+    "createdAt": "2025-04-10T00:35:05.6357834",
+    "createdBy": "toru09may@gmail.com",
+    "createdByType": "User",
+    "lastModifiedAt": "2025-04-10T00:35:05.6357834",
+    "lastModifiedBy": "toru09may@gmail.com",
+    "lastModifiedByType": "User"
+  },
+  "type": "Microsoft.App/managedEnvironments"
+}
+✅ Azureリソースグループとコンテナレジストリが正常に作成されました！
+
+==> 🐬 Azure Database for MySQLをデプロイ中...
+🐬 Azure Database for MySQL Flexible Serverをデプロイ中...
+MySQL Flexible Serverを作成中: wildcats-mysql-server
+WARNING: Checking the existence of the resource group 'wildcats-resource-group'...
+WARNING: Resource group 'wildcats-resource-group' exists ? : True 
+WARNING: Detected current client IP : 118.236.226.213
+WARNING: IOPS is 396 which is either your input or free(maximum) IOPS supported for your storage size and SKU.
+WARNING: Creating MySQL Server 'wildcats-mysql-server' in group 'wildcats-resource-group'...
+WARNING: Your server 'wildcats-mysql-server' is using sku 'Standard_B1s' (Paid Tier). Please refer to https://aka.ms/mysql-pricing for pricing details
+ERROR: (InternalServerError) An unexpected error occured while processing the request. Tracking ID: 'b77cb25d-5a5c-4dc0-885e-108cae061833'
+Code: InternalServerError
+Message: An unexpected error occured while processing the request. Tracking ID: 'b77cb25d-5a5c-4dc0-885e-108cae061833'

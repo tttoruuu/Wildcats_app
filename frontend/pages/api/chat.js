@@ -24,9 +24,19 @@ export default async function handler(req, res) {
     console.log('バックエンドAPI URL:', apiUrl);
     
     // Docker内での接続のためにURLを調整
-    const backendUrl = process.env.NODE_ENV === 'production' 
-      ? apiUrl 
-      : apiUrl.replace('localhost', 'backend'); // Dockerコンテナ内ではサービス名で通信
+    let backendUrl = apiUrl;
+    
+    // URLをさまざまな環境に対応させる
+    if (process.env.NODE_ENV === 'production') {
+      if (apiUrl.includes('svc.cluster.local')) {
+        // すでにKubernetes内部サービス名の場合はそのまま使用
+        backendUrl = apiUrl;
+      } 
+      // ここでHTTPSからHTTPへの変換を削除し、本番環境でもオリジナルのURLをそのまま使用
+    } else {
+      // 開発環境では、localhostをbackendに置き換え
+      backendUrl = apiUrl.replace('localhost', 'backend');
+    }
     
     console.log('使用するバックエンドURL:', backendUrl);
     
@@ -51,18 +61,37 @@ export default async function handler(req, res) {
       };
       console.log('リクエストデータ:', JSON.stringify(requestData).substring(0, 100) + '...');
       
-      const response = await axios.post(`${backendUrl}/conversation`, requestData, {
+      // タイムアウトを60秒に増やす
+      const axiosConfig = {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        timeout: 30000 // 30秒のタイムアウト
-      });
+        timeout: 60000 // 60秒のタイムアウト
+      };
+      
+      console.log('Axiosリクエスト設定:', JSON.stringify(axiosConfig));
+      
+      // バックエンドAPIにリクエスト送信
+      const endpointPath = '/conversation';
+      console.log(`${backendUrl}${endpointPath} へリクエスト送信中...`);
+      const response = await axios.post(`${backendUrl}${endpointPath}`, requestData, axiosConfig);
       
       console.log('バックエンドAPIレスポンス:', response.data);
       return res.status(200).json({ response: response.data.response });
     } catch (error) {
       console.error('バックエンドAPIエラー:', error.message);
+      console.error('エラータイプ:', error.name);
+      
+      if (error.code) {
+        console.error('エラーコード:', error.code);
+      }
+      
+      if (error.response) {
+        console.error('エラーステータス:', error.response.status);
+        console.error('エラーヘッダー:', JSON.stringify(error.response.headers));
+        console.error('エラーデータ:', JSON.stringify(error.response.data));
+      }
       
       // エラーを詳細に解析
       let errorDetail = '不明なエラー';

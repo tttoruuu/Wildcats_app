@@ -1,11 +1,18 @@
 import axios from 'axios';
 
-// APIのベースURL
-const API_BASE_URL = 'http://localhost:8000';
+// APIのベースURL - ハードコードされたURLを完全に削除し、環境変数を優先
+const API_BASE_URL = 
+  typeof window !== 'undefined' && window.__NEXT_DATA__?.props?.pageProps?.apiUrl
+  ? window.__NEXT_DATA__.props.pageProps.apiUrl
+  : process.env.NEXT_PUBLIC_API_URL 
+  ? process.env.NEXT_PUBLIC_API_URL 
+  : 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io';
+
+console.log('Using API URL:', API_BASE_URL);  // デバッグ用
 
 // 認証済みAPIクライアントの作成
 const getAuthenticatedClient = () => {
-  const token = localStorage.getItem('token');
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
   
   return axios.create({
     baseURL: API_BASE_URL,
@@ -21,9 +28,25 @@ export const authAPI = {
   // ユーザー登録
   register: async (userData) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/register`, userData);
+      console.log('Registering user with data:', userData);
+      console.log('API URL:', API_BASE_URL);
+      
+      // シンプルなCORSリクエスト - credentials無しでCORSエラーを回避
+      const response = await axios.post(`${API_BASE_URL}/register`, userData, {
+        withCredentials: false,  // クレデンシャルを使用しない
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        }
+      });
       return response.data;
     } catch (error) {
+      console.error('Register error details:', error.message);
+      if (error.response) {
+        console.error('Response data:', error.response.data);
+        console.error('Response status:', error.response.status);
+        console.error('Response headers:', error.response.headers);
+      }
       throw error.response?.data || { detail: 'ネットワークエラーが発生しました' };
     }
   },
@@ -31,19 +54,30 @@ export const authAPI = {
   // ログイン
   login: async (username, password) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/login`, { username, password });
+      const response = await axios.post(`${API_BASE_URL}/login`, { username, password }, {
+        withCredentials: false,  // クレデンシャルを使用しない
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        }
+      });
       const { access_token, token_type } = response.data;
       // トークンをローカルストレージに保存
-      localStorage.setItem('token', access_token);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('token', access_token);
+      }
       return { access_token, token_type };
     } catch (error) {
+      console.error('Login error:', error);
       throw error.response?.data || { detail: 'ネットワークエラーが発生しました' };
     }
   },
   
   // ログアウト
   logout: () => {
-    localStorage.removeItem('token');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('token');
+    }
   },
   
   // 現在のユーザー情報を取得
@@ -55,7 +89,9 @@ export const authAPI = {
     } catch (error) {
       if (error.response?.status === 401) {
         // 認証エラーの場合、トークンを削除
-        localStorage.removeItem('token');
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('token');
+        }
       }
       throw error.response?.data || { detail: 'ネットワークエラーが発生しました' };
     }
@@ -133,7 +169,7 @@ export const profileAPI = {
   // プロフィール画像のアップロード
   uploadProfileImage: async (file) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
       if (!token) {
         throw { detail: '認証が必要です' };
       }
@@ -150,6 +186,7 @@ export const profileAPI = {
       
       return response.data;
     } catch (error) {
+      console.error('Profile image upload error:', error);
       throw error.response?.data || { detail: 'ネットワークエラーが発生しました' };
     }
   },

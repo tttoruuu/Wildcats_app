@@ -12,19 +12,26 @@ RUN npm run build
 FROM node:18-alpine
 WORKDIR /app
 
+ARG NODE_ENV=production
+ENV NODE_ENV=${NODE_ENV}
+EXPOSE 3000
+
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/styles ./styles
+COPY --from=builder /app/pages ./pages
+COPY --from=builder /app/components ./components
+COPY --from=builder /app/services ./services
+COPY --from=builder /app/next.config.js ./next.config.js
 
-ENV NODE_ENV=production
-EXPOSE 3000
+# 環境変数ファイルをコピー
+COPY --from=builder /app/.env* ./
 
-CMD ["npm", "start"]
-
-# 開発環境用の設定
-ENV NODE_ENV=development
-
-# 開発サーバーを起動
-CMD ["npm", "run", "dev"]
+# NODE_ENVに基づいてコマンドを設定
+CMD if [ "$NODE_ENV" = "production" ]; then \
+        npm start; \
+    else \
+        npm run dev; \
+    fi

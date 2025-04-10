@@ -1,8 +1,18 @@
 #!/bin/bash
 
 set -e
+set -o pipefail
+
+# 変数定義
 REGISTRY="wildcats9999.azurecr.io"
-RG="myResourceGroup"
+RG="wildcats-resource-group"
+ENV_NAME="wildcats-environment"
+FRONTEND_APP_NAME="frontend-container"
+BACKEND_APP_NAME="backend-container"
+MYSQL_SERVER_NAME="wildcats-mysql-server"
+MYSQL_DB_NAME="testdb"
+MYSQL_ADMIN="dbadmin"
+MYSQL_PASSWORD="Password123!"
 VERSION=$1
 
 if [ -z "$VERSION" ]; then
@@ -13,22 +23,33 @@ fi
 
 LOGFILE="rollback-log-$VERSION.log"
 
-echo "⏪ Rolling back to version [$VERSION]..." | tee $LOGFILE
+echo "⏪ バージョン[$VERSION]へのロールバックを開始します..." | tee $LOGFILE
 
-# Frontend rollback
+# バックエンドのエンドポイントURLを取得
+BACKEND_URL=$(az containerapp show \
+  --name $BACKEND_APP_NAME \
+  --resource-group $RG \
+  --query properties.configuration.ingress.fqdn \
+  --output tsv)
+BACKEND_URL="https://$BACKEND_URL"
+
+# データベース接続文字列の設定
+DB_CONNECTION_STRING="mysql+pymysql://${MYSQL_ADMIN}:${MYSQL_PASSWORD}@${MYSQL_SERVER_NAME}.mysql.database.azure.com:3306/${MYSQL_DB_NAME}?ssl_ca=DigiCertGlobalRootCA.crt.pem"
+
+# フロントエンドをロールバック
+echo "フロントエンドをロールバック中..." | tee -a $LOGFILE
 az containerapp update \
-  --name frontend-container \
+  --name $FRONTEND_APP_NAME \
   --resource-group $RG \
   --image $REGISTRY/frontend:$VERSION \
-  --env-vars NEXT_PUBLIC_API_URL="http://backend-container:8000" \
-  --ingress external | tee -a $LOGFILE
+  --set-env-vars NEXT_PUBLIC_API_URL=$BACKEND_URL | tee -a $LOGFILE
 
-# Backend rollback
+# バックエンドをロールバック
+echo "バックエンドをロールバック中..." | tee -a $LOGFILE
 az containerapp update \
-  --name backend-container \
+  --name $BACKEND_APP_NAME \
   --resource-group $RG \
   --image $REGISTRY/backend:$VERSION \
-  --env-vars DATABASE_URL="mysql+pymysql://user:password@mysql-container:3306/testdb" \
-  --ingress internal | tee -a $LOGFILE
+  --set-env-vars DATABASE_URL="$DB_CONNECTION_STRING" | tee -a $LOGFILE
 
-echo "✅ Successfully rolled back to [$VERSION]!" | tee -a $LOGFILE
+echo "✅ バージョン[$VERSION]へのロールバックが完了しました！" | tee -a $LOGFILE

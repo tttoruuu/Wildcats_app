@@ -27,7 +27,7 @@ docker-next-fastapi-mysql/
 3. **会話練習**
    - 会話シナリオの選択
    - 会う回数の選択（初めて、2-3回目、それ以上）
-   - 会話シミュレーション
+   - 会話シミュレーション（ChatGPT APIを利用）
 
 ## 🏁 クイックスタート
 
@@ -37,6 +37,10 @@ docker-next-fastapi-mysql/
 # リポジトリのクローン
 git clone <repository-url>
 cd docker-next-fastapi-mysql
+
+# 環境変数の設定（.envファイルのコピー）
+cp .env.example .env
+# .envファイルを編集してOPENAI_API_KEYを設定
 
 # Dockerコンテナのビルドと起動
 docker compose up -d --build
@@ -50,6 +54,49 @@ docker compose logs -f
 - フロントエンド: http://localhost:3000
 - バックエンドAPI: http://localhost:8000
 - Swagger UI (API仕様書): http://localhost:8000/docs
+
+## 🚢 Azure Container Appsへのデプロイ
+
+このプロジェクトはAzure Container Appsにデプロイすることを前提としています。デプロイは以下の手順で行えます：
+
+```bash
+# 1. Azureへのログイン
+az login
+
+# 2. 環境変数の設定 (.envファイルを作成して必要な情報を設定)
+cp .env.example .env
+# 重要: OPENAI_API_KEYを必ず設定してください
+
+# 3. リソースグループのデプロイ
+./scripts/deploy-azure-rg.sh
+
+# 4. データベースのデプロイ
+./scripts/deploy-db.sh
+
+# 5. バックエンドのデプロイ
+./scripts/deploy-backend.sh
+
+# 6. フロントエンドのデプロイ
+./scripts/deploy-frontend.sh
+```
+
+### ⚠️ OpenAI APIキーの設定
+
+ChatGPT機能を使用するには、OpenAI APIキーを設定する必要があります：
+
+1. OpenAIのウェブサイトでAPIキーを取得
+2. 以下のいずれかの方法でAPIキーを設定：
+   - ルートディレクトリの`.env`ファイルに`OPENAI_API_KEY=sk-xxxxxxxx...`を追加
+   - Azure Container Appsの環境変数に直接設定
+
+### デプロイの詳細設定
+
+デプロイに関する詳細な設定は各スクリプトファイルで変更できます：
+
+- `scripts/deploy-azure-rg.sh`: リソースグループとコンテナアプリ環境の設定
+- `scripts/deploy-db.sh`: MySQLデータベースの設定
+- `scripts/deploy-backend.sh`: バックエンドの設定とデプロイ
+- `scripts/deploy-frontend.sh`: フロントエンドの設定とデプロイ
 
 ## 🧩 アーキテクチャ
 

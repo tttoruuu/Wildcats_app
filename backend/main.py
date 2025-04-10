@@ -23,12 +23,22 @@ load_dotenv()  # .env読み込み
 ENV = os.getenv("ENV", "development")
 FRONTEND_ORIGIN = os.getenv("FRONTEND_ORIGIN", "http://localhost:3000")
 
-# CORS設定: 開発環境ではDockerネットワーク内の接続も許可
-origins = [
-    FRONTEND_ORIGIN,  # 標準の設定（http://localhost:3000）
-    "http://frontend:3000",  # Dockerネットワーク内
-    "http://localhost:3000",  # ホストマシンからの接続
-]
+# CORS設定: 全てのオリジンを許可（セキュリティが問題ない開発環境では有効）
+origins = ["*"]  # すべてのオリジンを許可
+
+# 本番環境用に特定のオリジンも追加（両方の方法を試す）
+if ENV == "production" and FRONTEND_ORIGIN != "http://localhost:3000":
+    specific_origins = [
+        FRONTEND_ORIGIN,
+        "http://frontend:3000",
+        "http://localhost:3000",
+        "https://frontend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io",
+    ]
+else:
+    specific_origins = [
+        "http://localhost:3000",
+        "http://frontend:3000",
+    ]
 
 app = FastAPI(
     title="お見合い会話練習API",
@@ -36,14 +46,22 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# CORS設定
+print("ENV:", ENV)
+print("FRONTEND_ORIGIN:", FRONTEND_ORIGIN)
+
+# CORS設定 - ワイルドカード "*" を使って全てのオリジンを許可
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"],
     allow_headers=["*"],
+    max_age=86400,  # プリフライトリクエストのキャッシュ時間（秒）
+    expose_headers=["*"],
 )
+
+# デバッグ用
+print("CORS allow_origins:", origins)
 
 # 会話相手APIルーターの追加
 app.include_router(conversation_partners.router)
@@ -106,10 +124,6 @@ def get_env():
         "ENV": ENV,
         "FRONTEND_ORIGIN": FRONTEND_ORIGIN
     }
-
-print("ENV:", ENV)
-print("FRONTEND_ORIGIN:", FRONTEND_ORIGIN)
-print("CORS allow_origins:", origins)
 
 #
 # 認証関連のエンドポイント
