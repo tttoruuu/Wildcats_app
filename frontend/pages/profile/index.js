@@ -42,16 +42,16 @@ export default function Profile() {
   };
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">読み込み中...</div>;
+    return <div className="min-h-screen flex items-center justify-center bg-[#F5F5F5]">読み込み中...</div>;
   }
 
   if (error && !user) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-4 text-center">
+      <div className="min-h-screen flex flex-col items-center justify-center px-6 py-4 text-center bg-[#F5F5F5]">
         <p className="text-red-600 mb-4">{error}</p>
         <button 
           onClick={() => router.push('/auth/login')}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          className="bg-gradient-to-r from-[#FF8551] to-[#FFA46D] hover:opacity-90 text-white font-medium py-2 px-6 rounded-full shadow-sm"
         >
           ログイン画面に戻る
         </button>
@@ -61,42 +61,42 @@ export default function Profile() {
 
   return (
     <Layout title="プロフィール">
-      <div className="p-4">
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-4">
+      <div className="px-6 py-4 bg-[#F5F5F5] min-h-screen">
+        <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm p-6 mb-4 border border-white/40">
           <div className="flex items-center space-x-4 mb-6">
             {user.profile_image_url ? (
               <img
                 src={apiService.getImageUrl(user.profile_image_url)}
                 alt="プロフィール画像"
-                className="w-20 h-20 rounded-full object-cover"
+                className="w-20 h-20 rounded-full object-cover border-2 border-[#FF8551]/30"
               />
             ) : (
-              <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center">
-                <span className="text-gray-400">画像なし</span>
+              <div className="w-20 h-20 rounded-full bg-[#FFF0E8] flex items-center justify-center border-2 border-[#FF8551]/30">
+                <span className="text-[#FF8551]">{user.username.charAt(0).toUpperCase()}</span>
               </div>
             )}
             <div>
-              <h2 className="text-2xl font-bold">{user.full_name}</h2>
-              <p className="text-gray-500">@{user.username}</p>
+              <h2 className="text-2xl font-bold text-gray-800">{user.full_name}</h2>
+              <p className="text-[#FF8551]">@{user.username}</p>
             </div>
           </div>
           
           <div className="space-y-4">
             <Link href="/profile/user-info">
-              <div className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors">
-                <h3 className="text-lg font-medium">ユーザー情報の詳細を見る</h3>
+              <div className="bg-[#FFF5F0] rounded-xl p-4 hover:bg-[#FFEBE0] transition-colors border border-[#FF8551]/10">
+                <h3 className="text-lg font-medium text-[#FF8551]">ユーザー情報の詳細を見る</h3>
               </div>
             </Link>
             
             <Link href="/profile/edit">
-              <div className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors">
-                <h3 className="text-lg font-medium">プロフィールを編集する</h3>
+              <div className="bg-[#FFF5F0] rounded-xl p-4 hover:bg-[#FFEBE0] transition-colors border border-[#FF8551]/10">
+                <h3 className="text-lg font-medium text-[#FF8551]">プロフィールを編集する</h3>
               </div>
             </Link>
             
             <button
               onClick={handleLogout}
-              className="w-full bg-red-50 text-red-600 rounded-lg p-4 hover:bg-red-100 transition-colors text-left"
+              className="w-full bg-red-50 text-red-600 rounded-xl p-4 hover:bg-red-100 transition-colors text-left border border-red-100"
             >
               <h3 className="text-lg font-medium">ログアウト</h3>
             </button>

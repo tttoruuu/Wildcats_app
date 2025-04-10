@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import axios from 'axios';
 import Layout from '../../components/Layout';
+import { ArrowLeft } from 'lucide-react';
 
 export default function UserInfo() {
   const router = useRouter();
@@ -46,7 +47,7 @@ export default function UserInfo() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-4 text-center">
+      <div className="min-h-screen flex flex-col items-center justify-center px-6 py-4 text-center">
         <p className="text-red-600 mb-4">{error || 'ユーザー情報の取得に失敗しました'}</p>
         <button 
           onClick={() => router.push('/auth/login')}
@@ -60,7 +61,17 @@ export default function UserInfo() {
 
   return (
     <Layout>
-      <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto py-6 px-6">
+        <div className="flex items-center mb-6">
+          <button 
+            onClick={() => router.back()}
+            className="text-[#FF8551] flex items-center gap-1 hover:opacity-80 transition-opacity"
+          >
+            <ArrowLeft size={18} />
+            <span>もどる</span>
+          </button>
+        </div>
+        
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
             {error}
