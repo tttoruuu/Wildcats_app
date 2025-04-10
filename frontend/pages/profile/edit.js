@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Layout from '../../components/Layout';
 import Button from '../../components/common/Button';
 import apiService from '../../services/api';
+import { ArrowLeft } from 'lucide-react';
 
 export default function ProfileEdit() {
   const router = useRouter();
@@ -73,7 +74,7 @@ export default function ProfileEdit() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-4 text-center">
+      <div className="min-h-screen flex flex-col items-center justify-center px-6 py-4 text-center">
         <p className="text-red-600 mb-4">{error || 'ユーザー情報の取得に失敗しました'}</p>
         <button 
           onClick={() => router.push('/auth/login')}
@@ -87,8 +88,17 @@ export default function ProfileEdit() {
 
   return (
     <Layout title="プロフィール編集">
-      <div className="p-4">
+      <div className="px-6 py-4">
         <div className="bg-white rounded-lg shadow-sm p-6 mb-4">
+          <div className="flex items-center mb-4">
+            <button 
+              onClick={() => router.back()}
+              className="text-[#FF8551] flex items-center gap-1 hover:opacity-80 transition-opacity"
+            >
+              <ArrowLeft size={18} />
+              <span>もどる</span>
+            </button>
+          </div>
           <h2 className="text-2xl font-bold mb-6">プロフィール編集</h2>
           
           {error && (
@@ -145,15 +155,6 @@ export default function ProfileEdit() {
             >
               アップロード
             </Button>
-          </div>
-
-          <div className="mt-6">
-            <button
-              onClick={() => router.back()}
-              className="text-indigo-600 hover:text-indigo-800"
-            >
-              ← 戻る
-            </button>
           </div>
         </div>
       </div>

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Layout from '../../components/Layout';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
+import Image from 'next/image';
 
 export default function Login() {
   const router = useRouter();
@@ -35,11 +36,20 @@ export default function Login() {
   };
 
   return (
-    <Layout>
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <Layout hideFooter={true}>
+      <div className="min-h-screen flex items-center justify-center bg-[#F5F5F5] py-12 px-6">
         <div className="max-w-md w-full space-y-8">
-          <div>
-            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          <div className="flex flex-col items-center justify-center">
+            <div className="w-48 h-48 relative flex justify-center items-center mb-4">
+              <Image
+                src="/images/logo.png"
+                alt="Miraim ロゴ"
+                width={160}
+                height={160}
+                className="object-contain mx-auto"
+              />
+            </div>
+            <h2 className="text-center text-xl font-bold text-[#FF8551]">
               ログイン
             </h2>
           </div>
@@ -64,14 +74,17 @@ export default function Login() {
             )}
 
             <div>
-              <Button type="submit" className="w-full">
+              <button
+                type="submit"
+                className="group relative w-full flex justify-center py-3 px-4 border border-transparent rounded-full shadow-sm text-sm font-medium text-white bg-gradient-to-r from-[#FF8551] to-[#FFA46D] hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FF8551]"
+              >
                 ログイン
-              </Button>
+              </button>
             </div>
           </form>
 
           <div className="text-center">
-            <Link href="/auth/register" className="text-sm text-blue-600 hover:text-blue-500">
+            <Link href="/auth/register" className="text-sm text-[#FF8551] hover:text-[#FFA46D]">
               アカウントをお持ちでない方はこちら
             </Link>
           </div>
@@ -81,8 +94,8 @@ export default function Login() {
       {/* 成功ポップアップ */}
       {showSuccessPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-xl">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">ログイン成功</h3>
+          <div className="bg-white p-6 rounded-xl shadow-xl">
+            <h3 className="text-lg font-medium text-[#FF8551] mb-4">ログイン成功</h3>
             <p className="text-gray-600">ログインに成功しました。ホーム画面に移動します。</p>
           </div>
         </div>

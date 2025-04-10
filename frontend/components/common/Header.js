@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import axios from 'axios';
 
 export default function Header() {
@@ -36,27 +37,11 @@ export default function Header() {
   if (!user) return null;
 
   return (
-    <header className="bg-gray-800 text-white p-4">
-      <div className="flex items-center">
-        <div className="flex-shrink-0 mr-4">
-          {user.profile_image_url ? (
-            <img
-              src={user.profile_image_url}
-              alt="プロフィール"
-              className="w-12 h-12 rounded-full object-cover"
-            />
-          ) : (
-            <div className="w-12 h-12 rounded-full bg-gray-500 flex items-center justify-center">
-              <span className="text-white text-xs">{user.username.charAt(0).toUpperCase()}</span>
-            </div>
-          )}
-        </div>
-        <div>
-          <h1 className="text-xl font-bold">
-            Hi, {user.username} <span className="text-yellow-400">👋</span>
-          </h1>
-          <p className="text-sm text-gray-300">{user.full_name}</p>
-        </div>
+    <header className="bg-gradient-to-r from-[#FF8551] to-[#FFA46D] text-white p-4 shadow-sm">
+      <div className="max-w-7xl mx-auto">
+        <Link href="/">
+          <h1 className="text-xl font-bold text-center">M i r a i m</h1>
+        </Link>
       </div>
     </header>
   );

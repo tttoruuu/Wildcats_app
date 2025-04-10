@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import axios from 'axios';
 import Layout from '../../components/Layout';
 import apiService from '../../services/api';
+import { ArrowLeft } from 'lucide-react';
 
 export default function ConversationPractice() {
   const router = useRouter();
@@ -267,9 +268,10 @@ export default function ConversationPractice() {
 
   if (loading) {
     return (
-      <Layout title="会話練習">
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-800 text-white p-4">
-          <p>読み込み中...</p>
+      <Layout title="会話練習" hideHeader={true}>
+        <div className="flex flex-col items-center justify-center min-h-screen bg-[#F5F5F5] text-gray-800 px-6 py-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF8551] mx-auto"></div>
+          <p className="mt-4">読み込み中...</p>
         </div>
       </Layout>
     );
@@ -277,12 +279,12 @@ export default function ConversationPractice() {
 
   if (!partner) {
     return (
-      <Layout title="会話練習">
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-800 text-white p-4">
+      <Layout title="会話練習" hideHeader={true}>
+        <div className="flex flex-col items-center justify-center min-h-screen bg-[#F5F5F5] text-gray-800 px-6 py-4">
           <p className="mb-4">会話相手が見つかりませんでした</p>
           <button
             onClick={() => router.push('/conversation')}
-            className="bg-orange-300 text-white rounded-full py-2 px-6 hover:bg-orange-400"
+            className="bg-gradient-to-r from-[#FF8551] to-[#FFA46D] text-white rounded-full py-2 px-6 hover:opacity-90 shadow-sm"
           >
             戻る
           </button>
@@ -292,19 +294,20 @@ export default function ConversationPractice() {
   }
 
   return (
-    <Layout title={`${partner.name}との会話`}>
-      <div className="flex flex-col min-h-screen bg-gray-800 text-white">
+    <Layout title={`${partner.name}との会話`} hideHeader={true}>
+      <div className="flex flex-col min-h-screen bg-[#F5F5F5] text-gray-800">
         {/* ヘッダー */}
-        <div className="bg-gray-900 p-4 flex items-center border-b border-gray-700">
+        <div className="bg-transparent pt-4 p-4 flex items-center">
           <button
             onClick={() => router.push('/conversation')}
-            className="mr-4 text-gray-400 hover:text-white"
+            className="mr-4 text-[#FF8551] flex items-center gap-1 hover:opacity-80 transition-opacity"
           >
-            ←
+            <ArrowLeft size={18} />
+            <span>もどる</span>
           </button>
           <div>
-            <h1 className="text-lg font-semibold">{partner.name}</h1>
-            <p className="text-xs text-gray-400">
+            <h1 className="text-lg font-semibold text-gray-800">{partner.name}</h1>
+            <p className="text-xs text-gray-500">
               {partner.age}歳 • {partner.gender === 'female' ? '女性' : partner.gender === 'male' ? '男性' : 'その他'} • {partner.occupation}
             </p>
           </div>
@@ -323,10 +326,10 @@ export default function ConversationPractice() {
                 <div
                   className={`max-w-xs p-3 rounded-lg ${
                     message.sender === 'user'
-                      ? 'bg-orange-500 text-white'
+                      ? 'bg-gradient-to-r from-[#FF8551] to-[#FFA46D] text-white'
                       : message.sender === 'system'
                         ? 'bg-red-500 text-white'
-                        : 'bg-gray-700 text-white'
+                        : 'bg-white/90 backdrop-blur-sm border border-white/40 text-gray-800 shadow-sm'
                   }`}
                 >
                   {message.text}
@@ -336,7 +339,7 @@ export default function ConversationPractice() {
             <div ref={messagesEndRef} />
             
             {/* ラリー数表示 */}
-            <div className="text-center text-sm text-gray-400">
+            <div className="text-center text-sm text-gray-500 mt-2">
               会話ラリー数: {currentRallyCount} / {maxRallyCount}
             </div>
             
@@ -345,7 +348,7 @@ export default function ConversationPractice() {
               <div className="flex justify-center mt-4">
                 <button
                   onClick={handleGetFeedback}
-                  className="bg-green-500 text-white rounded-full py-2 px-6 hover:bg-green-600"
+                  className="bg-gradient-to-r from-[#FF8551] to-[#FFA46D] text-white rounded-full py-2 px-6 hover:opacity-90 shadow-sm"
                 >
                   フィードバックをもらう
                 </button>
@@ -355,24 +358,24 @@ export default function ConversationPractice() {
         </div>
 
         {/* 入力エリア */}
-        <div className="bg-gray-900 p-4 border-t border-gray-700">
+        <div className="bg-white/90 p-4 border-t border-gray-100 shadow-sm">
           <div className="max-w-md mx-auto flex">
             <textarea
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder={showFeedbackButton ? "ラリー数の上限に達しました" : "メッセージを入力..."}
-              className={`flex-grow bg-gray-700 text-white rounded-l-lg p-3 focus:outline-none ${showFeedbackButton ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`flex-grow bg-[#FAFAFA] text-gray-800 rounded-l-xl p-3 focus:outline-none focus:ring-1 focus:ring-[#FF8551] border border-gray-200 ${showFeedbackButton ? 'opacity-50 cursor-not-allowed' : ''}`}
               rows="2"
               disabled={showFeedbackButton}
             />
             <button
               onClick={handleSendMessage}
               disabled={!inputMessage.trim() || sending || showFeedbackButton}
-              className={`bg-orange-500 text-white rounded-r-lg px-4 ${
+              className={`bg-gradient-to-r from-[#FF8551] to-[#FFA46D] text-white rounded-r-xl px-4 ${
                 !inputMessage.trim() || sending || showFeedbackButton
                   ? 'opacity-50 cursor-not-allowed'
-                  : 'hover:bg-orange-600'
+                  : 'hover:opacity-90'
               }`}
             >
               送信
