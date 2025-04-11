@@ -21,6 +21,8 @@ class User(Base):
 
     # リレーションシップ
     conversation_partners = relationship("ConversationPartner", back_populates="user")
+    posts = relationship("Post", back_populates="user")
+    likes = relationship("Like", back_populates="user")
 
     def __repr__(self):
         return f"<User {self.username}>"

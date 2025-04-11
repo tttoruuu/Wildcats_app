@@ -7,7 +7,7 @@ import { ArrowLeft } from 'lucide-react';
 
 export default function ConversationPractice() {
   const router = useRouter();
-  const { partnerId, meetingCount, scenario, rallyCount } = router.query;
+  const { partnerId, meetingCount, scenario, rallyCount, conversation } = router.query;
   const [partner, setPartner] = useState(null);
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
@@ -28,6 +28,27 @@ export default function ConversationPractice() {
     }
   }, [rallyCount]);
 
+  // URLクエリから会話履歴を復元
+  useEffect(() => {
+    if (conversation) {
+      try {
+        const parsedConversation = JSON.parse(conversation);
+        if (Array.isArray(parsedConversation) && parsedConversation.length > 0) {
+          setMessages(parsedConversation);
+          // ラリー数も復元
+          const userMessageCount = parsedConversation.filter(msg => msg.sender === 'user').length;
+          setCurrentRallyCount(userMessageCount);
+          // ラリー数が上限に達していたらフィードバックボタンを表示
+          if (userMessageCount >= maxRallyCount) {
+            setShowFeedbackButton(true);
+          }
+        }
+      } catch (err) {
+        console.error('会話履歴の解析に失敗しました', err);
+      }
+    }
+  }, [conversation, maxRallyCount]);
+
   useEffect(() => {
     if (meetingCount) {
       const newLevel = meetingCount === 'first' ? 1 : 2;
@@ -44,25 +65,28 @@ export default function ConversationPractice() {
         const partner = await apiService.partners.getPartner(partnerId);
         setPartner(partner);
         
-        // 初期メッセージを追加（会合回数とレベルに基づく）
-        let initialMessage = '';
-        
-        if (meetingCount === 'first') {
-          initialMessage = level === 1
-            ? 'はじめまして、初めてお会いできて嬉しいです。どうぞよろしくお願いします。😊'
-            : 'はじめまして、お会いできて嬉しいです。お互いのことを知っていければと思います。趣味や興味のあることなど、お話できたら嬉しいです。どうぞよろしくお願いします。😊';
-        } else {
-          initialMessage = level === 1
-            ? 'また会えて嬉しいです。最近はいかがお過ごしですか？'
-            : 'また会えて嬉しいです。前回はとても楽しかったです。今日はどんなお話ができるか楽しみにしていました。😊';
-        }
+        // 会話履歴がURLから復元されていない場合のみ初期メッセージを設定
+        if (messages.length === 0) {
+          // 初期メッセージを追加（会合回数とレベルに基づく）
+          let initialMessage = '';
+          
+          if (meetingCount === 'first') {
+            initialMessage = level === 1
+              ? 'はじめまして、初めてお会いできて嬉しいです。どうぞよろしくお願いします。😊'
+              : 'はじめまして、お会いできて嬉しいです。お互いのことを知っていければと思います。趣味や興味のあることなど、お話できたら嬉しいです。どうぞよろしくお願いします。😊';
+          } else {
+            initialMessage = level === 1
+              ? 'また会えて嬉しいです。最近はいかがお過ごしですか？'
+              : 'また会えて嬉しいです。前回はとても楽しかったです。今日はどんなお話ができるか楽しみにしていました。😊';
+          }
 
-        setMessages([
-          {
-            sender: 'partner',
-            text: initialMessage,
-          },
-        ]);
+          setMessages([
+            {
+              sender: 'partner',
+              text: initialMessage,
+            },
+          ]);
+        }
       } catch (err) {
         console.error('会話相手の情報取得に失敗しました', err);
         
@@ -182,62 +206,65 @@ export default function ConversationPractice() {
         });
         
         // ChatGPT APIを利用するエンドポイントを呼び出し
-        const response = await axios.post('/api/chat', {
-          userInput: inputMessage.trim(),
-          chatHistory: formattedHistory,
-          level,
+        const response = await apiService.conversation.simulateConversation(
           partnerId,
-          meetingCount
-        }, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          timeout: 30000 // タイムアウトを30秒に設定
-        });
-        
-        console.log('API応答:', response.data);
-        
-        if (response.data.response) {
-          const partnerMessage = { sender: 'partner', text: response.data.response };
+          meetingCount,
+          level,
+          inputMessage.trim(),
+          formattedHistory
+        );
+
+        console.log('API応答:', response);
+
+        // APIが正常応答を返したか確認
+        if (response && response.response) {
+          // サーバーからのフォールバックレスポンスかどうかをチェック
+          const fallbackKeywords = [
+            "サーバーが混雑", "通信エラー", "ネットワークに問題", "時間をおいて", 
+            "少し考え中", "うまく言葉が見つかりません", "少し疲れてしまいました"
+          ];
+          
+          const isLikelyFallback = fallbackKeywords.some(keyword => 
+            response.response.includes(keyword)
+          );
+          
+          if (isLikelyFallback) {
+            console.warn('フォールバック応答を検出:', response.response);
+          }
+          
+          const partnerMessage = { 
+            sender: 'partner', 
+            text: response.response,
+            isFallback: isLikelyFallback
+          };
           setMessages(prev => [...prev, partnerMessage]);
+        } else {
+          console.error('API応答フォーマットが不正です:', response);
+          throw new Error('API応答フォーマットが不正です');
         }
       } catch (error) {
         console.error('ChatGPT APIリクエストに失敗しました', error);
         
-        // エラーメッセージを詳細に表示
-        let errorMsg = 'APIリクエストに失敗しました。';
-        
+        // エラーの詳細情報をログに出力
+        let errorDetail = '不明なエラー';
         if (error.response) {
-          // サーバーからのレスポンスがある場合
-          const statusCode = error.response.status;
-          const errorDetail = error.response.data?.error || error.response.data?.detail || '';
-          
-          if (statusCode === 401) {
-            // 認証エラーの場合はログイン画面にリダイレクト
-            localStorage.removeItem('token');
-            router.push('/auth/login');
-            return;
-          }
-          
-          errorMsg = `エラー(${statusCode}): ${errorDetail}`;
-          console.error('詳細なエラー情報:', errorDetail);
+          // サーバーからのエラーレスポンス
+          errorDetail = error.response.data?.error || '詳細不明のサーバーエラー';
         } else if (error.request) {
-          // リクエストは送信されたがレスポンスがない場合
-          errorMsg = 'サーバーからの応答がありません。ネットワーク接続を確認してください。';
-          console.error('リクエストエラー:', error.request);
+          // リクエスト送信後、レスポンスが返ってこない
+          errorDetail = 'サーバーからの応答がありません';
         } else {
-          // リクエスト設定時のエラー
-          errorMsg = `リクエストエラー: ${error.message}`;
-          console.error('その他のエラー:', error.message);
+          // その他のエラー
+          errorDetail = error.message;
         }
+        console.error('詳細なエラー情報:', errorDetail);
         
-        // エラーメッセージをシステムメッセージとして表示
-        const systemMessage = { 
+        // エラーメッセージを画面に表示
+        const errorMessage = { 
           sender: 'system', 
-          text: errorMsg
+          text: `エラーが発生しました: ${errorDetail}。もう一度お試しください。` 
         };
-        setMessages(prev => [...prev, systemMessage]);
+        setMessages(prev => [...prev, errorMessage]);
       } finally {
         setSending(false);
       }
@@ -255,13 +282,17 @@ export default function ConversationPractice() {
   };
 
   const handleGetFeedback = () => {
+    // 会話履歴をJSON文字列に変換して渡す
+    const messagesJson = JSON.stringify(messages);
+    
     // フィードバックページに遷移
     router.push({
       pathname: '/conversation/feedback',
       query: { 
         partnerId,
         meetingCount,
-        rallyCount: maxRallyCount
+        rallyCount: maxRallyCount,
+        conversation: messagesJson
       }
     });
   };
@@ -385,4 +416,4 @@ export default function ConversationPractice() {
       </div>
     </Layout>
   );
-} 
+}

@@ -8,10 +8,12 @@ from dotenv import load_dotenv
 from database import SessionLocal, engine, Base, get_db
 from models.user import User
 from models.conversation_partner import ConversationPartner
+from models.post import Post
+from models.like import Like
 from models import schemas
 from auth.password import get_password_hash, verify_password
 from auth.jwt import create_access_token, get_current_user
-from routers import conversation_partners
+from routers import conversation_partners, posts
 from fastapi.responses import JSONResponse
 import random
 
@@ -65,6 +67,9 @@ print("CORS allow_origins:", origins)
 
 # 会話相手APIルーターの追加
 app.include_router(conversation_partners.router)
+
+# 投稿APIルーターの追加
+app.include_router(posts.router)
 
 # データベースセッションの依存関係
 def get_db():
@@ -235,7 +240,7 @@ def upload_profile_image(
 #
 
 @app.post("/conversation")
-def simulate_conversation(
+async def simulate_conversation(
     data: dict,
     current_user: User = Depends(get_current_user)
 ):
@@ -264,9 +269,17 @@ def simulate_conversation(
     print(f"ユーザーメッセージ: {message}")
     print(f"チャット履歴: {len(chat_history)}件")
     
+    # 緊急フォールバック応答 (APIでエラーが起きた場合の対応)
+    fallback_responses = [
+        "申し訳ありません、少し考え中です...また話しかけてみてください。",
+        "ごめんなさい、うまく言葉が見つかりません。別の話題はどうですか？",
+        "少し疲れてしまいました。少し休憩してから続けましょうか？"
+    ]
+    
     try:
         import openai
         import os
+        import random
         from dotenv import load_dotenv
         from openai import OpenAI
         
@@ -280,6 +293,13 @@ def simulate_conversation(
         if api_key:
             masked_key = api_key[:5] + "..." + api_key[-5:] if len(api_key) > 10 else "***" 
             print(f"OpenAI APIキー: {masked_key}")
+            
+            # APIキーの形式を確認
+            import re
+            if re.match(r'^sk-[A-Za-z0-9]+$', api_key):
+                print("APIキー形式: 有効")
+            else:
+                print(f"APIキー形式が不正な可能性があります。キーの長さ: {len(api_key)}")
         else:
             print("OpenAI APIキーが設定されていません")
             raise HTTPException(
@@ -290,8 +310,9 @@ def simulate_conversation(
         # OpenAIクライアントを初期化
         try:
             client = OpenAI(api_key=api_key)
+            print("OpenAIクライアント初期化成功")
         except Exception as e:
-            print(f"OpenAIクライアント初期化エラー: {str(e)}")
+            print(f"OpenAIクライアント初期化エラー: {type(e).__name__}: {str(e)}")
             raise HTTPException(
                 status_code=500,
                 detail=f"OpenAIクライアント初期化エラー: {str(e)}"
@@ -365,36 +386,57 @@ def simulate_conversation(
         # ChatGPT APIを呼び出して応答を生成
         try:
             print("OpenAI APIリクエスト開始...")
-            response = client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=messages,
-                max_tokens=200,
-                temperature=0.7,
-                timeout=30.0  # 30秒のタイムアウト設定
-            )
+            print(f"送信するプロンプト内容: {messages[0]['content'][:100]}...")
+            print(f"メッセージ数: {len(messages)}")
             
-            # 応答を取得
-            ai_response = response.choices[0].message.content
-            print(f"OpenAI APIレスポンス: {ai_response[:50]}...")
+            # タイムアウト時間を設定（秒単位）- 長めに設定
+            timeout_seconds = 120
             
-            return {"response": ai_response}
-        except Exception as api_error:
-            # エラーの詳細情報を出力
-            error_message = f"OpenAI API呼び出しエラー: {type(api_error).__name__}: {str(api_error)}"
-            print(error_message)
-            # エラーメッセージをそのまま返す
-            raise HTTPException(
-                status_code=500, 
-                detail=error_message
-            )
-    
+            # API呼び出しを実行
+            print(f"OpenAI API呼び出し開始... タイムアウト: {timeout_seconds}秒")
+            start_time = __import__('time').time()
+            
+            try:
+                # ヘッダー設定とリトライ回数を調整
+                client.api_key = api_key
+                client.timeout = timeout_seconds
+                client.max_retries = 3  # リトライ回数を増やす
+                
+                response = client.chat.completions.create(
+                    model="gpt-3.5-turbo",
+                    messages=messages,
+                    temperature=0.7,
+                    max_tokens=150,
+                    timeout=timeout_seconds
+                )
+                
+                end_time = __import__('time').time()
+                print(f"OpenAI API呼び出し完了: {end_time - start_time:.2f}秒")
+                
+                if response and response.choices:
+                    assistant_message = response.choices[0].message.content
+                    print(f"OpenAI API応答: {assistant_message}")
+                    return {"response": assistant_message}
+                else:
+                    print("OpenAI API応答が空です")
+                    return {"response": random.choice(fallback_responses)}
+                    
+            except Exception as e:
+                print(f"OpenAI API呼び出しエラー: {type(e).__name__}: {str(e)}")
+                return {"response": random.choice(fallback_responses)}
+                
+        except Exception as e:
+            print(f"会話シミュレーションエラー: {type(e).__name__}: {str(e)}")
+            return {"response": random.choice(fallback_responses)}
+            
     except Exception as e:
-        import traceback
-        print(f"会話シミュレーションエラー: {str(e)}")
-        print(traceback.format_exc())
-        
-        # エラーメッセージを詳細に
-        raise HTTPException(
-            status_code=500, 
-            detail=f"会話処理エラー: {str(e)}"
-        )
+        print(f"予期せぬエラー: {type(e).__name__}: {str(e)}")
+        return {"response": random.choice(fallback_responses)}
+
+# ヘルスチェックエンドポイント
+@app.get("/healthcheck")
+def health_check():
+    """
+    サーバーの状態を確認するシンプルなヘルスチェックエンドポイント
+    """
+    return {"status": "ok", "time": __import__('datetime').datetime.now().isoformat()}

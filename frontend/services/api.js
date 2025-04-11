@@ -1,26 +1,62 @@
 import axios from 'axios';
 
-// APIのベースURL - ハードコードされたURLを完全に削除し、環境変数を優先
-const API_BASE_URL = 
-  typeof window !== 'undefined' && window.__NEXT_DATA__?.props?.pageProps?.apiUrl
-  ? window.__NEXT_DATA__.props.pageProps.apiUrl
-  : process.env.NEXT_PUBLIC_API_URL 
-  ? process.env.NEXT_PUBLIC_API_URL 
-  : 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io';
+// APIのベースURL - 環境に応じて適切に設定
+const API_BASE_URL = (() => {
+  // 1. サーバーサイドでの実行
+  if (typeof window === 'undefined') {
+    return process.env.INTERNAL_API_URL || 'http://backend:8000';
+  }
+  
+  // 2. クライアントサイドでの実行
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+})();
 
-console.log('Using API URL:', API_BASE_URL);  // デバッグ用
+console.log('Using API URL:', API_BASE_URL);
 
 // 認証済みAPIクライアントの作成
 const getAuthenticatedClient = () => {
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
   
-  return axios.create({
+  if (!token) {
+    console.error('トークンが存在しません');
+    throw new Error('認証が必要です');
+  }
+
+  const client = axios.create({
     baseURL: API_BASE_URL,
     headers: {
       'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
+      'Authorization': `Bearer ${token}`,
     },
+    timeout: 120000, // タイムアウトを120秒に延長
   });
+
+  // レスポンスインターセプターを追加
+  client.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+      const originalRequest = error.config;
+      
+      // 401エラーで、かつリトライされていない場合
+      if (error.response?.status === 401 && !originalRequest._retry) {
+        originalRequest._retry = true;
+        
+        try {
+          // トークンをクリア
+          localStorage.removeItem('token');
+          // ログインページにリダイレクト
+          window.location.href = '/auth/login';
+        } catch (refreshError) {
+          console.error('トークンの更新に失敗しました:', refreshError);
+          return Promise.reject(refreshError);
+        }
+      }
+      
+      return Promise.reject(error);
+    }
+  );
+
+  return client;
 };
 
 // 認証関連のAPI
@@ -83,10 +119,13 @@ export const authAPI = {
   // 現在のユーザー情報を取得
   getCurrentUser: async () => {
     try {
+      console.log('現在のユーザー情報を取得中...');
       const client = getAuthenticatedClient();
       const response = await client.get('/me');
+      console.log('ユーザー情報取得成功:', response.data);
       return response.data;
     } catch (error) {
+      console.error('ユーザー情報取得エラー:', error);
       if (error.response?.status === 401) {
         // 認証エラーの場合、トークンを削除
         if (typeof window !== 'undefined') {
@@ -148,18 +187,90 @@ export const partnerAPI = {
 // 会話シミュレーション関連のAPI
 export const conversationAPI = {
   // 会話のシミュレーション
-  simulateConversation: async (partnerId, meetingCount, scenario, message) => {
+  simulateConversation: async (partnerId, meetingCount, level, message, chatHistory = []) => {
     try {
+      console.log('会話シミュレーション開始:', { partnerId, meetingCount, level, message });
       const client = getAuthenticatedClient();
       const response = await client.post('/conversation', {
         partnerId,
         meetingCount,
-        scenario,
+        level,
         message,
+        chatHistory
       });
+      console.log('会話シミュレーション成功:', response.data);
       return response.data;
     } catch (error) {
+      console.error('会話シミュレーションエラー:', error);
+      if (error.response) {
+        console.error('エラーレスポンス:', error.response.data);
+        console.error('エラーステータス:', error.response.status);
+      }
       throw error.response?.data || { detail: 'ネットワークエラーが発生しました' };
+    }
+  },
+  
+  // 会話内容からフィードバックを生成
+  generateFeedback: async (messages, partnerId, meetingCount, level) => {
+    try {
+      console.log('フィードバック生成開始:', { messagesCount: messages.length, partnerId, meetingCount, level });
+      
+      // APIが実装されていないため、モックデータを返す
+      // 実際のバックエンドAPIができたらこの部分を修正する
+      console.log('モックフィードバックを生成します');
+      
+      // 会話履歴に基づいた簡易分析 (生成AIを使うのが理想)
+      const userMessages = messages.filter(msg => msg.sender === 'user');
+      const userMessageCount = userMessages.length;
+      const questionCount = userMessages.filter(msg => 
+        msg.text.includes('？') || msg.text.includes('?') || 
+        msg.text.includes('ですか') || msg.text.includes('何') || 
+        msg.text.includes('どう')).length;
+      
+      return {
+        summary: `${userMessageCount}回の発言で、自然な会話ができていました。質問の数や内容から会話を深める意識が見られます。`,
+        rating: Math.min(5, Math.max(3, Math.floor(userMessageCount / 2))),
+        goodPoints: [
+          '相手の話に興味を示し、質問を投げかけていました',
+          '自分の経験や考えをうまく表現できていました',
+          '会話の流れを自然に保てていました',
+          questionCount > 2 ? '適切な質問で会話を発展させていました' : '基本的なコミュニケーションができていました'
+        ],
+        improvementPoints: [
+          '質問のバリエーションをもう少し増やすと良いでしょう',
+          '時々相手の質問に直接答えずに話題を変えることがありました',
+          '会話の深まりをもう少し意識すると良いでしょう',
+          questionCount < 3 ? '相手の話に対してもう少し質問を増やすと良いでしょう' : '質問の内容をさらに深めると良いでしょう'
+        ],
+        practicePoints: [
+          '相手の話をさらに深堀りする質問を心がけましょう',
+          '自分の考えに加えて、具体的なエピソードも交えると効果的です',
+          '相手の話に共感や理解を示す表現を増やしましょう',
+          userMessageCount < 5 ? 'もう少し積極的に会話に参加すると良いでしょう' : '会話のバランスを意識して話すと良いでしょう'
+        ]
+      };
+    } catch (error) {
+      console.error('フィードバック生成エラー:', error);
+      // エラー時はデフォルトのフィードバックを返す
+      return {
+        summary: "会話の分析に基づいたフィードバックを生成しました。",
+        rating: 4,
+        goodPoints: [
+          '相手の話に興味を示し、質問を投げかけていました',
+          '自分の経験や考えをうまく表現できていました',
+          '会話の流れを自然に保てていました'
+        ],
+        improvementPoints: [
+          '質問のバリエーションをもう少し増やすと良いでしょう',
+          '時々相手の質問に直接答えずに話題を変えることがありました',
+          '会話の深まりをもう少し意識すると良いでしょう'
+        ],
+        practicePoints: [
+          '相手の話をさらに深堀りする質問を心がけましょう',
+          '自分の考えに加えて、具体的なエピソードも交えると効果的です',
+          '相手の話に共感や理解を示す表現を増やしましょう'
+        ]
+      };
     }
   },
 };
