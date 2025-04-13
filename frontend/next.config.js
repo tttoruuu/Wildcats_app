@@ -6,15 +6,23 @@ const nextConfig = {
     defaultLocale: 'ja',
   },
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || (
+      process.env.NODE_ENV === 'production'
+        ? 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io'
+        : 'http://localhost:8000'
+    ),
   },
   publicRuntimeConfig: {
-    apiUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
+    apiUrl: process.env.NEXT_PUBLIC_API_URL || (
+      process.env.NODE_ENV === 'production'
+        ? 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io'
+        : 'http://localhost:8000'
+    ),
+    environment: process.env.NODE_ENV || 'development',
   },
-  // フロントエンドでのAPI URL設定を確実にするため、getInitialPropsを使ってpropsに追加
   async generateBuildId() {
     return 'build-' + new Date().toISOString();
   },
 }
 
-module.exports = nextConfig 
+module.exports = nextConfig

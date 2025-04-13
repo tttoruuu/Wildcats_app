@@ -77,12 +77,10 @@ export default function ConversationFeedback() {
         // フィードバック生成
         try {
           // フィードバックを生成
-          const level = meetingCount === 'first' ? 1 : 2;
           const feedbackData = await apiService.conversation.generateFeedback(
             messages,
             partnerId,
-            meetingCount,
-            level
+            meetingCount
           );
           
           // フィードバックのステートを更新
@@ -91,50 +89,17 @@ export default function ConversationFeedback() {
           // フィードバック項目から自動的にチェックボックスを設定
           const newCheckboxes = {};
           // 良かった点を自動的にチェック
-          feedbackData.goodPoints.forEach((point, i) => {
-            newCheckboxes[`0-${i}`] = true;
+          feedbackData.encouragement.forEach((point, i) => {
+            newCheckboxes[`0-${i}`] = false;
           });
           // 改善点をチェック
-          feedbackData.improvementPoints.forEach((point, i) => {
-            newCheckboxes[`1-${i}`] = true;
-          });
-          // 練習ポイントをチェック
-          feedbackData.practicePoints.forEach((point, i) => {
-            newCheckboxes[`2-${i}`] = true;
+          feedbackData.advice.forEach((point, i) => {
+            newCheckboxes[`1-${i}`] = false;
           });
           setCheckboxes(newCheckboxes);
           
           // チェックされた項目のリストも更新
           const items = [];
-          // 良かった点
-          feedbackData.goodPoints.forEach((text, i) => {
-            items.push({
-              id: `0-${i}`,
-              category: '良かった点',
-              text,
-              date: new Date().toISOString()
-            });
-          });
-          
-          // 改善点
-          feedbackData.improvementPoints.forEach((text, i) => {
-            items.push({
-              id: `1-${i}`,
-              category: '改善点',
-              text,
-              date: new Date().toISOString()
-            });
-          });
-          
-          // 練習ポイント
-          feedbackData.practicePoints.forEach((text, i) => {
-            items.push({
-              id: `2-${i}`,
-              category: '今後の練習ポイント',
-              text,
-              date: new Date().toISOString()
-            });
-          });
           setCheckedItems(items);
           
         } catch (feedbackError) {
@@ -199,49 +164,47 @@ export default function ConversationFeedback() {
     // チェックリスト画面（まだ存在しない場合は作成する必要あり）に遷移
     router.push('/checklist');
   };
+  
+  // スコアに基づいた評価メッセージを取得
+  const getEvaluationMessage = (score) => {
+    if (score >= 90) return { emoji: '😊', message: 'すごく自然な会話だった〜！その調子！' };
+    if (score >= 70) return { emoji: '😎', message: '落ち着いて話せていてGood！とてもスムーズな会話だったよ。' };
+    if (score >= 50) return { emoji: '🤔', message: '会話の流れはいい感じ！もう少し深掘りしてみよう！' };
+    if (score >= 30) return { emoji: '😅', message: '緊張してたけど頑張ってたね！次はリラックスしてみよう！' };
+    return { emoji: '😮', message: '面白い発言で場が盛り上がったね！意外性がいい感じ！' };
+  };
+  
+  // 評価メッセージを取得
+  const evaluation = feedback ? getEvaluationMessage(feedback.score) : { emoji: '🤔', message: '会話の流れはいい感じ！' };
 
   const feedbackItems = feedback ? [
     {
       title: '良かった点',
       icon: <Heart className="w-5 h-5 text-[#FF8551]" />,
-      points: feedback.goodPoints
+      points: feedback.encouragement
     },
     {
       title: '改善点',
       icon: <XCircle className="w-5 h-5 text-[#FF8551]" />,
-      points: feedback.improvementPoints
-    },
-    {
-      title: '今後の練習ポイント',
-      icon: <BookOpen className="w-5 h-5 text-[#FF8551]" />,
-      points: feedback.practicePoints
+      points: feedback.advice
     }
   ] : [
     {
       title: '良かった点',
       icon: <Heart className="w-5 h-5 text-[#FF8551]" />,
       points: [
-        '相手の話に興味を示し、質問を投げかけていました',
-        '自分の経験や考えをうまく表現できていました',
-        '会話の流れを自然に保てていました'
+        '質問に丁寧に答えていた',
+        '会話を続けようとする姿勢が良かった', 
+        '自己開示ができていた'
       ]
     },
     {
       title: '改善点',
       icon: <XCircle className="w-5 h-5 text-[#FF8551]" />,
       points: [
-        '質問のバリエーションをもう少し増やすと良いでしょう',
-        '時々相手の質問に直接答えずに話題を変えることがありました',
-        '会話の深まりをもう少し意識すると良いでしょう'
-      ]
-    },
-    {
-      title: '今後の練習ポイント',
-      icon: <BookOpen className="w-5 h-5 text-[#FF8551]" />,
-      points: [
-        '相手の話をさらに深堀りする質問を心がけましょう',
-        '自分の考えに加えて、具体的なエピソードも交えると効果的です',
-        '相手の話に共感や理解を示す表現を増やしましょう'
+        '質問のバリエーションを増やすと良い',
+        '相手の話に共感を示すとより良い',
+        'もう少し会話を深掘りしてみよう'
       ]
     }
   ];
@@ -270,13 +233,11 @@ export default function ConversationFeedback() {
             <span>もどる</span>
           </button>
           <h1 className="text-xl font-bold text-[#FF8551]">FEEDBACK📝</h1>
-          <div className="flex items-center justify-center mt-6 p-2 rounded-full w-full max-w-md bg-gradient-to-r from-[#FF8551]/90 to-[#FFA46D]/90 backdrop-blur-sm">
+          <div className="flex items-center justify-center mt-6 p-4 rounded-full w-full max-w-md bg-gradient-to-r from-[#FF8551]/90 to-[#FFA46D]/90 backdrop-blur-sm">
             <div className="text-center text-white">
-              <p className="text-sm font-semibold">
-                {feedback ? feedback.summary.split('.')[0] : 'すごく自然な会話でした！'}
-              </p>
-              <p className="text-xs mt-0.5">
-                {feedback ? feedback.summary.split('.').slice(1).join('.').trim() : '次はもう少し踏み込んだ質問にチャレンジしてみましょう'}
+              <p className="text-xl font-semibold flex items-center justify-center">
+                <span className="mr-3 text-4xl">{evaluation.emoji}</span> 
+                {evaluation.message}
               </p>
             </div>
           </div>
@@ -307,7 +268,7 @@ export default function ConversationFeedback() {
                 </div>
                 
                 {/* フィードバック項目のスケルトン */}
-                {[1, 2, 3].map(i => (
+                {[1, 2].map(i => (
                   <div key={i} className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm p-4 border border-white/40 animate-pulse">
                     <div className="h-5 bg-gray-200 rounded w-1/4 mb-3"></div>
                     <div className="space-y-2">
@@ -320,33 +281,6 @@ export default function ConversationFeedback() {
               </div>
             ) : (
               <>
-                {/* 評価 */}
-                <div className="mb-5">
-                  <h2 className="text-md font-semibold mb-2 flex items-center">
-                    <Star className="mr-2 text-yellow-400 w-5 h-5" />
-                    会話の評価
-                  </h2>
-                  <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm p-4 border border-white/40">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">全体評価</span>
-                      <div className="flex">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star
-                            key={star}
-                            className="w-4 h-4 text-yellow-400"
-                            fill={star <= (feedback?.rating || 5) ? "#FBBF24" : "none"}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                    <div className="bg-[#FFFAF0] rounded-xl p-3 text-xs leading-tight text-gray-700 border border-amber-100/50">
-                      <p>
-                        {rallyCount || 0}回のラリーを通して、{feedback?.summary || '自然な会話の流れを作ることができていました。相手に興味を示し、適切な質問をすることで会話を発展させることができています。'}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
                 {/* フィードバック各項目 - エラー状態の表示を追加 */}
                 {error ? (
                   <div className="my-5 p-4 bg-red-50 rounded-xl border border-red-100 text-red-600 text-sm">
@@ -357,23 +291,23 @@ export default function ConversationFeedback() {
                 ) : (
                   feedbackItems.map((item, index) => (
                     <div key={index} className="mb-5 bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm p-4 border border-white/40">
-                      <h2 className="text-sm font-semibold mb-2 flex items-center">
-                        <span className="mr-2 p-1 rounded-full bg-[#FFF0E8]">{item.icon}</span>
+                      <h2 className="text-sm font-semibold mb-3 flex items-center">
+                        <span className="mr-2 p-1.5 rounded-full bg-[#FFF0E8]">{item.icon}</span>
                         {item.title}
                       </h2>
-                      <ul className="list-none space-y-2">
+                      <ul className="list-none space-y-3">
                         {item.points.map((point, i) => (
-                          <li key={i} className="flex items-start bg-[#FAFAFA] rounded-xl py-1.5 px-3 shadow-sm border border-gray-100/50">
+                          <li key={i} className="flex items-start bg-[#FAFAFA] rounded-xl py-2.5 px-4 shadow-sm border border-gray-100/50">
                             <input
                               type="checkbox"
                               id={`checkbox-${index}-${i}`}
                               checked={!!checkboxes[`${index}-${i}`]}
                               onChange={() => handleCheckboxChange(index, i, point)}
-                              className="mr-2 mt-0.5 h-4 w-4 rounded border-gray-300 text-[#FFAB7D] focus:ring-[#FFAB7D] accent-[#FFAB7D]"
+                              className="mr-3 mt-0.5 h-4 w-4 rounded border-gray-300 text-[#FFAB7D] focus:ring-[#FFAB7D] accent-[#FFAB7D]"
                             />
                             <label 
                               htmlFor={`checkbox-${index}-${i}`}
-                              className="text-xs leading-tight text-gray-700"
+                              className="text-sm leading-snug text-gray-700"
                             >
                               {point}
                             </label>
@@ -384,6 +318,11 @@ export default function ConversationFeedback() {
                   ))
                 )}
 
+                {/* 説明文 */}
+                <p className="text-center text-sm text-gray-600 my-4">
+                  あとで見直したいフィードバックにチェックを入れよう！
+                </p>
+
                 {/* 選択中の項目数を表示 */}
                 <div className="my-4 text-center">
                   <p className="text-sm text-gray-600">
@@ -392,23 +331,74 @@ export default function ConversationFeedback() {
                 </div>
 
                 {/* ボタンエリア */}
-                <div className="flex justify-between mt-8 mb-24">
+                <div className="flex flex-col gap-3 my-8">
+                  <button
+                    onClick={saveToChecklist}
+                    className="bg-gradient-to-r from-[#FF8551] to-[#FFA46D] text-white rounded-full py-3 px-6 shadow-sm hover:opacity-90 transition-all flex items-center justify-center"
+                  >
+                    <List className="w-4 h-4 mr-2" />
+                    <span className="text-sm whitespace-nowrap">チェックリストに登録</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      // meetingCountに基づいて適切なページに遷移
+                      if (meetingCount === 'first') {
+                        router.push('/conversation/tips-first');
+                      } else {
+                        router.push('/conversation/tips-later');
+                      }
+                    }}
+                    className="bg-white/90 text-[#FF8551] border border-[#FF8551]/70 rounded-full py-3 px-6 shadow-sm hover:bg-[#FFF1E9] transition-colors flex items-center justify-center"
+                  >
+                    <BookOpen className="w-4 h-4 mr-2" />
+                    <span className="text-sm whitespace-nowrap">押さえておくべきポイント</span>
+                  </button>
                   <button
                     onClick={() => router.push({
                       pathname: '/conversation/practice',
                       query: { partnerId, meetingCount, rallyCount, conversation }
                     })}
-                    className="bg-white/90 text-[#FF8551] border border-[#FF8551]/70 rounded-full py-2.5 px-6 shadow-sm hover:bg-[#FFF1E9] transition-colors flex items-center"
+                    className="bg-white/90 text-[#FF8551] border border-[#FF8551]/70 rounded-full py-3 px-6 shadow-sm hover:bg-[#FFF1E9] transition-colors flex items-center justify-center"
                   >
                     <span className="text-sm whitespace-nowrap">もう一度練習する</span>
                   </button>
-                  <button
-                    onClick={saveToChecklist}
-                    className="bg-gradient-to-r from-[#FF8551] to-[#FFA46D] text-white rounded-full py-2.5 px-6 shadow-sm hover:opacity-90 transition-all flex items-center"
-                  >
-                    <List className="w-4 h-4 mr-1" />
-                    <span className="text-sm whitespace-nowrap">チェックリストに登録</span>
-                  </button>
+                </div>
+
+                {/* 会話履歴セクション */}
+                <div className="mt-4 mb-24">
+                  <div className="flex items-center mb-4">
+                    <h2 className="text-sm font-semibold flex items-center">
+                      <span className="mr-2 p-1.5 rounded-full bg-[#FFF0E8]">
+                        <BookOpen className="w-5 h-5 text-[#FF8551]" />
+                      </span>
+                      会話履歴
+                    </h2>
+                  </div>
+                  
+                  <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm p-4 border border-white/40">
+                    <div className="space-y-4 max-h-96 overflow-y-auto p-2">
+                      {messages.map((message, index) => (
+                        <div
+                          key={index}
+                          className={`flex ${
+                            message.sender === 'user' ? 'justify-end' : 'justify-start'
+                          }`}
+                        >
+                          <div
+                            className={`max-w-xs p-3 rounded-lg ${
+                              message.sender === 'user'
+                                ? 'bg-gradient-to-r from-[#FF8551] to-[#FFA46D] text-white'
+                                : message.sender === 'system'
+                                  ? 'bg-red-500 text-white'
+                                  : 'bg-white/90 border border-white/40 text-gray-800 shadow-sm'
+                            }`}
+                          >
+                            {message.text}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </>
             )}

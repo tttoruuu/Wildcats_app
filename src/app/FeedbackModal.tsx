@@ -21,6 +21,13 @@ interface FeedbackModalProps {
   onClose: () => void;
 }
 
+interface SelectedPoint {
+  id: string;
+  category: string;
+  text: string;
+  date: string;
+}
+
 const feedbackTypes = {
   happy: {
     emoji: "😊",
@@ -85,7 +92,7 @@ const AnimatedDiv = animated.div as React.FC<AnimatedProps<React.HTMLAttributes<
 
 export default function FeedbackModal({ feedback, onClose }: FeedbackModalProps) {
   const [checkedItems, setCheckedItems] = useState<{ [key: string]: boolean }>({});
-  const [selectedPoints, setSelectedPoints] = useState<Array<{id: string, category: string, text: string, date: string}>>([]);
+  const [selectedPoints, setSelectedPoints] = useState<SelectedPoint[]>([]);
   const [showConfetti, setShowConfetti] = useState(false);
   const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
   const [currentFeedback, setCurrentFeedback] = useState<Feedback>(feedback);
@@ -135,8 +142,8 @@ export default function FeedbackModal({ feedback, onClose }: FeedbackModalProps)
 
   // 初期チェックの設定
   useEffect(() => {
-    const newCheckedItems = {};
-    const newSelectedPoints = [];
+    const newCheckedItems: { [key: string]: boolean } = {};
+    const newSelectedPoints: SelectedPoint[] = [];
     
     // 良かった点の設定
     currentFeedback.goodPoints?.forEach((point, i) => {
@@ -210,7 +217,7 @@ export default function FeedbackModal({ feedback, onClose }: FeedbackModalProps)
     ? getFeedbackType(currentFeedback.rating * 20) // 5段階を100段階に変換
     : currentFeedback.score
       ? getFeedbackType(currentFeedback.score)
-      : currentFeedback.goodPoints?.length >= 5 || currentFeedback.encouragement?.length >= 5
+      : (currentFeedback.goodPoints?.length ?? 0) >= 5 || (currentFeedback.encouragement?.length ?? 0) >= 5
         ? feedbackTypes.happy
         : feedbackTypes.thinking;
 
@@ -251,7 +258,7 @@ export default function FeedbackModal({ feedback, onClose }: FeedbackModalProps)
       ? currentFeedback.rating >= 4 
       : currentFeedback.score 
         ? currentFeedback.score >= 80 
-        : currentFeedback.goodPoints?.length >= 5 || currentFeedback.encouragement?.length >= 5;
+        : (currentFeedback.goodPoints?.length ?? 0) >= 5 || (currentFeedback.encouragement?.length ?? 0) >= 5;
 
     if (isHighScore) {
       setShowConfetti(true);

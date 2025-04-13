@@ -6,6 +6,11 @@ COPY package*.json ./
 RUN npm install
 
 COPY . .
+
+# ビルド時に環境変数を明示的に設定
+ARG NEXT_PUBLIC_API_URL=https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+
 RUN npm run build
 
 # 本番ランタイムステージ
@@ -14,6 +19,11 @@ WORKDIR /app
 
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
+
+# バックエンドのURLを明示的に設定
+ARG NEXT_PUBLIC_API_URL=https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+
 EXPOSE 3000
 
 COPY --from=builder /app/package*.json ./

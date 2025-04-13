@@ -7,7 +7,12 @@ const API_BASE_URL = (() => {
     return process.env.INTERNAL_API_URL || 'http://backend:8000';
   }
   
-  // 2. クライアントサイドでの実行
+  // 2. クライアントサイドでの実行 - ウィンドウオブジェクトから直接取得を試みる
+  // これによりNext.jsのgetInitialPropsで渡されたAPIUrlをキャプチャできる
+  if (typeof window !== 'undefined' && window.__NEXT_DATA__?.props?.pageProps?.apiUrl) {
+    return window.__NEXT_DATA__.props.pageProps.apiUrl;
+  }
+  
   return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 })();
 
@@ -82,6 +87,12 @@ export const authAPI = {
         console.error('Response data:', error.response.data);
         console.error('Response status:', error.response.status);
         console.error('Response headers:', error.response.headers);
+        
+        // エラーメッセージをより詳細に表示
+        if (error.response.data && typeof error.response.data === 'object') {
+          console.error('詳細エラー情報:', JSON.stringify(error.response.data, null, 2));
+          return Promise.reject(error.response.data);
+        }
       }
       throw error.response?.data || { detail: 'ネットワークエラーが発生しました' };
     }
@@ -211,64 +222,40 @@ export const conversationAPI = {
   },
   
   // 会話内容からフィードバックを生成
-  generateFeedback: async (messages, partnerId, meetingCount, level) => {
+  generateFeedback: async (messages, partnerId, meetingCount) => {
     try {
-      console.log('フィードバック生成開始:', { messagesCount: messages.length, partnerId, meetingCount, level });
+      console.log('フィードバック生成開始:', { messagesCount: messages.length, partnerId, meetingCount });
       
-      // APIが実装されていないため、モックデータを返す
-      // 実際のバックエンドAPIができたらこの部分を修正する
-      console.log('モックフィードバックを生成します');
+      // メッセージ形式をAPIが期待する形式に変換
+      const chatHistory = messages.map(msg => ({
+        role: msg.sender === 'user' ? 'user' : 'assistant',
+        content: msg.text
+      }));
       
-      // 会話履歴に基づいた簡易分析 (生成AIを使うのが理想)
-      const userMessages = messages.filter(msg => msg.sender === 'user');
-      const userMessageCount = userMessages.length;
-      const questionCount = userMessages.filter(msg => 
-        msg.text.includes('？') || msg.text.includes('?') || 
-        msg.text.includes('ですか') || msg.text.includes('何') || 
-        msg.text.includes('どう')).length;
+      // フィードバックAPIを呼び出す
+      const client = getAuthenticatedClient();
+      const response = await client.post('/conversation-feedback', {
+        partnerId,
+        meetingCount,
+        chatHistory
+      });
       
-      return {
-        summary: `${userMessageCount}回の発言で、自然な会話ができていました。質問の数や内容から会話を深める意識が見られます。`,
-        rating: Math.min(5, Math.max(3, Math.floor(userMessageCount / 2))),
-        goodPoints: [
-          '相手の話に興味を示し、質問を投げかけていました',
-          '自分の経験や考えをうまく表現できていました',
-          '会話の流れを自然に保てていました',
-          questionCount > 2 ? '適切な質問で会話を発展させていました' : '基本的なコミュニケーションができていました'
-        ],
-        improvementPoints: [
-          '質問のバリエーションをもう少し増やすと良いでしょう',
-          '時々相手の質問に直接答えずに話題を変えることがありました',
-          '会話の深まりをもう少し意識すると良いでしょう',
-          questionCount < 3 ? '相手の話に対してもう少し質問を増やすと良いでしょう' : '質問の内容をさらに深めると良いでしょう'
-        ],
-        practicePoints: [
-          '相手の話をさらに深堀りする質問を心がけましょう',
-          '自分の考えに加えて、具体的なエピソードも交えると効果的です',
-          '相手の話に共感や理解を示す表現を増やしましょう',
-          userMessageCount < 5 ? 'もう少し積極的に会話に参加すると良いでしょう' : '会話のバランスを意識して話すと良いでしょう'
-        ]
-      };
+      console.log('フィードバック生成成功:', response.data);
+      return response.data;
     } catch (error) {
       console.error('フィードバック生成エラー:', error);
       // エラー時はデフォルトのフィードバックを返す
       return {
-        summary: "会話の分析に基づいたフィードバックを生成しました。",
-        rating: 4,
-        goodPoints: [
-          '相手の話に興味を示し、質問を投げかけていました',
-          '自分の経験や考えをうまく表現できていました',
-          '会話の流れを自然に保てていました'
+        score: 65,
+        encouragement: [
+          "質問に丁寧に答えていた",
+          "会話を続けようとする姿勢が良かった", 
+          "自己開示ができていた"
         ],
-        improvementPoints: [
-          '質問のバリエーションをもう少し増やすと良いでしょう',
-          '時々相手の質問に直接答えずに話題を変えることがありました',
-          '会話の深まりをもう少し意識すると良いでしょう'
-        ],
-        practicePoints: [
-          '相手の話をさらに深堀りする質問を心がけましょう',
-          '自分の考えに加えて、具体的なエピソードも交えると効果的です',
-          '相手の話に共感や理解を示す表現を増やしましょう'
+        advice: [
+          "質問のバリエーションを増やすと良い",
+          "相手の話に共感を示すとより良い",
+          "もう少し会話を深掘りしてみよう"
         ]
       };
     }

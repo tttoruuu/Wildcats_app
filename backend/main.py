@@ -151,25 +151,54 @@ def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
     - **戻り値**: 作成されたユーザー情報（パスワードを除く）
     - **エラー**: ユーザー名が既に登録されている場合 (400)
     """
+    print(f"ユーザー登録リクエスト受信: username={user.username}, email={user.email}")
+    print(f"生年月日データ: {user.birth_date} (タイプ: {type(user.birth_date)})")
+    
+    # リクエストデータをJSON形式で出力
+    import json
+    try:
+        user_dict = user.dict()
+        user_dict["birth_date"] = str(user_dict["birth_date"])  # dateオブジェクトを文字列に変換
+        print(f"ユーザーデータ: {json.dumps(user_dict, indent=2, ensure_ascii=False)}")
+    except Exception as e:
+        print(f"データ出力エラー: {str(e)}")
+    
+    # ユーザー名の重複チェック
     db_user = db.query(User).filter(User.username == user.username).first()
     if db_user:
+        print(f"エラー: Username {user.username} は既に登録されています")
         raise HTTPException(status_code=400, detail="Username already registered")
     
-    hashed_password = get_password_hash(user.password)
-    db_user = User(
-        username=user.username,
-        password_hash=hashed_password,
-        full_name=user.full_name,
-        email=user.email,
-        birth_date=user.birth_date,
-        hometown=user.hometown,
-        hobbies=user.hobbies,
-        matchmaking_agency=user.matchmaking_agency
-    )
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-    return db_user
+    # メールアドレスの重複チェック
+    db_email = db.query(User).filter(User.email == user.email).first()
+    if db_email:
+        print(f"エラー: Email {user.email} は既に登録されています")
+        raise HTTPException(status_code=400, detail="このメールアドレスは既に登録されています。違うアドレスを使用するか、ログインをお試しください。")
+    
+    try:
+        hashed_password = get_password_hash(user.password)
+        db_user = User(
+            username=user.username,
+            password_hash=hashed_password,
+            full_name=user.full_name,
+            email=user.email,
+            birth_date=user.birth_date,
+            hometown=user.hometown,
+            hobbies=user.hobbies,
+            matchmaking_agency=user.matchmaking_agency
+        )
+        db.add(db_user)
+        db.commit()
+        db.refresh(db_user)
+        print(f"ユーザー登録成功: {user.username}")
+        return db_user
+    except Exception as e:
+        print(f"ユーザー登録エラー: {str(e)}")
+        db.rollback()
+        # IntegrityErrorの場合は、メールアドレス重複エラーの可能性が高い
+        if "Duplicate entry" in str(e) and "email" in str(e):
+            raise HTTPException(status_code=400, detail="このメールアドレスは既に登録されています。違うアドレスを使用するか、ログインをお試しください。")
+        raise HTTPException(status_code=400, detail=f"Registration failed: {str(e)}")
 
 @app.post("/login", response_model=schemas.Token)
 def login(user_data: schemas.UserLogin, db: Session = Depends(get_db)):
@@ -322,52 +351,198 @@ async def simulate_conversation(
         partner_info = "あなたは日本人の女性です。"
         try:
             # partner_idから相手の情報を取得する処理
-            # 実際の実装ではデータベースから取得
-            pass
-        except:
-            # エラー時はデフォルト情報を使用
-            if partner_id == "1":
-                partner_info += "名前はあいさん、24歳、看護師、明るく社交的な性格です。"
-            elif partner_id == "2":
-                partner_info += "名前はゆうりさん、28歳、デザイナー、冷静で論理的な性格です。"
-            elif partner_id == "3":
-                partner_info += "名前はしおりさん、22歳、学生、好奇心旺盛な性格です。"
-            elif partner_id == "4":
-                partner_info += "名前はかおりさん、30歳、会社員、優しくて思いやりがある性格です。"
-            elif partner_id == "5":
-                partner_info += "名前はなつみさん、26歳、フリーランス、創造的で自由な発想の持ち主です。"
+            # partner_idをintに変換
+            partner_id_int = int(partner_id) if partner_id.isdigit() else 0
+            
+            # データベースセッションを取得
+            db = next(get_db())
+            
+            # 会話相手の情報を取得
+            partner = db.query(ConversationPartner).filter(ConversationPartner.id == partner_id_int).first()
+            
+            # ユーザー情報も取得（男性側の情報）
+            user_info = db.query(User).filter(User.id == current_user.id).first()
+            
+            if partner and user_info:
+                # 年齢計算（birth_dateがある場合）
+                current_year = __import__('datetime').datetime.now().year
+                birth_year = user_info.birth_date.year if user_info.birth_date else None
+                age = current_year - birth_year if birth_year else "不明"
+                
+                # データベースから取得した情報でパートナー情報を作成
+                partner_info = f"""
+あなたは以下の情報を持つ人物として会話してください：
+
+【基本情報】
+・名前：{partner.name}
+・年齢：{partner.age}歳
+・職業：IT企業でSE（システムエンジニア）として3年目
+・出身：{partner.birthplace}
+・学歴：都内の私立大学情報学部卒
+・居住：東京都内で一人暮らし（最寄り駅：渋谷）
+・通勤時間：電車で30分程度
+
+【性格・趣味】
+・落ち着いていて知的な印象だが、話すと親しみやすい
+・趣味は{partner.hobby}
+・休日にすることは{partner.weekend_activity}
+・読書（ミステリーや現代小説）
+・映画鑑賞（家で観るのが好き）
+・料理（和食中心、お弁当作りも）
+
+【価値観】
+・仕事と家庭の両立を希望
+・休日は趣味や家族との時間を大切にしたい
+・自然が好きで、たまに一人旅もする
+・結婚後もキャリアは続けたい
+
+【会話の特徴】
+・質問されたことには丁寧に答える
+・相手の話にも興味を持って質問する
+・共通の話題を見つけようと努める
+・適度に自分の経験や考えも話す
+・笑顔の絵文字も時々使用（😊）
+
+【会話相手の情報】
+・名前：{user_info.full_name}
+・年齢：{age}歳
+・出身：{user_info.hometown if user_info.hometown else "不明"}
+・趣味：{user_info.hobbies if user_info.hobbies else "特になし"}
+"""
+                print(f"データベースから会話相手情報を取得: {partner.name}, {partner.age}歳")
+                print(f"ユーザー情報: {user_info.full_name}, 出身: {user_info.hometown}")
             else:
-                partner_info += "名前はあいさん、24歳、看護師、明るく社交的な性格です。"
+                print(f"指定されたID: {partner_id_int}の会話相手が見つかりません")
+                raise Exception("会話相手が見つかりません")
+                
+        except Exception as e:
+            print(f"会話相手情報取得エラー: {str(e)}")
+            # エラー時はデフォルト情報を使用
+            partner_info = """
+あなたは以下の情報を持つ人物として会話してください：
+
+【基本情報】
+・名前：さくら
+・年齢：28歳
+・職業：IT企業でSE（システムエンジニア）として3年目
+・出身：東京都
+・学歴：都内の私立大学情報学部卒
+・居住：東京都内で一人暮らし（最寄り駅：渋谷）
+・通勤時間：電車で30分程度
+
+【性格・趣味】
+・落ち着いていて知的な印象だが、話すと親しみやすい
+・趣味は読書とプログラミング
+・休日にすることは公園を散歩することとカフェでコーディング
+・読書（ミステリーや現代小説）
+・映画鑑賞（家で観るのが好き）
+・料理（和食中心、お弁当作りも）
+
+【価値観】
+・仕事と家庭の両立を希望
+・休日は趣味や家族との時間を大切にしたい
+・自然が好きで、たまに一人旅もする
+・結婚後もキャリアは続けたい
+
+【会話の特徴】
+・質問されたことには丁寧に答える
+・相手の話にも興味を持って質問する
+・共通の話題を見つけようと努める
+・適度に自分の経験や考えも話す
+・笑顔の絵文字も時々使用（😊）
+"""
         
         # 会話の状況を設定
         situation = ""
         if meeting_count == "first":
-            situation = "これは初めてのお見合いです。"
+            situation = "これは結婚相談所のプレ交際での初めての会話です。お互いの相性を確かめる大切な機会です。"
         else:
-            situation = "これは2回目以降のお見合いです。以前に一度会ったことがあります。"
+            situation = "これは結婚相談所のプレ交際での2回目以降の会話です。以前に一度会ったことがあります。将来のパートナーとしての相性を探る段階です。"
         
         # 難易度レベルに応じたプロンプト設定
         level_instruction = ""
-        if level == 1:
+        conversation_style = ""
+        
+        # レベル1: 初回会話（基本的な会話スタイル）
+        if meeting_count == "first":
             level_instruction = "簡単な日本語で話してください。長い文章は避け、シンプルな言葉を使ってください。"
+            conversation_style = """
+【レベル1：基本的な会話スタイル】
+・質問に対して簡潔に答える
+・基本的な情報交換を中心に
+・「です・ます」調で丁寧に
+・深い個人的な話題は避ける
+・結婚を意識した交際であることを念頭に置く
+
+会話例：
+Q: お仕事は何をされていますか？
+A: IT企業でシステムエンジニアとして働いています。
+
+Q: 趣味は何かありますか？
+A: カフェ巡りと写真撮影が趣味です。休日によく出かけています。
+
+避けるべき話題：
+- 過去の恋愛経験の詳細
+- 年収や資産状況の具体的な数字
+- 政治的な話題
+- 相手の外見への直接的な言及
+"""
+        # レベル2: 2回目以降（自然な会話展開）
         else:
             level_instruction = "自然な日本語で会話してください。より自然で流暢な表現を使ってください。"
+            conversation_style = """
+【レベル2：自然な会話展開】
+・質問への返答後、関連する話題を展開
+・相手の興味に合わせて話を広げる
+・自分からも質問や話題を提供
+・共感を示しながら会話を深める
+・時には冗談も交えて
+・将来のパートナーとしての価値観の一致を探る
+
+会話例：
+Q: お仕事は何をされていますか？
+A: IT企業でシステムエンジニアとして働いています。プログラミングや設計を担当していて、最近は後輩の指導もさせていただいているんです。お仕事は楽しいことばかりではないですが、やりがいを感じています。よろしければ、あなたのお仕事についても伺えますか？
+
+Q: 趣味は何かありますか？
+A: カフェ巡りと写真撮影が好きです。特に静かな雰囲気のカフェを見つけるのが楽しくて。見つけたお気に入りのカフェで、本を読んだり写真を撮ったり...。実は最近、渋谷に素敵なカフェを見つけたんです。あなたもカフェはお好きですか？
+
+相手の回答に対する反応例：
+- 「そうなんですね！私も実は...」
+- 「それ、とても素敵だと思います。」
+- 「へぇ、興味深いです。もう少し詳しく聞かせていただけますか？」
+- 「私も同じようなことを考えていました（笑）」
+
+会話の展開方法：
+1. 相手の話に共感や興味を示す
+2. 関連する自分の経験を話す
+3. さらに質問して話を深める
+4. 新しい話題にも自然に展開する
+5. 結婚観や家庭観についても自然に触れる
+
+避けるべき話題：
+- 過去の恋愛経験の詳細
+- 年収や資産状況の具体的な数字
+- 政治的な話題
+- 相手の外見への直接的な言及
+"""
         
         # システムプロンプトの構築
         system_prompt = f"""
-あなたはお見合い相手のロールプレイを行います。以下の設定に基づいて応答してください。
+あなたは結婚相談所でのプレ交際における会話練習のロールプレイを行います。以下の設定に基づいて応答してください。
 
 {partner_info}
 {situation}
 {level_instruction}
+{conversation_style}
 
-- 優しく丁寧に、時に冗談を交えながら応答してください
+- 優しく丁寧に応答してください
 - 自然な会話の流れを意識してください
 - 質問には適切に答え、時には相手に質問を返してください
 - 絵文字を適度に使って、感情を表現してください
 - 回答は必ず日本語で行ってください
 - 一般的な知識や経験を交えて話し、より自然な人間らしい会話を心がけてください
-- 長すぎる回答は避け、80-120文字程度を目安にしてください
+- 長すぎる回答は避け、「レベル1」では60-80文字程度、「レベル2」では80-150文字程度を目安にしてください
+- 結婚を前提とした交際であることを常に意識してください
 """
         
         # 会話履歴の整形
@@ -440,3 +615,210 @@ def health_check():
     サーバーの状態を確認するシンプルなヘルスチェックエンドポイント
     """
     return {"status": "ok", "time": __import__('datetime').datetime.now().isoformat()}
+
+#
+# 会話フィードバック関連のエンドポイント
+#
+
+@app.post("/conversation-feedback")
+async def generate_conversation_feedback(
+    data: dict,
+    current_user: User = Depends(get_current_user)
+):
+    """
+    会話履歴に基づいてフィードバックを生成するエンドポイント
+    
+    - **認証**: Bearer トークン認証が必要
+    - **入力データ**:
+        - partnerId (str): 会話相手のID
+        - meetingCount (str): 会話回数 ('first', 'other')
+        - chatHistory (list): チャット履歴
+    - **戻り値**: フィードバック情報（スコア、良かった点、改善点）
+    - **エラー**: 認証エラー (401)
+    """
+    # パラメータの取得
+    partner_id = data.get('partnerId', '')
+    meeting_count = data.get('meetingCount', '')
+    chat_history = data.get('chatHistory', [])
+    
+    # リクエストデータをデバッグ用に出力
+    print(f"会話フィードバックリクエスト: partnerId={partner_id}, meetingCount={meeting_count}")
+    print(f"チャット履歴: {len(chat_history)}件")
+    
+    # 緊急フォールバック応答 (APIでエラーが起きた場合の対応)
+    fallback_feedback = {
+        "score": 65,
+        "encouragement": [
+            "質問に丁寧に答えていた",
+            "会話を続けようとする姿勢が良かった", 
+            "自己開示ができていた"
+        ],
+        "advice": [
+            "質問のバリエーションを増やすと良い",
+            "相手の話に共感を示すとより良い",
+            "もう少し会話を深掘りしてみよう"
+        ]
+    }
+    
+    try:
+        import openai
+        import os
+        import json
+        from dotenv import load_dotenv
+        from openai import OpenAI
+        
+        # .envファイルから環境変数を読み込む（コンテナ内の環境変数が優先される）
+        load_dotenv()
+        
+        # OpenAI APIキーを設定
+        api_key = os.environ.get("OPENAI_API_KEY")
+        
+        # APIキー情報をデバッグ用に安全に出力
+        if api_key:
+            masked_key = api_key[:5] + "..." + api_key[-5:] if len(api_key) > 10 else "***" 
+            print(f"OpenAI APIキー: {masked_key}")
+        else:
+            print("OpenAI APIキーが設定されていません")
+            raise HTTPException(
+                status_code=500,
+                detail="サーバー設定エラー: OpenAI APIキーが設定されていません。サーバー管理者に連絡してください。"
+            )
+            
+        # OpenAIクライアントを初期化
+        try:
+            client = OpenAI(api_key=api_key)
+            print("OpenAIクライアント初期化成功")
+        except Exception as e:
+            print(f"OpenAIクライアント初期化エラー: {type(e).__name__}: {str(e)}")
+            raise HTTPException(
+                status_code=500,
+                detail=f"OpenAIクライアント初期化エラー: {str(e)}"
+            )
+        
+        # 会話履歴からユーザーとパートナーの会話を抽出
+        conversation_text = ""
+        for msg in chat_history:
+            role = msg.get("role", "")
+            content = msg.get("content", "")
+            if role and content:
+                sender = "User" if role == "user" else "Partner"
+                conversation_text += f"{sender}: {content}\n"
+        
+        # 会話状況の文脈を追加
+        context = "初回のお見合い会話" if meeting_count == "first" else "2回目以降のお見合い会話"
+        
+        # フィードバック生成のためのプロンプト
+        feedback_prompt = f"""
+会話履歴を分析して、お見合い・デートの会話のフィードバックを生成してください。
+以下の2つの観点から評価し、フィードバックを作成してください：
+
+1. 良かった点（encouragement）: ユーザーの会話でうまくいっていた部分や良い印象を与えた点
+2. 改善点（advice）: より自然な会話にするためのアドバイス
+
+＊各フィードバックは3〜4個ずつ作成してください。
+＊各フィードバックは具体的で実践的なものにして、30-60字程度で表現してください。
+＊主語は省略し、なるべく具体的な指摘にしてください。
+＊相手の発言に対する応答や質問の仕方など、より具体的な例を挙げてください。
+
+例：
+良かった点の例：
+× 「丁寧な自己紹介ができた」
+○ 「仕事内容を具体的に説明し、相手が理解しやすかった」
+
+× 「相手に質問ができていた」
+○ 「相手の趣味について深掘りする質問ができていた」
+
+改善点の例：
+× 「質問の意図を確認しよう」
+○ 「『それはどういう意味ですか？』と質問の意図を確認してみよう」
+
+× 「自分の経験も話してみよう」
+○ 「趣味の話で『私も以前〇〇をした時に...』と体験を共有しよう」
+
+また、全体的な評価として0〜100のスコアも付けてください。
+
+点数に応じて以下の評価を出して：
+
+90点以上：happy（😊）- 「すごく自然な会話だった〜！その調子！」
+70～89点：confident（😎）- 「落ち着いて話せていてGood！とてもスムーズな会話だったよ。」
+50～69点：thinking（🤔）- 「会話の流れはいい感じ！もう少し深掘りしてみよう！」
+30～49点：shy（😅）- 「緊張してたけど頑張ってたね！次はリラックスしてみよう！」
+30点未満：surprised（😮）- 「面白い発言で場が盛り上がったね！意外性がいい感じ！」
+
+会話の状況：{context}
+
+会話履歴：
+{conversation_text}
+
+返答は以下のJSON形式で返してください：
+{{
+  "score": 評価スコア（0〜100の整数）,
+  "encouragement": ["良かった点1", "良かった点2", "良かった点3", "良かった点4"],
+  "advice": ["改善点1", "改善点2", "改善点3", "改善点4"]
+}}
+
+良かった点と改善点は最低3個、最大4個作成してください。状況により3個か4個かは判断してください。
+"""
+
+        # ChatGPT APIを呼び出してフィードバックを生成
+        try:
+            print("OpenAI APIリクエスト開始（フィードバック生成）...")
+            
+            # タイムアウト時間を設定（秒単位）
+            timeout_seconds = 120
+            
+            # API呼び出しを実行
+            print(f"OpenAI API呼び出し開始... タイムアウト: {timeout_seconds}秒")
+            start_time = __import__('time').time()
+            
+            response = client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[{"role": "system", "content": feedback_prompt}],
+                temperature=0.7,
+                max_tokens=500,
+                timeout=timeout_seconds
+            )
+            
+            end_time = __import__('time').time()
+            print(f"OpenAI API呼び出し完了: {end_time - start_time:.2f}秒")
+            
+            if response and response.choices:
+                feedback_text = response.choices[0].message.content
+                print(f"生成されたフィードバック: {feedback_text}")
+                
+                # JSONをパース
+                try:
+                    # 余分なテキストがある場合、JSONのみを抽出
+                    import re
+                    json_match = re.search(r'\{.*\}', feedback_text, re.DOTALL)
+                    if json_match:
+                        json_str = json_match.group(0)
+                        feedback_data = json.loads(json_str)
+                    else:
+                        feedback_data = json.loads(feedback_text)
+                    
+                    # 必要なフィールドが含まれているか確認
+                    if "score" in feedback_data and "encouragement" in feedback_data and "advice" in feedback_data:
+                        # スコアが数値であることを確認
+                        if isinstance(feedback_data["score"], (int, float)):
+                            return feedback_data
+                        else:
+                            print("スコアが数値ではありません。フォールバックを使用します。")
+                            return fallback_feedback
+                    else:
+                        print("フィードバックデータに必要なフィールドが含まれていません。フォールバックを使用します。")
+                        return fallback_feedback
+                except json.JSONDecodeError as e:
+                    print(f"JSON解析エラー: {str(e)}")
+                    return fallback_feedback
+            else:
+                print("OpenAI API応答が空です")
+                return fallback_feedback
+                
+        except Exception as e:
+            print(f"OpenAI API呼び出しエラー: {type(e).__name__}: {str(e)}")
+            return fallback_feedback
+            
+    except Exception as e:
+        print(f"フィードバック生成エラー: {type(e).__name__}: {str(e)}")
+        return fallback_feedback

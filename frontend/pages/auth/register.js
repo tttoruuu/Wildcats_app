@@ -4,6 +4,8 @@ import { useForm } from 'react-hook-form';
 import Link from 'next/link';
 import Layout from '../../components/Layout';
 import Input from '../../components/common/Input';
+// 一時的にBirthDateInputのインポートをコメントアウト
+// import BirthDateInput from '../../components/common/BirthDateInput';
 import Button from '../../components/common/Button';
 import apiService from '../../services/api';
 import Image from 'next/image';
@@ -11,23 +13,42 @@ import { ArrowLeft } from 'lucide-react';
 
 export default function Register() {
   const router = useRouter();
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const { register, handleSubmit, setValue, formState: { errors } } = useForm();
   const [error, setError] = useState('');
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
   const onSubmit = async (data) => {
     try {
-      // 生年月日をYYYY-MM-DD形式に変換
-      const birthDate = new Date(data.birth_date);
-      const formattedBirthDate = birthDate.toISOString().split('T')[0];
-
+      console.log('フォームデータ:', data);
+      
+      // 生年月日の形式を確認
+      if (!data.birth_date || !data.birth_date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        setError('生年月日の形式が正しくありません。例: 1990-01-01');
+        return;
+      }
+      
+      // 日付が有効かチェック
+      try {
+        const birthDate = new Date(data.birth_date);
+        if (isNaN(birthDate.getTime())) {
+          setError('無効な日付です。正しい日付を入力してください。');
+          return;
+        }
+        console.log('変換された日付オブジェクト:', birthDate);
+      } catch (dateError) {
+        console.error('日付変換エラー:', dateError);
+        setError('日付の形式が正しくありません。YYYY-MM-DD形式で入力してください。');
+        return;
+      }
+      
       // apiService.auth.register()を使用してユーザー登録
       const userData = {
         ...data,
-        birth_date: formattedBirthDate
       };
       
+      console.log('送信データ:', userData);
       const response = await apiService.auth.register(userData);
+      console.log('登録成功:', response);
 
       // 登録成功時の処理
       setShowSuccessPopup(true);
@@ -37,9 +58,34 @@ export default function Register() {
       }, 3000);
     } catch (err) {
       console.error('登録エラー:', err);
-      setError('登録に失敗しました。入力内容を確認してください。');
+      let errorMessage = '登録に失敗しました。入力内容を確認してください。';
+      
+      // エラーの詳細情報があれば表示
+      if (err.detail) {
+        errorMessage = `エラー: ${err.detail}`;
+      }
+      
+      // オブジェクト型のエラーの場合、全てのエラーメッセージを表示
+      if (err && typeof err === 'object') {
+        console.error('詳細なエラー情報:', JSON.stringify(err, null, 2));
+        const errorDetails = Object.entries(err)
+          .map(([key, value]) => `${key}: ${value}`)
+          .join(', ');
+          
+        if (errorDetails) {
+          errorMessage = `エラー: ${errorDetails}`;
+        }
+      }
+      
+      setError(errorMessage);
     }
   };
+
+  // BirthDateInputはもう使用しないため、この関数は必要なくなる
+  // const handleBirthDateChange = (date) => {
+  //   console.log('生年月日が変更されました:', date);
+  //   setValue('birth_date', date);
+  // };
 
   return (
     <Layout hideFooter={true}>
@@ -95,11 +141,13 @@ export default function Register() {
                 register={register('email', { required: true })}
                 error={errors.email && 'メールアドレスは必須です'}
               />
+              {/* BirthDateInputコンポーネントの代わりに直接テキスト入力を使用 */}
               <Input
                 label="生年月日"
-                type="date"
+                type="text"
                 register={register('birth_date', { required: true })}
-                error={errors.birth_date && '生年月日は必須です'}
+                error={errors.birth_date && '生年月日は必須です。YYYY-MM-DD形式（例: 1990-01-01）で入力してください。'}
+                placeholder="YYYY-MM-DD（例: 1990-01-01）"
               />
               <Input
                 label="出身地"

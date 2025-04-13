@@ -274,13 +274,6 @@ export default function ConversationPractice() {
     }
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  };
-
   const handleGetFeedback = () => {
     // 会話履歴をJSON文字列に変換して渡す
     const messagesJson = JSON.stringify(messages);
@@ -394,7 +387,6 @@ export default function ConversationPractice() {
             <textarea
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
-              onKeyDown={handleKeyDown}
               placeholder={showFeedbackButton ? "ラリー数の上限に達しました" : "メッセージを入力..."}
               className={`flex-grow bg-[#FAFAFA] text-gray-800 rounded-l-xl p-3 focus:outline-none focus:ring-1 focus:ring-[#FF8551] border border-gray-200 ${showFeedbackButton ? 'opacity-50 cursor-not-allowed' : ''}`}
               rows="2"
