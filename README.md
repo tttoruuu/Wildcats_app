@@ -29,6 +29,29 @@ docker-next-fastapi-mysql/
    - 会う回数の選択（初めて、2-3回目、それ以上）
    - 会話シミュレーション（ChatGPT APIを利用）
 
+## 追加した機能：X-Forwarded-Proto ヘッダー対応
+
+Azure Container AppsなどのリバースプロキシでHTTPSリクエストを適切に処理するための対応を追加しました。
+
+### 主な変更点
+
+1. X-Forwarded-Protoヘッダーを処理するミドルウェアの実装
+2. リクエストヘッダー検証用の `/headers` エンドポイントの追加
+
+### 検証方法
+
+ローカル環境での確認:
+
+```bash
+# X-Forwarded-Protoヘッダーを含むリクエスト
+curl -v -H "X-Forwarded-Proto: https" http://localhost:8000/headers | json_pp
+
+# 通常のリクエスト（ヘッダーなし）
+curl -v http://localhost:8000/headers | json_pp
+```
+
+詳細な手順とAzure Container Appsでの設定確認については、[X-Forwarded-Proto ヘッダー検証ガイド](docs/azure-proxy-check.md)を参照してください。
+
 ## 🏁 クイックスタート
 
 以下の手順で開発環境をセットアップできます：

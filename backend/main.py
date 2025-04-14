@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File
+from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Request
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from datetime import timedelta
@@ -16,6 +16,7 @@ from auth.jwt import create_access_token, get_current_user
 from routers import conversation_partners, posts
 from fastapi.responses import JSONResponse
 import random
+from urllib.parse import urlparse
 
 # データベースのテーブルを作成
 Base.metadata.create_all(bind=engine)
@@ -25,22 +26,44 @@ load_dotenv()  # .env読み込み
 ENV = os.getenv("ENV", "development")
 FRONTEND_ORIGIN = os.getenv("FRONTEND_ORIGIN", "http://localhost:3000")
 
-# CORS設定: 全てのオリジンを許可（セキュリティが問題ない開発環境では有効）
-origins = ["*"]  # すべてのオリジンを許可
+# CORS設定: 具体的なオリジンのリストを指定する
+origins = [
+    "http://localhost:3000",  # ローカル開発環境
+    "http://frontend:3000",   # Docker Compose環境
+    "https://frontend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io",  # 本番環境のフロントエンド（HTTPS）
+    # 以下を追加 - Azureの各リビジョンURLも許可
+    "https://frontend-container--*.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io",
+    # ユーザーがアクセスする可能性のあるカスタムドメイン
+    "https://*.azurecontainerapps.io",
+    "https://*.azurewebsites.net",
+]
 
-# 本番環境用に特定のオリジンも追加（両方の方法を試す）
-if ENV == "production" and FRONTEND_ORIGIN != "http://localhost:3000":
-    specific_origins = [
-        FRONTEND_ORIGIN,
-        "http://frontend:3000",
-        "http://localhost:3000",
-        "https://frontend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io",
-    ]
-else:
-    specific_origins = [
-        "http://localhost:3000",
-        "http://frontend:3000",
-    ]
+# 本番環境フロントエンドのオリジンが環境変数から指定されている場合は追加
+if ENV == "production" and FRONTEND_ORIGIN:
+    # URLがhttp://で始まっている場合は、https://バージョンも追加
+    if FRONTEND_ORIGIN.startswith('http://'):
+        https_origin = 'https://' + FRONTEND_ORIGIN[7:]
+        if https_origin not in origins:
+            origins.append(https_origin)
+            print(f"HTTPS origin added: {https_origin}")
+    
+    # 元のURLをそのまま追加（もし存在しない場合）
+    if FRONTEND_ORIGIN not in origins:
+        origins.append(FRONTEND_ORIGIN)
+        print(f"Original origin added: {FRONTEND_ORIGIN}")
+    
+    # FRONTEND_ORIGINからドメイン部分を抽出してワイルドカードパターンも追加
+    try:
+        parsed_url = urlparse(FRONTEND_ORIGIN)
+        domain_parts = parsed_url.netloc.split('.')
+        if len(domain_parts) >= 3:  # サブドメインを含むドメイン
+            # *.example.com パターンを追加
+            wildcard_domain = f"{parsed_url.scheme}://*.{'.'.join(domain_parts[1:])}"
+            if wildcard_domain not in origins:
+                origins.append(wildcard_domain)
+                print(f"Wildcard domain added: {wildcard_domain}")
+    except Exception as e:
+        print(f"Failed to parse domain for wildcard pattern: {e}")
 
 app = FastAPI(
     title="お見合い会話練習API",
@@ -51,7 +74,7 @@ app = FastAPI(
 print("ENV:", ENV)
 print("FRONTEND_ORIGIN:", FRONTEND_ORIGIN)
 
-# CORS設定 - ワイルドカード "*" を使って全てのオリジンを許可
+# CORS設定 - 具体的なオリジンリストを指定
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -64,6 +87,27 @@ app.add_middleware(
 
 # デバッグ用
 print("CORS allow_origins:", origins)
+
+# X-Forwarded-Proto ヘッダー処理ミドルウェア
+@app.middleware("http")
+async def process_x_forwarded_proto(request: Request, call_next):
+    """
+    X-Forwarded-Proto ヘッダーを処理するミドルウェア
+    Azure Container AppsのリバースプロキシからのHTTPSリクエストを適切に処理します
+    """
+    # ヘッダーのログ記録
+    print(f"リクエストヘッダー: {dict(request.headers)}")
+    
+    # X-Forwarded-Protoヘッダーが'https'の場合、request.url.schemeを'https'に設定
+    forwarded_proto = request.headers.get("x-forwarded-proto")
+    if forwarded_proto == "https":
+        print(f"X-Forwarded-Proto: {forwarded_proto} - リクエストをHTTPSとして処理します")
+        # FastAPIのリクエストオブジェクトのスキームを更新
+        request.scope["scheme"] = "https"
+    
+    # 次のミドルウェアまたはエンドポイントを呼び出す
+    response = await call_next(request)
+    return response
 
 # 会話相手APIルーターの追加
 app.include_router(conversation_partners.router)
@@ -128,6 +172,27 @@ def get_env():
     return {
         "ENV": ENV,
         "FRONTEND_ORIGIN": FRONTEND_ORIGIN
+    }
+
+@app.get("/headers")
+def get_headers(request: Request):
+    """
+    リクエストヘッダーを確認するためのエンドポイント
+    X-Forwarded-Proto ヘッダーの存在と値を検証します
+    
+    - **戻り値**: リクエストヘッダー情報
+    """
+    headers = dict(request.headers)
+    protocol = headers.get("x-forwarded-proto", "未設定")
+    secure = protocol == "https"
+    
+    return {
+        "all_headers": headers,
+        "x_forwarded_proto": protocol,
+        "is_secure": secure,
+        "host": headers.get("host", "未設定"),
+        "origin": headers.get("origin", "未設定"),
+        "request_protocol": request.url.scheme
     }
 
 #
@@ -218,7 +283,12 @@ def login(user_data: schemas.UserLogin, db: Session = Depends(get_db)):
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    access_token = create_access_token(data={"sub": user.username})
+    # 有効期限を24時間（1440分）に設定
+    access_token_expires = timedelta(minutes=1440)
+    access_token = create_access_token(
+        data={"sub": user.username},
+        expires_delta=access_token_expires
+    )
     return {"access_token": access_token, "token_type": "bearer"}
 
 @app.get("/me", response_model=schemas.UserResponse)
@@ -377,15 +447,15 @@ async def simulate_conversation(
 ・名前：{partner.name}
 ・年齢：{partner.age}歳
 ・職業：IT企業でSE（システムエンジニア）として3年目
-・出身：{partner.birthplace}
+・出身：{partner.hometown}
 ・学歴：都内の私立大学情報学部卒
 ・居住：東京都内で一人暮らし（最寄り駅：渋谷）
 ・通勤時間：電車で30分程度
 
 【性格・趣味】
 ・落ち着いていて知的な印象だが、話すと親しみやすい
-・趣味は{partner.hobby}
-・休日にすることは{partner.weekend_activity}
+・趣味は{partner.hobbies}
+・休日にすることは{partner.daily_routine}
 ・読書（ミステリーや現代小説）
 ・映画鑑賞（家で観るのが好き）
 ・料理（和食中心、お弁当作りも）

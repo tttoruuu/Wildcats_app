@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Layout from '../../components/Layout';
 import apiService from '../../services/api';
 import { ArrowLeft, X } from 'lucide-react';
+import axios from 'axios';
 
 export default function PartnersList() {
   const router = useRouter();
@@ -19,13 +20,22 @@ export default function PartnersList() {
     const fetchPartners = async () => {
       try {
         setLoading(true);
+        
+        // トークンの確認
+        const token = localStorage.getItem('token');
+        if (!token) {
+          console.log('トークンがありません、ログイン画面にリダイレクトします');
+          router.push('/auth/login');
+          return;
+        }
+        
         // APIからデータを取得
         const partnersData = await apiService.partners.getPartners();
+        console.log('会話相手データ取得:', partnersData && Array.isArray(partnersData) ? partnersData.length + '件' : 'データなし');
         
-        if (partnersData && partnersData.length > 0) {
+        if (partnersData && Array.isArray(partnersData)) {
           setPartners(partnersData);
         } else {
-          // データが空の場合は空配列を設定
           setPartners([]);
         }
         setError(null);
@@ -38,12 +48,6 @@ export default function PartnersList() {
           router.push('/auth/login');
           return;
         }
-        
-        // APIエラー時にフォールバックとしてサンプルデータを表示
-        setPartners([
-          { id: '1', name: 'あいさん', age: 37, hometown: '東京都', hobbies: '料理、旅行', daily_routine: '公園を散歩したり、カフェでのんびり過ごします' },
-          { id: '2', name: 'ゆうりさん', age: 37, hometown: '北海道', hobbies: '読書、映画鑑賞', daily_routine: '図書館で過ごすことが多いです' },
-        ]);
       } finally {
         setLoading(false);
       }

@@ -4,6 +4,14 @@ import Link from 'next/link';
 import Layout from '../../components/Layout';
 import apiService from '../../services/api';
 import { ArrowLeft, ChevronDown } from 'lucide-react';
+import axios from 'axios';
+
+// HTTPS強制変換ユーティリティ
+const ensureHttps = (url) => {
+  if (typeof window === 'undefined' || !url) return url;
+  if (url.includes('localhost') || url.includes('127.0.0.1')) return url;
+  return url.replace(/^http:/i, 'https:');
+};
 
 export default function ConversationIndex() {
   const router = useRouter();
@@ -12,39 +20,125 @@ export default function ConversationIndex() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // トークンの確認と有効性チェック
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.log('トークンが存在しません。ログインページにリダイレクトします。');
+        router.push('/auth/login');
+        return false;
+      }
+
+      // JWTトークンの単純な有効期限チェック
+      try {
+        const tokenParts = token.split('.');
+        if (tokenParts.length === 3) {
+          const payload = JSON.parse(atob(tokenParts[1]));
+          if (payload.exp) {
+            const expDate = new Date(payload.exp * 1000);
+            const now = new Date();
+            if (expDate < now) {
+              console.log('トークンの有効期限が切れています。ログインページにリダイレクトします。');
+              localStorage.removeItem('token');
+              router.push('/auth/login');
+              return false;
+            }
+          }
+        }
+      } catch (e) {
+        console.error('トークン検証エラー:', e);
+      }
+      
+      return true;
+    };
+    
+    checkAuth();
+  }, [router]);
+
   // APIから会話相手を取得
   useEffect(() => {
     const fetchPartners = async () => {
       try {
         setLoading(true);
-        // APIから会話相手のデータを取得
-        const partnersData = await apiService.partners.getPartners();
+        console.log('会話相手のデータを取得開始...');
+        console.log('API base URL:', apiService.baseUrl);
         
-        if (partnersData && partnersData.length > 0) {
+        let partnersData = [];
+        try {
+          // APIから会話相手のデータを取得（通常の方法）
+          partnersData = await apiService.partners.getPartners();
+        } catch (apiError) {
+          console.error('通常のAPI呼び出しでエラー:', apiError);
+          
+          // Mixed Contentエラーが原因と思われる場合、直接HTTPSリクエストを試す
+          if (apiError.message && (
+              apiError.message.includes('Mixed Content') || 
+              apiError.message.includes('blocked') || 
+              apiError.message === 'Network Error')) {
+            
+            console.log('Mixed Contentエラーの可能性があります。直接HTTPSで再試行します。');
+            
+            // バックエンドのURLを強制的にHTTPSに変換
+            const backendUrl = apiService.baseUrl || 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io';
+            const httpsUrl = ensureHttps(backendUrl);
+            console.log('直接HTTPSで試行:', httpsUrl);
+            
+            const token = localStorage.getItem('token');
+            const response = await axios.get(`${httpsUrl}/conversation-partners`, {
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json'
+              }
+            });
+            
+            console.log('HTTPS直接リクエスト成功:', response.status);
+            partnersData = response.data;
+          } else {
+            // その他のエラーは上位に投げる
+            throw apiError;
+          }
+        }
+        
+        console.log('会話相手データ受信:', partnersData);
+        console.log('データ型:', typeof partnersData);
+        console.log('配列か:', Array.isArray(partnersData));
+        
+        if (partnersData && Array.isArray(partnersData) && partnersData.length > 0) {
+          console.log(`${partnersData.length}人の会話相手を表示します`);
           setPartners(partnersData);
         } else {
           // データが空の場合は空配列を設定
+          console.log('会話相手データなし、空の配列を設定');
           setPartners([]);
         }
         setError(null);
       } catch (error) {
         console.error('会話相手データの取得に失敗しました:', error);
+        console.error('エラーの詳細:', error.message);
+        
+        if (error.response) {
+          console.error('サーバーレスポンス:', {
+            status: error.response.status,
+            statusText: error.response.statusText,
+            data: error.response.data,
+            headers: error.response.headers
+          });
+        }
+        
         setError('会話相手の情報を取得できませんでした。');
         
         // 認証エラーの場合はログイン画面にリダイレクト
         if (error.response && error.response.status === 401) {
+          console.log('認証エラー、ログイン画面へリダイレクト');
           router.push('/auth/login');
           return;
         }
         
-        // APIエラー時はサンプルデータを使用
-        setPartners([
-          { id: '1', name: 'あいさん' },
-          { id: '2', name: 'ゆうりさん' },
-          { id: '3', name: 'しおりさん' },
-          { id: '4', name: 'かおりさん' },
-          { id: '5', name: 'なつみさん' },
-        ]);
+        // エラー時は空配列を設定
+        console.log('APIエラー、空の配列を設定');
+        setPartners([]);
       } finally {
         setLoading(false);
       }

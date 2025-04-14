@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Layout from '../../components/Layout';
 import apiService from '../../services/api';
 import { Users, ArrowLeft } from 'lucide-react';
+import axios from 'axios';
 
 export default function RegisterPartner() {
   const router = useRouter();
@@ -30,10 +31,101 @@ export default function RegisterPartner() {
     setError('');
 
     try {
-      await apiService.partners.createPartner(formData);
-      router.push('/conversation');
+      // デバッグ情報を表示
+      console.log('API_BASE_URL: ', apiService.baseUrl || 'undefined');
+      
+      // トークンの確認
+      const token = localStorage.getItem('token');
+      console.log('Token exists: ', !!token);
+      if (!token) {
+        console.log('トークンが存在しません。ログイン画面にリダイレクトします。');
+        router.push('/auth/login');
+        return;
+      }
+      
+      // トークンの簡易検証
+      try {
+        const tokenParts = token.split('.');
+        if (tokenParts.length === 3) {
+          const payload = JSON.parse(atob(tokenParts[1]));
+          console.log('Token payload:', payload);
+          if (payload.exp) {
+            const expDate = new Date(payload.exp * 1000);
+            const now = new Date();
+            console.log('Token expires:', expDate.toISOString());
+            console.log('Token expired:', expDate < now);
+            if (expDate < now) {
+              console.log('トークンの期限が切れています。ログインし直してください。');
+              localStorage.removeItem('token');
+              router.push('/auth/login');
+              return;
+            }
+          }
+        }
+      } catch (e) {
+        console.error('トークン検証エラー:', e);
+        localStorage.removeItem('token');
+        router.push('/auth/login');
+        return;
+      }
+      
+      console.log('Submitting form data: ', formData);
+      
+      // Mixed Contentエラー回避のための直接HTTPS変換対策
+      try {
+        // 通常のAPI呼び出しを試す
+        await apiService.partners.createPartner(formData);
+        console.log('Partner registered successfully');
+        router.push('/conversation');
+      } catch (apiError) {
+        console.error('標準APIでのエラー:', apiError);
+        
+        // Mixed Contentエラーが原因と思われる場合、直接axiosでHTTPSリクエストを試みる
+        if (apiError.message && (
+            apiError.message.includes('Mixed Content') || 
+            apiError.message.includes('blocked') || 
+            apiError.message === 'Network Error')) {
+          
+          console.log('Mixed Contentエラーの可能性があります。直接HTTPSで再試行します。');
+          
+          // バックエンドのURLを強制的にHTTPSに変換
+          const backendUrl = apiService.baseUrl || 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io';
+          const httpsUrl = backendUrl.replace('http:', 'https:');
+          console.log('直接HTTPSで試行:', httpsUrl);
+          
+          const response = await axios.post(`${httpsUrl}/conversation-partners`, formData, {
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+              'Accept': 'application/json'
+            }
+          });
+          
+          console.log('HTTPS直接リクエスト成功:', response.status);
+          router.push('/conversation');
+          return;
+        }
+        
+        // 他のエラーは通常のエラーハンドリングへ
+        throw apiError;
+      }
     } catch (err) {
       console.error('会話相手の登録に失敗しました', err);
+      
+      // 詳細なエラーログ
+      if (err.response) {
+        console.error('Error response:', {
+          status: err.response.status,
+          statusText: err.response.statusText,
+          headers: err.response.headers,
+          data: err.response.data
+        });
+      } else if (err.request) {
+        console.error('Error request:', err.request);
+      } else {
+        console.error('Error message:', err.message);
+      }
+      
       setError('会話相手の登録に失敗しました。もう一度お試しください。');
       if (err.response && err.response.status === 401) {
         apiService.auth.logout();

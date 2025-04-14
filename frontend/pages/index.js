@@ -5,6 +5,7 @@ import Image from 'next/image';
 import axios from 'axios';
 import Layout from '../components/Layout';
 import { MessageSquare, CheckSquare, Users } from 'lucide-react';
+import { authAPI } from '../services/api';
 
 export default function MainPage() {
   const router = useRouter();
@@ -14,26 +15,32 @@ export default function MainPage() {
     username: ''
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      router.push('/auth/login');
-      return;
-    }
-
     const fetchUser = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/me', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setUser(response.data);
+        setLoading(true);
+        setError('');
+        
+        // トークンの有効性を確認
+        if (!authAPI.validateToken()) {
+          console.log('有効なトークンがありません。ログインページへリダイレクトします。');
+          router.replace('/auth/login');
+          return;
+        }
+        
+        // authAPIからユーザー情報を取得
+        const userData = await authAPI.getCurrentUser();
+        setUser(userData);
       } catch (err) {
         console.error('ユーザー情報の取得に失敗しました。', err);
+        setError('ユーザー情報の取得に失敗しました。');
+        
+        // 認証エラーの場合はログインページにリダイレクト
         if (err.response && err.response.status === 401) {
-          console.log('認証エラー: トークンが無効または期限切れです。再ログインが必要です。');
-          localStorage.removeItem('token');
-          router.push('/auth/login');
+          console.log('認証エラー: 再ログインが必要です。');
+          router.replace('/auth/login');
         }
       } finally {
         setLoading(false);
@@ -44,7 +51,7 @@ export default function MainPage() {
   }, [router]);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    authAPI.logout(); // APIの関数を使用
     router.push('/auth/login');
   };
 
@@ -52,6 +59,20 @@ export default function MainPage() {
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-800 bg-[#F5F5F5]">
         読み込み中...
+      </div>
+    );
+  }
+  
+  if (error && !user.username) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center text-gray-800 bg-[#F5F5F5] px-6">
+        <p className="text-red-500 mb-4">{error}</p>
+        <button 
+          onClick={() => router.push('/auth/login')}
+          className="bg-gradient-to-r from-[#FF8551] to-[#FFA46D] hover:opacity-90 text-white font-medium py-2 px-4 rounded-full"
+        >
+          ログイン画面に戻る
+        </button>
       </div>
     );
   }

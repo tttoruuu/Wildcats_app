@@ -1,4 +1,4 @@
-🚀 Azure上への完全デプロイを開始します [v20250410-0708]
+🚀 Azure上への完全デプロイを開始します [v20250413-1120]
 
 ==> 🔧 Azureリソースグループを作成中...
 🚀 Azureリソースグループとコンテナレジストリの作成を開始します...
@@ -18,7 +18,7 @@
 {
   "adminUserEnabled": false,
   "anonymousPullEnabled": false,
-  "creationDate": "2025-04-09T21:32:13.751506+00:00",
+  "creationDate": "2025-04-10T00:56:17.305760+00:00",
   "dataEndpointEnabled": false,
   "dataEndpointHostNames": [],
   "encryption": {
@@ -45,11 +45,11 @@
     },
     "retentionPolicy": {
       "days": 7,
-      "lastUpdatedTime": "2025-04-09T22:08:18.405898+00:00",
+      "lastUpdatedTime": "2025-04-13T02:20:42.365837+00:00",
       "status": "disabled"
     },
     "softDeletePolicy": {
-      "lastUpdatedTime": "2025-04-09T22:08:18.405986+00:00",
+      "lastUpdatedTime": "2025-04-13T02:20:42.365921+00:00",
       "retentionDays": 7,
       "status": "disabled"
     },
@@ -68,10 +68,10 @@
   },
   "status": null,
   "systemData": {
-    "createdAt": "2025-04-09T21:32:13.751506+00:00",
+    "createdAt": "2025-04-10T00:56:17.305760+00:00",
     "createdBy": "toru09may@gmail.com",
     "createdByType": "User",
-    "lastModifiedAt": "2025-04-09T22:08:18.312238+00:00",
+    "lastModifiedAt": "2025-04-13T02:20:42.249542+00:00",
     "lastModifiedBy": "toru09may@gmail.com",
     "lastModifiedByType": "User"
   },
@@ -84,8 +84,8 @@ Login Succeeded
 Container Apps環境を作成中: wildcats-environment
 WARNING: The behavior of this command has been altered by the following extension: containerapp
 WARNING: No Log Analytics workspace provided.
-WARNING: Generating a Log Analytics workspace with name "workspace-wildcatsresourcegroup020D"
-/ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..[KWARNING: 
+WARNING: Generating a Log Analytics workspace with name "workspace-wildcatsresourcegroupMtDS"
+/ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..[KWARNING: 
 Container Apps environment created. To deploy a container app, use: az containerapp create --help
 
 {
@@ -97,7 +97,7 @@ Container Apps environment created. To deploy a container app, use: az container
     "appLogsConfiguration": {
       "destination": "log-analytics",
       "logAnalyticsConfiguration": {
-        "customerId": "f08e32b6-4ace-4faf-86a3-c7514df491ec",
+        "customerId": "d92ac581-fc58-431b-93ae-23cd01cd5f99",
         "dynamicJsonColumns": false,
         "sharedKey": null
       }
@@ -118,7 +118,7 @@ Container Apps environment created. To deploy a container app, use: az container
     "daprConfiguration": {
       "version": "1.13.6-msft.2"
     },
-    "defaultDomain": "purplesea-e7684b0d.japaneast.azurecontainerapps.io",
+    "defaultDomain": "wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io",
     "diskEncryptionConfiguration": null,
     "eventStreamEndpoint": "https://japaneast.azurecontainerapps.dev/subscriptions/2d8cc7a9-24c6-4c3b-9086-d5a7b036937a/resourceGroups/wildcats-resource-group/managedEnvironments/wildcats-environment/eventstream",
     "infrastructureResourceGroup": null,
@@ -138,7 +138,7 @@ Container Apps environment created. To deploy a container app, use: az container
     },
     "provisioningState": "Succeeded",
     "publicNetworkAccess": "Enabled",
-    "staticIp": "130.33.236.196",
+    "staticIp": "135.149.73.160",
     "vnetConfiguration": null,
     "workloadProfiles": [
       {
@@ -151,10 +151,10 @@ Container Apps environment created. To deploy a container app, use: az container
   },
   "resourceGroup": "wildcats-resource-group",
   "systemData": {
-    "createdAt": "2025-04-09T21:32:41.79239",
+    "createdAt": "2025-04-10T00:56:46.4080967",
     "createdBy": "toru09may@gmail.com",
     "createdByType": "User",
-    "lastModifiedAt": "2025-04-09T22:08:38.0641092",
+    "lastModifiedAt": "2025-04-13T02:21:00.6480934",
     "lastModifiedBy": "toru09may@gmail.com",
     "lastModifiedByType": "User"
   },
@@ -163,8 +163,12 @@ Container Apps environment created. To deploy a container app, use: az container
 ✅ Azureリソースグループとコンテナレジストリが正常に作成されました！
 
 ==> 🐬 Azure Database for MySQLをデプロイ中...
-🐬 Azure Database for MySQL Flexible Serverをデプロイ中...
-MySQL Flexible Serverを作成中: wildcats-mysql-server
-WARNING: Checking the existence of the resource group 'wildcats-resource-group'...
-WARNING: Resource group 'wildcats-resource-group' exists ? : True 
-ERROR: Incorrect value for --tier. Allowed values : ['Burstable', 'GeneralPurpose', 'MemoryOptimized']
+🐬 Azure Database for MySQL Flexible Serverのデプロイを開始します...
+既存のMySQL Flexible Serverを使用します: wildcats-mysql-server
+既存のデータベースを使用します: testdb
+既存のSSL証明書を使用します
+🔌 データベース接続文字列:
+mysql+pymysql://dbadmin:Password123!@wildcats-mysql-server.mysql.database.azure.com:3306/testdb?ssl_ca=DigiCertGlobalRootCA.crt.pem
+SQLダンプファイルをインポート中...
+mysql: [Warning] Using a password on the command line interface can be insecure.
+ERROR 2059 (HY000): Authentication plugin 'mysql_native_password' cannot be loaded: dlopen(/usr/local/Cellar/mysql/9.2.0_3/lib/plugin/mysql_native_password.so, 0x0002): tried: '/usr/local/Cellar/mysql/9.2.0_3/lib/plugin/mysql_native_password.so' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/usr/local/Cellar/mysql/9.2.0_3/lib/plugin/mysql_native_password.so' (no such file), '/usr/local/Cellar/mysql/9.2.0_3/lib/plugin/mysql_native_password.so' (no such file)

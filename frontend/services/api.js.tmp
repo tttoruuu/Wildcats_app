@@ -3,6 +3,31 @@ import axios from 'axios';
 // =====================================
 // HTTPS強制変換ユーティリティ
 // =====================================
+// 全てのAPIリクエストでURLを確実にHTTPSに変換する
+const ensureHttps = (url) => {
+  // 本番環境でのみ実行
+  if (typeof window === 'undefined' || process.env.NODE_ENV !== 'production') {
+    return url;
+  }
+  
+  // localhostの場合は変換しない
+  if (url.includes('localhost') || url.includes('127.0.0.1')) {
+    return url;
+  }
+  
+  // httpからhttpsへ強制変換
+  if (url.startsWith('http:')) {
+    const httpsUrl = 'https:' + url.substring(5);
+    console.log(`[HTTPS強制] URLを変換: ${url} → ${httpsUrl}`);
+    return httpsUrl;
+  }
+  
+  return url;
+};
+
+// =====================================
+// 改善版HTTPS強制変換ユーティリティ
+// =====================================
 // すべての環境で適切に動作するHTTPS変換関数
 const ensureHttps = (url) => {
   // URLが存在しない場合はそのまま返す
@@ -64,101 +89,6 @@ if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
   console.log('[Security] グローバルHTTPSインターセプター設定完了');
 }
 
-// =====================================
-// グローバルAxiosインターセプター設定 - 強化版
-// =====================================
-// すべての環境でHTTPSページからのアクセス時はHTTPSを強制
-const setupAxiosInterceptors = () => {
-  console.log('[Security] 拡張HTTPSインターセプターを設定中...');
-  
-  // すべてのリクエストに対してHTTPSを強制するインターセプター
-  axios.interceptors.request.use(
-    (config) => {
-      const isBrowser = typeof window !== 'undefined';
-      const isHttpsPage = isBrowser && window.location.protocol === 'https:';
-      const isLocalhost = config.url?.includes('localhost') || config.url?.includes('127.0.0.1') ||
-                         config.baseURL?.includes('localhost') || config.baseURL?.includes('127.0.0.1');
-      
-      // デバッグ情報（開発環境のみ）
-      if (process.env.NODE_ENV === 'development') {
-        console.log('[Interceptor] リクエスト検査:', {
-          url: config.url,
-          baseURL: config.baseURL,
-          isHttpsPage,
-          isLocalhost
-        });
-      }
-      
-      // HTTPS変換条件: HTTPSページからHTTPリソースへのアクセスでローカルではない場合
-      if (isHttpsPage && !isLocalhost) {
-        // URL全体を変換
-        if (config.url && config.url.startsWith('http:')) {
-          const originalUrl = config.url;
-          config.url = config.url.replace(/^http:/i, 'https:');
-          console.log(`[Interceptor] URL変換: ${originalUrl} → ${config.url}`);
-        }
-        
-        // baseURLを変換
-        if (config.baseURL && config.baseURL.startsWith('http:')) {
-          const originalBaseUrl = config.baseURL;
-          config.baseURL = config.baseURL.replace(/^http:/i, 'https:');
-          console.log(`[Interceptor] baseURL変換: ${originalBaseUrl} → ${config.baseURL}`);
-        }
-      }
-      
-      return config;
-    },
-    (error) => Promise.reject(error)
-  );
-  
-  // Mixed Contentエラーを検出して再試行するレスポンスインターセプター
-  axios.interceptors.response.use(
-    response => response,
-    async (error) => {
-      // Mixed Contentエラーの検出
-      const isMixedContentError = error.message && (
-        error.message.includes('Mixed Content') || 
-        error.message.includes('blocked') || 
-        error.message.includes('insecure')
-      );
-      
-      if (isMixedContentError && error.config && !error.config.__isRetryRequest) {
-        console.log('[Interceptor] Mixed Contentエラーを検出、HTTPSで再試行します');
-        
-        // 再試行フラグを設定
-        error.config.__isRetryRequest = true;
-        
-        // URLをHTTPSに変換
-        if (error.config.url && error.config.url.startsWith('http:')) {
-          error.config.url = error.config.url.replace(/^http:/i, 'https:');
-        }
-        
-        // baseURLをHTTPSに変換
-        if (error.config.baseURL && error.config.baseURL.startsWith('http:')) {
-          error.config.baseURL = error.config.baseURL.replace(/^http:/i, 'https:');
-        }
-        
-        console.log('[Interceptor] 再試行設定:', {
-          url: error.config.url,
-          baseURL: error.config.baseURL
-        });
-        
-        // 変換したURLで再試行
-        return axios(error.config);
-      }
-      
-      return Promise.reject(error);
-    }
-  );
-  
-  console.log('[Security] 拡張HTTPSインターセプター設定完了');
-};
-
-// インターセプターの初期化
-if (typeof window !== 'undefined') {
-  setupAxiosInterceptors();
-}
-
 // APIのベースURL - 環境に応じて適切に設定
 const API_BASE_URL = (() => {
   // 1. サーバーサイドでの実行
@@ -195,46 +125,30 @@ const API_BASE_URL = (() => {
   return 'http://localhost:8000';
 })();
 
-// 本番環境ではHTTPSを強制する - 改善版
+// 本番環境ではHTTPSを強制する
 const FINAL_API_BASE_URL = (() => {
-  // 変数の初期化
-  let apiUrl = API_BASE_URL;
-  const isProduction = process.env.NODE_ENV === 'production';
-  const isBrowser = typeof window !== 'undefined';
-  const isHttpsPage = isBrowser && window.location.protocol === 'https:';
-  const isLocalhost = apiUrl.includes('localhost') || apiUrl.includes('127.0.0.1');
-  
-  console.log('[API URL初期化]', {
-    original: apiUrl,
-    isProduction,
-    isBrowser,
-    isHttpsPage,
-    isLocalhost
-  });
-  
-  // ローカルホスト以外で本番環境またはHTTPSページからアクセスしている場合
-  if (!isLocalhost && (isProduction || isHttpsPage)) {
-    // URLにプロトコルが含まれていない場合はhttpsを追加
-    if (!apiUrl.startsWith('http')) {
-      apiUrl = 'https://' + apiUrl;
-      console.log(`[Security] プロトコルなしのURL。HTTPSを追加: ${apiUrl}`);
-    }
-    
-    // httpをhttpsに変換
-    if (apiUrl.startsWith('http:')) {
-      apiUrl = 'https:' + apiUrl.substring(5);
-      console.log(`[Security] HTTPをHTTPSに変換: ${apiUrl}`);
+  // 常にhttps://を強制する（本番環境の場合）
+  if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
+    // localhostではない場合、常にHTTPSを使用
+    if (!API_BASE_URL.includes('localhost') && !API_BASE_URL.includes('127.0.0.1')) {
+      // URLにプロトコルが含まれていない場合は、httpsを追加
+      if (!API_BASE_URL.startsWith('http')) {
+        const httpsUrl = 'https://' + API_BASE_URL;
+        console.log(`[Security] Protocol missing, adding HTTPS: ${API_BASE_URL} to ${httpsUrl}`);
+        return httpsUrl;
+      }
+      
+      // httpをhttpsに置換
+      if (API_BASE_URL.startsWith('http:')) {
+        const httpsUrl = 'https:' + API_BASE_URL.substring(5);
+        console.log(`[Security] URL converted from ${API_BASE_URL} to ${httpsUrl}`);
+        return httpsUrl;
+      }
     }
   }
   
-  // さらにMixed Content対策: HTTPS環境からHTTPへのアクセスを試みていたら強制変換
-  if (isBrowser && isHttpsPage && apiUrl.startsWith('http:')) {
-    apiUrl = 'https:' + apiUrl.substring(5);
-    console.log(`[Security] Mixed Content対策: ${apiUrl}`);
-  }
-  
-  console.log(`[最終API URL] ${apiUrl}`);
-  return apiUrl;
+  // すでにhttpsか、ローカル環境の場合はそのまま
+  return API_BASE_URL;
 })();
 
 console.log('Final API URL setting:', FINAL_API_BASE_URL);
@@ -520,90 +434,19 @@ export const partnerAPI = {
     try {
       logRequest('GET', '/conversation-partners');
       
-      console.log('============= 会話相手取得デバッグ情報 =============');
-      // APIの詳細情報
-      console.log('1. APIベースURL:', FINAL_API_BASE_URL);
-      console.log('2. 接続先ホスト名:', FINAL_API_BASE_URL.replace(/^https?:\/\//, '').split('/')[0]);
-      console.log('3. プロトコル:', FINAL_API_BASE_URL.startsWith('https') ? 'HTTPS' : 'HTTP');
-      console.log('4. ローカル環境か:', isLocalEnvironment());
+      console.log('APIベースURL:', FINAL_API_BASE_URL);
       
-      // トークンの確認
-      const token = localStorage.getItem('token');
-      console.log('5. トークン存在:', !!token);
-      // トークンの先頭部分を表示（セキュリティのため全体は表示しない）
-      if (token) {
-        console.log('6. トークン先頭部分:', token.substring(0, 20) + '...');
-        
-        // JWTをデコードして内容確認（サブ、期限など）
-        try {
-          const tokenParts = token.split('.');
-          if (tokenParts.length === 3) {
-            const payload = JSON.parse(atob(tokenParts[1]));
-            console.log('7. トークンペイロード:', payload);
-            console.log('8. サブジェクト:', payload.sub);
-            if (payload.exp) {
-              const expDate = new Date(payload.exp * 1000);
-              const now = new Date();
-              console.log('9. トークン有効期限:', expDate.toISOString());
-              console.log('10. 現在時刻:', now.toISOString());
-              console.log('11. 有効期限まで:', Math.floor((expDate - now) / 1000), '秒');
-              
-              // 有効期限チェック
-              if (expDate < now) {
-                console.error('トークンの期限が切れています');
-                localStorage.removeItem('token');
-                if (typeof window !== 'undefined') {
-                  window.location.href = '/auth/login';
-                }
-                throw new Error('トークンの期限が切れています');
-              }
-            }
-          }
-        } catch (e) {
-          console.error('トークンデコードエラー:', e);
-        }
-      } else {
-        // トークンがない場合
-        console.error('トークンが存在しません');
-        if (typeof window !== 'undefined') {
-          window.location.href = '/auth/login';
-        }
+      // トークンの存在と有効性を確認
+      if (!tokenUtils.isTokenValid()) {
+        console.error('トークンが無効または期限切れです');
+        tokenUtils.redirectToLogin();
         throw new Error('認証が必要です');
       }
       
-      // 本番環境では常にHTTPSを使用する
-      let apiBaseUrl = FINAL_API_BASE_URL;
-      
-      // 環境変数と状態をログ出力
-      console.log('12. API URL詳細情報:', {
-        original: apiBaseUrl,
-        protocol: apiBaseUrl.startsWith('https:') ? 'HTTPS' : apiBaseUrl.startsWith('http:') ? 'HTTP' : '不明',
-        isProduction: process.env.NODE_ENV === 'production',
-        pageProtocol: typeof window !== 'undefined' ? window.location.protocol : '不明',
-        isLocalEnv: isLocalEnvironment()
-      });
-      
-      // 確実にHTTPSを使用
-      if (!isLocalEnvironment() && apiBaseUrl.startsWith('http:')) {
-        // 強制的にhttpsに変換
-        const originalUrl = apiBaseUrl;
-        apiBaseUrl = apiBaseUrl.replace(/^http:/i, 'https:');
-        console.log('13. HTTPSに強制変換:', {
-          before: originalUrl,
-          after: apiBaseUrl
-        });
-      }
-      
-      // 最終的な安全対策: 強制変換ユーティリティを通す
-      apiBaseUrl = ensureHttps(apiBaseUrl);
-      console.log('14. 最終API URL:', apiBaseUrl);
-      
-      // リクエスト詳細
-      const fullUrl = `${apiBaseUrl}/conversation-partners/`;
-      console.log('15. 完全なリクエストURL:', fullUrl);
+      const token = tokenUtils.getToken();
       
       // CORS対応リクエスト設定
-      const response = await axios.get(fullUrl, {
+      const response = await axios.get(`${FINAL_API_BASE_URL}/conversation-partners`, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
@@ -673,91 +516,37 @@ export const partnerAPI = {
       // 環境チェック
       const isLocalhost = isLocalEnvironment();
       
-      // 詳細なデバッグ情報をログ出力
-      console.log('============= 会話相手登録デバッグ情報 =============');
-      console.log('1. APIベースURL:', FINAL_API_BASE_URL);
-      console.log('2. 環境情報:', {
-        isProduction: process.env.NODE_ENV === 'production',
-        isLocalhost,
-        pageProtocol: typeof window !== 'undefined' ? window.location.protocol : '不明',
-        apiProtocol: FINAL_API_BASE_URL.startsWith('https') ? 'HTTPS' : 'HTTP'
-      });
+      // URLが適切にHTTPSになっているか確認（ローカルホスト以外の場合）
+      console.log('API URL for createPartner:', FINAL_API_BASE_URL);
       
-      // --- 複雑なHTTPS強制ロジックを一時的にコメントアウト ---
-      /* 
       // 本番環境では常にHTTPSを強制する
       let apiBaseUrl = FINAL_API_BASE_URL;
-      
-      // 確実にHTTPSを使用（ローカル環境以外）
-      if (!isLocalhost && apiBaseUrl.startsWith('http:')) {
-        const originalUrl = apiBaseUrl;
-        apiBaseUrl = apiBaseUrl.replace(/^http:/i, 'https:');
-        console.log('3. HTTPSに強制変換:', {
-          before: originalUrl,
-          after: apiBaseUrl
-        });
+      if (!isLocalhost && !apiBaseUrl.startsWith('https') && 
+          typeof window !== 'undefined' && window.location.protocol === 'https:') {
+        // 強制的にhttpsに変換
+        apiBaseUrl = apiBaseUrl.replace('http:', 'https:');
+        console.log('本番環境で強制的にHTTPSに変換:', apiBaseUrl);
       }
       
       // 最終的な安全対策: 強制変換ユーティリティを通す
       apiBaseUrl = ensureHttps(apiBaseUrl);
-      console.log('4. 最終API URL:', apiBaseUrl);
-
-      // 最終的な安全対策: 強制変換ユーティリティを通す
-      // 再度確認: URL文字列がHTTPS化されているか
-      if (typeof window !== 'undefined' && 
-          window.location.protocol === 'https:' && 
-          apiBaseUrl.startsWith('http:')) {
-        console.log('⚠️ 警告: HTTPS環境でHTTPリクエストが発生します。強制的に修正します。');
-        apiBaseUrl = apiBaseUrl.replace(/^http:/i, 'https:');
-      }
       
-      // 完全なURLをログ出力
-      const fullUrl = `${apiBaseUrl}/conversation-partners`;
-      console.log('4. 最終リクエストURL:', fullUrl);
-      */
-      // --- 複雑なHTTPS強制ロジックここまで ---
-      
-      // --- axios直接呼び出しをコメントアウト --- 
-      /*
       // 標準的な方法でリクエスト - 変換後のURLを使用
-      const token = localStorage.getItem('token');
-      console.log('5. トークン存在:', !!token);
-      if (token) {
-        console.log('6. トークン先頭部分:', token.substring(0, 10) + '...');
-      }
+      const token = tokenUtils.getToken();
       
       // axios直接使用でエンドポイント完全指定
-      const response_direct = await axios.post(`${apiBaseUrl}/conversation-partners`, partnerData, {
+      const response = await axios.post(`${apiBaseUrl}/conversation-partners`, partnerData, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
           'Accept': 'application/json'
         }
       });
-      */
-      // --- axios直接呼び出しここまで ---
-
-      // getAuthenticatedClient を使用してリクエストを送信 (こちらをメインにする)
-      const client = getAuthenticatedClient();
-      console.log('6. Client Base URL:', client.defaults.baseURL);
       
-      // --- 追加ログ --- 
-      console.log('7. [重要確認] client.post 直前の BaseURL:', client.defaults.baseURL);
-      if (!client.defaults.baseURL.startsWith('https')) {
-        console.error('🚨 エラー: client の baseURL が HTTPS ではありません！');
-      }
-      // --- 追加ログここまで ---
-
-      // response 変数の重複宣言を避ける
-      const partnerResponse = await client.post('/conversation-partners', partnerData);
-      
-      console.log('会話相手登録成功:', partnerResponse.status);
-      return partnerResponse.data;
+      console.log('会話相手登録成功:', response.status);
+      return response.data;
     } catch (error) {
       console.error('会話相手登録エラー:', error.message);
-      
-      // --- 複雑なエラーハンドリングと再試行ロジックを一時的にコメントアウト ---
-      /*
       console.error('ネットワークエラー詳細:', error);
       
       // Mixed Contentエラーの可能性をチェック
@@ -770,12 +559,12 @@ export const partnerAPI = {
         
         try {
           // 直接HTTPSのURLを使って再試行
-          const token = localStorage.getItem('token');
+          const token = tokenUtils.getToken();
           // 確実にhttpsを使用
           const httpsUrl = FINAL_API_BASE_URL.replace(/^http:/i, 'https:');
           console.log('HTTPSに変換して再試行:', httpsUrl);
           
-          const httpsResponse = await axios.post(`${httpsUrl}/conversation-partners`, partnerData, {
+          const response = await axios.post(`${httpsUrl}/conversation-partners`, partnerData, {
             headers: {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${token}`,
@@ -783,82 +572,14 @@ export const partnerAPI = {
             }
           });
           
-          console.log('HTTPS変換後のリクエスト成功:', httpsResponse.status);
-          return httpsResponse.data;
+          console.log('HTTPS変換後のリクエスト成功:', response.status);
+          return response.data;
         } catch (retryError) {
           console.error('HTTPS変換後も失敗:', retryError.message);
-          // throw retryError; // 再試行失敗時は下のエラー処理に任せる
+          throw retryError;
         }
-      }
-
-      // Mixed Contentエラーの可能性をチェック - より包括的な検出
-      if (error.message) {
-        // HTTPSページからHTTPリソースへのアクセスを試みた可能性
-        console.error('エラーが発生したため、HTTPSでの再試行を実行します');
-        
-        try {
-          // 常にHTTPSを使用して再試行
-          const token = localStorage.getItem('token');
-          // バックエンドURlを強制的にHTTPSに変換
-          const httpsBaseUrl = FINAL_API_BASE_URL.replace(/^http:/i, 'https:');
-          console.log('確実なHTTPS URL:', httpsBaseUrl);
-          
-          // 完全なURLをログ出力
-          const httpsFullUrl = `${httpsBaseUrl}/conversation-partners`;
-          console.log('再試行用の完全URL:', httpsFullUrl);
-          
-          const httpsRetryResponse = await axios.post(httpsFullUrl, partnerData, {
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`,
-              'Accept': 'application/json'
-            }
-          });
-          
-          console.log('再試行成功:', httpsRetryResponse.status);
-          return httpsRetryResponse.data;
-        } catch (retryError) {
-          console.error('再試行も失敗:', retryError.message);
-          if (retryError.response) {
-            console.error('再試行時のサーバーレスポンス:', {
-              status: retryError.response.status,
-              data: retryError.response.data
-            });
-          }
-        }
-      }
-
-      // Mixed Content エラー発生時の再試行ロジック (getAuthenticatedClientを使用)
-      if (error.message && (error.message.includes('Mixed Content') || error.message.includes('Network Error'))) {
-        console.error('エラーを検出しました。getAuthenticatedClientを使用してHTTPSで再試行します。');
-        try {
-          const client = getAuthenticatedClient(); // 再度クライアント取得 (HTTPS強制含む)
-          console.log('再試行時のClient Base URL:', client.defaults.baseURL);
-          const retryResponse = await client.post('/conversation-partners', partnerData);
-          console.log('再試行成功:', retryResponse.status);
-          return retryResponse.data;
-        } catch (retryError) {
-          console.error('再試行も失敗:', retryError.message);
-          // 再試行失敗時のエラー情報を元のエラーに追加するなどの処理も検討
-        }
-      }
-      */
-      // --- 複雑なエラーハンドリングここまで ---
-      
-      // シンプルなエラーログ出力
-      if (error.response) {
-        console.error('エラー詳細:', {
-          status: error.response.status,
-          data: error.response.data
-        });
-      } else if (error.request) {
-        console.error('ネットワークリクエストエラー:', error.request);
-      } else {
-        console.error('リクエスト設定またはその他のエラー:', error.message);
       }
       
-      // 各種エラーの詳細な処理 (必要に応じてコメント解除)
-      /*
       if (error.response) {
         console.error('エラー詳細:', {
           status: error.response.status,
@@ -878,10 +599,9 @@ export const partnerAPI = {
         // リクエスト設定中にエラーが発生した場合
         console.error('リクエスト設定エラー:', error.message);
       }
-      */
       
-      // エラーオブジェクトをスロー（UI側でエラー表示できるように）
-      throw error.response?.data || { detail: '会話相手の登録中にエラーが発生しました: ' + error.message };
+      // エラーオブジェクトをスロー
+      throw error.response?.data || { detail: 'ネットワークエラーが発生しました: ' + error.message };
     }
   },
   

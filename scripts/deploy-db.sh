@@ -74,9 +74,10 @@ echo $CONN_STRING | tee -a $LOGFILE
 
 # SQLダンプファイルをインポート（もし存在するなら）
 if [ -f "dump.sql" ]; then
-  echo "SQLダンプファイルをインポート中..." | tee -a $LOGFILE
-  mysql -h ${MYSQL_SERVER_NAME}.mysql.database.azure.com -u ${MYSQL_ADMIN} -p${MYSQL_PASSWORD} --ssl-ca=DigiCertGlobalRootCA.crt.pem ${MYSQL_DB_NAME} < dump.sql
-  echo "SQLダンプファイルのインポートが完了しました" | tee -a $LOGFILE
+  echo "SQLダンプファイルが見つかりましたが、ローカルからのインポートをスキップします。" | tee -a $LOGFILE
+  echo "バックエンドデプロイ時にマイグレーションが実行されるため、テーブルは自動的に作成されます。" | tee -a $LOGFILE
+else
+  echo "SQLダンプファイルが見つかりません。テーブル作成をスキップします。" | tee -a $LOGFILE
 fi
 
 echo "✅ Azure Database for MySQL Flexible Serverのデプロイが完了しました！" | tee -a $LOGFILE

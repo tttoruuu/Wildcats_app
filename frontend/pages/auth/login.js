@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useForm } from 'react-hook-form';
 import axios from 'axios';
@@ -7,31 +7,65 @@ import Layout from '../../components/Layout';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
 import Image from 'next/image';
+import { authAPI } from '../../services/api';
 
 export default function Login() {
   const router = useRouter();
   const { register, handleSubmit, formState: { errors } } = useForm();
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+
+  // ページ読み込み時にトークンの有効性を確認
+  useEffect(() => {
+    // 既に有効なトークンがある場合は、ホームページにリダイレクト
+    const checkAuth = async () => {
+      try {
+        if (authAPI.validateToken()) {
+          console.log('有効なトークンがあります。ホームページにリダイレクトします。');
+          router.replace('/');
+        }
+      } catch (error) {
+        console.error('トークン検証エラー:', error);
+      }
+    };
+    
+    checkAuth();
+  }, [router]);
 
   const onSubmit = async (data) => {
     try {
+      setIsLoading(true);
+      setError('');
       console.log('ログイン開始:', data.username);
-      const response = await axios.post('http://localhost:8000/login', data);
-      console.log('ログイン応答:', response.data);
       
-      if (response.data.access_token) {
-        localStorage.setItem('token', response.data.access_token);
-        console.log('トークンをローカルストレージに保存:', response.data.access_token);
+      // ログイン処理
+      const result = await authAPI.login(data.username, data.password);
+      
+      if (result && result.access_token) {
+        console.log('ログイン成功');
+        
+        // 成功ポップアップを表示して、短い遅延後にリダイレクト
         setShowSuccessPopup(true);
-        // 3秒後にホーム画面にリダイレクト
         setTimeout(() => {
           router.push('/');
-        }, 3000);
+        }, 1500);
+      } else {
+        setError('ログインに失敗しました。もう一度お試しください。');
       }
     } catch (err) {
       console.error('ログインエラー:', err);
-      setError('ログインに失敗しました。ユーザー名とパスワードを確認してください。');
+      
+      // エラーメッセージの設定
+      if (err.detail) {
+        setError(err.detail);
+      } else if (err.message) {
+        setError(err.message);
+      } else {
+        setError('ログインに失敗しました。ユーザー名とパスワードをご確認ください。');
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -76,9 +110,10 @@ export default function Login() {
             <div>
               <button
                 type="submit"
-                className="group relative w-full flex justify-center py-3 px-4 border border-transparent rounded-full shadow-sm text-sm font-medium text-white bg-gradient-to-r from-[#FF8551] to-[#FFA46D] hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FF8551]"
+                disabled={isLoading}
+                className={`group relative w-full flex justify-center py-3 px-4 border border-transparent rounded-full shadow-sm text-sm font-medium text-white bg-gradient-to-r from-[#FF8551] to-[#FFA46D] hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FF8551] ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
               >
-                ログイン
+                {isLoading ? 'ログイン中...' : 'ログイン'}
               </button>
             </div>
           </form>

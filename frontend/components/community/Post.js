@@ -53,8 +53,7 @@ export default function Post({ post, token, onLikeUpdate }) {
           />
         </div>
         <div>
-          <h3 className="font-medium text-gray-800">{post.user_full_name}</h3>
-          <p className="text-xs text-gray-500">@{post.username}</p>
+          <p className="font-medium text-gray-800">@{post.username}</p>
         </div>
         <span className="ml-auto text-xs text-gray-400">{formattedDate}</span>
       </div>
@@ -70,6 +69,7 @@ export default function Post({ post, token, onLikeUpdate }) {
             alt="Post image"
             fill
             className="object-cover"
+            unoptimized={true}
           />
         </div>
       )}

@@ -30,6 +30,15 @@ else
   API_URL="https://$API_URL"
 fi
 
+# APIのURLがhttpsで始まることを確認（より強力な検証）
+if [[ "$API_URL" != https://* ]]; then
+  echo "バックエンドURLがhttpsで始まっていないため、修正します: $API_URL → https://${API_URL#http://}" | tee -a $LOGFILE
+  API_URL="https://${API_URL#http://}"
+fi
+
+# 二重確認: 常にHTTPSを使用
+API_URL=$(echo "$API_URL" | sed 's/^http:/https:/g')
+
 echo "🔌 API URL: $API_URL" | tee -a $LOGFILE
 
 # .env.productionファイルを更新

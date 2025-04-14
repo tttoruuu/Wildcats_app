@@ -58,19 +58,8 @@ export default function ConversationFeedback() {
             return;
           } else {
             setError('相手の情報を取得できませんでした。');
-            const dummyPartners = [
-              { id: '1', name: 'あいさん', age: 24, gender: 'female', occupation: '看護師', personality: '明るく社交的' },
-              { id: '2', name: 'ゆうりさん', age: 28, gender: 'female', occupation: 'デザイナー', personality: '冷静で論理的' },
-              { id: '3', name: 'しおりさん', age: 22, gender: 'female', occupation: '学生', personality: '好奇心旺盛' },
-              { id: '4', name: 'かおりさん', age: 30, gender: 'female', occupation: '会社員', personality: '優しくて思いやりがある' },
-              { id: '5', name: 'なつみさん', age: 26, gender: 'female', occupation: 'フリーランス', personality: '創造的で自由な発想の持ち主' },
-            ];
-
-            const foundPartner = dummyPartners.find(p => p.id === partnerId);
-            if (foundPartner) {
-              partnerData = foundPartner;
-              setPartner(foundPartner);
-            }
+            // データ取得失敗時は空データを設定
+            setPartner(null);
           }
         }
         

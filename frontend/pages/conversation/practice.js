@@ -18,6 +18,7 @@ export default function ConversationPractice() {
   const [currentRallyCount, setCurrentRallyCount] = useState(0);
   const [showFeedbackButton, setShowFeedbackButton] = useState(false);
   const [maxRallyCount, setMaxRallyCount] = useState(8);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (rallyCount) {
@@ -94,57 +95,16 @@ export default function ConversationPractice() {
           localStorage.removeItem('token');
           router.push('/auth/login');
         } else {
-          // エラー時はダミーデータを使用
-          useDummyData();
+          // APIエラー時は空データを設定
+          setPartner(null);
+          setError('会話相手の情報を取得できませんでした。');
         }
       } finally {
         setLoading(false);
       }
     };
 
-    // APIが実装されていない場合はダミーデータを使用
-    const useDummyData = () => {
-      // ID に基づいてダミーデータから相手を検索
-      const dummyPartners = [
-        { id: '1', name: 'あいさん', age: 24, gender: 'female', occupation: '看護師', personality: '明るく社交的' },
-        { id: '2', name: 'ゆうりさん', age: 28, gender: 'female', occupation: 'デザイナー', personality: '冷静で論理的' },
-        { id: '3', name: 'しおりさん', age: 22, gender: 'female', occupation: '学生', personality: '好奇心旺盛' },
-        { id: '4', name: 'かおりさん', age: 30, gender: 'female', occupation: '会社員', personality: '優しくて思いやりがある' },
-        { id: '5', name: 'なつみさん', age: 26, gender: 'female', occupation: 'フリーランス', personality: '創造的で自由な発想の持ち主' },
-      ];
-      
-      const foundPartner = dummyPartners.find(p => p.id === partnerId);
-      if (foundPartner) {
-        setPartner(foundPartner);
-        
-        // 初期メッセージを追加（会合回数とレベルに基づく）
-        let initialMessage = '';
-        
-        if (meetingCount === 'first') {
-          initialMessage = level === 1
-            ? 'はじめまして、初めてお会いできて嬉しいです。どうぞよろしくお願いします。😊'
-            : 'はじめまして、お会いできて嬉しいです。お互いのことを知っていければと思います。趣味や興味のあることなど、お話できたら嬉しいです。どうぞよろしくお願いします。😊';
-        } else {
-          initialMessage = level === 1
-            ? 'また会えて嬉しいです。最近はいかがお過ごしですか？'
-            : 'また会えて嬉しいです。前回はとても楽しかったです。今日はどんなお話ができるか楽しみにしていました。😊';
-        }
-
-        setMessages([
-          {
-            sender: 'partner',
-            text: initialMessage,
-          },
-        ]);
-      }
-    };
-
-    try {
-      fetchPartner();
-    } catch (error) {
-      useDummyData();
-      setLoading(false);
-    }
+    fetchPartner();
   }, [partnerId, router, meetingCount, level]);
 
   // スクロールを最下部に自動調整
