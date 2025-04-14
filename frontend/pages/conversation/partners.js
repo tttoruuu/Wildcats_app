@@ -120,6 +120,15 @@ export default function PartnersList() {
             </button>
           </div>
           
+          <div className="flex justify-center mb-6">
+            <button
+              onClick={() => router.push('/conversation/tips-selection')}
+              className="text-[#FF8551] flex items-center gap-1 hover:opacity-80 transition-opacity"
+            >
+              <span>💡会話のTips</span>
+            </button>
+          </div>
+          
           {loading ? (
             <div className="text-center py-8">読み込み中...</div>
           ) : error ? (

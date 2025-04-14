@@ -241,6 +241,15 @@ export default function ConversationIndex() {
             次へ進む
           </button>
         )}
+        
+        <div className="mt-6">
+          <button
+            onClick={() => router.push('/conversation/tips-selection')}
+            className="text-[#FF8551] hover:opacity-80 transition-opacity"
+          >
+            会話のTips
+          </button>
+        </div>
       </div>
     </Layout>
   );
