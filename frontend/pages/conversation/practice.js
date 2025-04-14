@@ -68,17 +68,52 @@ export default function ConversationPractice() {
         
         // 会話履歴がURLから復元されていない場合のみ初期メッセージを設定
         if (messages.length === 0) {
-          // 初期メッセージを追加（会合回数とレベルに基づく）
-          let initialMessage = '';
+          // 話題のリストを定義
+          const level1Topics = [
+            '趣味や休日の過ごし方について教えていただけますか？',
+            '出身はどちらですか？学生時代の思い出などあれば教えてください。',
+            'ご家族のことについて少し教えていただけますか？',
+            '最近行かれた素敵なお店などはありますか？',
+            '旅行で行ってみたい場所はありますか？',
+            'お仕事でのやりがいについて教えていただけますか？',
+            '好きな食べ物や行きつけのお店などはありますか？'
+          ];
           
+          const level2Topics = [
+            '日々の暮らしのスタイルについて、朝は何時頃起きることが多いですか？',
+            '理想の結婚生活について、住みたい場所や共働きについてどう考えていますか？',
+            'ご家族との関係はどのような感じですか？家族の行事などはありますか？',
+            'お金の使い方について少し聞かせていただけますか？貯金はどのくらい意識されていますか？',
+            '将来の夢や理想のライフスタイルについて聞かせていただけませんか？',
+            'もし子どもができたら、一緒にどんなことをしたいですか？何か考えていることはありますか？',
+            '料理や家事について、こだわりや逆に苦手なことはありますか？',
+            '結婚後も大事にしたい趣味や時間ってありますか？',
+            'パートナーとの理想の関わり方について、どのようなことをされると嬉しいと感じますか？'
+          ];
+          
+          // 会合回数とレベルに基づいてランダムな話題を選択
+          let randomTopic = '';
+          let initialMessage = '';
           if (meetingCount === 'first') {
-            initialMessage = level === 1
-              ? 'はじめまして、初めてお会いできて嬉しいです。どうぞよろしくお願いします。😊'
-              : 'はじめまして、お会いできて嬉しいです。お互いのことを知っていければと思います。趣味や興味のあることなど、お話できたら嬉しいです。どうぞよろしくお願いします。😊';
+            randomTopic = level === 1
+              ? level1Topics[Math.floor(Math.random() * level1Topics.length)]
+              : level2Topics[Math.floor(Math.random() * level2Topics.length)];
+              
+            let greeting = level === 1
+              ? 'はじめまして、お会いできて嬉しいです。'
+              : 'はじめまして、お会いできて嬉しいです。お互いのことを知っていければと思います。';
+              
+            initialMessage = `${greeting} ${randomTopic} 😊`;
           } else {
-            initialMessage = level === 1
-              ? 'また会えて嬉しいです。最近はいかがお過ごしですか？'
-              : 'また会えて嬉しいです。前回はとても楽しかったです。今日はどんなお話ができるか楽しみにしていました。😊';
+            randomTopic = level === 1
+              ? level1Topics[Math.floor(Math.random() * level1Topics.length)]
+              : level2Topics[Math.floor(Math.random() * level2Topics.length)];
+              
+            let greeting = level === 1
+              ? 'また会えて嬉しいです。'
+              : 'また会えて嬉しいです。前回はとても楽しかったです。今日はもっとお話しできるのを楽しみにしていました。';
+              
+            initialMessage = `${greeting} ${randomTopic} 😊`;
           }
 
           setMessages([
@@ -253,7 +288,7 @@ export default function ConversationPractice() {
   if (loading) {
     return (
       <Layout title="会話練習" hideHeader={true}>
-        <div className="flex flex-col items-center justify-center min-h-screen bg-[#F5F5F5] text-gray-800 px-6 py-4">
+        <div className="flex flex-col items-center justify-center min-h-screen bg-[#F5F5F5] text-gray-800 px-4 sm:px-6 py-4">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF8551] mx-auto"></div>
           <p className="mt-4">読み込み中...</p>
         </div>
@@ -264,7 +299,7 @@ export default function ConversationPractice() {
   if (!partner) {
     return (
       <Layout title="会話練習" hideHeader={true}>
-        <div className="flex flex-col items-center justify-center min-h-screen bg-[#F5F5F5] text-gray-800 px-6 py-4">
+        <div className="flex flex-col items-center justify-center min-h-screen bg-[#F5F5F5] text-gray-800 px-4 sm:px-6 py-4">
           <p className="mb-4">会話相手が見つかりませんでした</p>
           <button
             onClick={() => router.push('/conversation')}
@@ -279,27 +314,37 @@ export default function ConversationPractice() {
 
   return (
     <Layout title={`${partner.name}との会話`} hideHeader={true}>
-      <div className="flex flex-col min-h-screen bg-[#F5F5F5] text-gray-800">
+      <div 
+        className="flex flex-col items-center min-h-screen bg-[#F5F5F5] text-gray-800 px-4 sm:px-6 py-4"
+        style={{
+          backgroundImage: `url('/images/back.png')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          backgroundAttachment: 'fixed',
+          backgroundBlendMode: 'overlay'
+        }}
+      >
         {/* ヘッダー */}
-        <div className="bg-transparent pt-4 p-4 flex items-center">
+        <div className="w-full max-w-md mt-8 relative">
           <button
             onClick={() => router.push('/conversation')}
-            className="mr-4 text-[#FF8551] flex items-center gap-1 hover:opacity-80 transition-opacity"
+            className="text-[#FF8551] flex items-center gap-1 hover:opacity-80 transition-opacity absolute left-0"
           >
             <ArrowLeft size={18} />
             <span>もどる</span>
           </button>
-          <div>
-            <h1 className="text-lg font-semibold text-gray-800">{partner.name}</h1>
-            <p className="text-xs text-gray-500">
+          <div className="text-center mt-10">
+            <h1 className="text-xl font-semibold text-gray-800">{partner.name}</h1>
+            <p className="text-sm text-gray-500">
               {partner.age}歳 • {partner.gender === 'female' ? '女性' : partner.gender === 'male' ? '男性' : 'その他'} • {partner.occupation}
             </p>
           </div>
         </div>
 
         {/* メッセージエリア */}
-        <div className="flex-grow p-4 overflow-y-auto">
-          <div className="max-w-md mx-auto space-y-4">
+        <div className="w-full max-w-md flex-grow mt-4 overflow-y-auto">
+          <div className="space-y-4">
             {messages.map((message, index) => (
               <div
                 key={index}
@@ -329,7 +374,7 @@ export default function ConversationPractice() {
             
             {/* フィードバックボタン */}
             {showFeedbackButton && (
-              <div className="flex justify-center mt-4">
+              <div className="flex justify-center mt-4 mb-4">
                 <button
                   onClick={handleGetFeedback}
                   className="bg-gradient-to-r from-[#FF8551] to-[#FFA46D] text-white rounded-full py-2 px-6 hover:opacity-90 shadow-sm"
@@ -342,8 +387,8 @@ export default function ConversationPractice() {
         </div>
 
         {/* 入力エリア */}
-        <div className="bg-white/90 p-4 border-t border-gray-100 shadow-sm">
-          <div className="max-w-md mx-auto flex">
+        <div className="w-full max-w-md bg-white/90 p-4 rounded-xl border border-white/40 shadow-sm mb-4">
+          <div className="flex">
             <textarea
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}

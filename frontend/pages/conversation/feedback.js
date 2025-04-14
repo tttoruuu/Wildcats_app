@@ -200,32 +200,35 @@ export default function ConversationFeedback() {
   return (
     <Layout title="会話フィードバック" hideHeader={true}>
       <div 
-        className="flex flex-col min-h-screen text-gray-800"
+        className="flex flex-col items-center min-h-screen bg-[#F5F5F5] text-gray-800 px-4 sm:px-6 py-4"
         style={{
           backgroundImage: `url('/images/back.png')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
           backgroundAttachment: 'fixed',
-          backgroundColor: 'rgba(230, 230, 230, 0.7)',
           backgroundBlendMode: 'overlay'
         }}
       >
         {/* ヘッダー */}
-        <div className="bg-transparent pt-8 px-6 p-4 flex flex-col items-center relative">
+        <div className="w-full max-w-md mt-8 relative">
           <button
             onClick={() => router.back()}
-            className="absolute left-6 top-8 text-[#FF8551] flex items-center gap-1 hover:opacity-80 transition-opacity"
+            className="text-[#FF8551] flex items-center gap-1 hover:opacity-80 transition-opacity absolute left-0"
             aria-label="戻る"
           >
             <ArrowLeft size={18} />
             <span>もどる</span>
           </button>
-          <h1 className="text-xl font-bold text-[#FF8551]">FEEDBACK📝</h1>
-          <div className="flex items-center justify-center mt-6 p-4 rounded-full w-full max-w-md bg-gradient-to-r from-[#FF8551]/90 to-[#FFA46D]/90 backdrop-blur-sm">
+          <h1 className="text-2xl font-bold mt-16 mb-8 text-center text-[#FF8551]">FEEDBACK📝</h1>
+        </div>
+
+        {/* スコア表示 */}
+        <div className="w-full max-w-md mb-8">
+          <div className="flex items-center justify-center p-4 rounded-full bg-gradient-to-r from-[#FF8551]/90 to-[#FFA46D]/90 backdrop-blur-sm">
             <div className="text-center text-white">
-              <p className="text-xl font-semibold flex items-center justify-center">
-                <span className="mr-3 text-4xl">{evaluation.emoji}</span> 
+              <p className="text-base sm:text-xl font-semibold flex items-center justify-center">
+                <span className="mr-3 text-2xl sm:text-4xl">{evaluation.emoji}</span> 
                 {evaluation.message}
               </p>
             </div>
@@ -233,165 +236,163 @@ export default function ConversationFeedback() {
         </div>
 
         {/* コンテンツエリア */}
-        <div className="flex-grow px-6 py-4 overflow-y-auto">
-          <div className="max-w-md mx-auto">
-            {loading ? (
-              <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF8551] mx-auto"></div>
-                <p className="mt-4 text-gray-600">情報を読み込み中...</p>
-              </div>
-            ) : loadingFeedback ? (
-              <div className="space-y-4">
-                {/* スケルトンローダー */}
-                <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm p-4 border border-white/40 animate-pulse">
-                  <div className="h-5 bg-gray-200 rounded w-1/4 mb-3"></div>
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="h-4 bg-gray-200 rounded w-1/5"></div>
-                    <div className="flex space-x-1">
-                      {[1, 2, 3, 4, 5].map(i => (
-                        <div key={i} className="w-4 h-4 rounded-full bg-gray-200"></div>
-                      ))}
-                    </div>
+        <div className="w-full max-w-md">
+          {loading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF8551] mx-auto"></div>
+              <p className="mt-4 text-gray-600">情報を読み込み中...</p>
+            </div>
+          ) : loadingFeedback ? (
+            <div className="space-y-4">
+              {/* スケルトンローダー */}
+              <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm p-4 border border-white/40 animate-pulse">
+                <div className="h-5 bg-gray-200 rounded w-1/4 mb-3"></div>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="h-4 bg-gray-200 rounded w-1/5"></div>
+                  <div className="flex space-x-1">
+                    {[1, 2, 3, 4, 5].map(i => (
+                      <div key={i} className="w-4 h-4 rounded-full bg-gray-200"></div>
+                    ))}
                   </div>
-                  <div className="h-20 bg-gray-100 rounded-xl"></div>
+                </div>
+                <div className="h-20 bg-gray-100 rounded-xl"></div>
+              </div>
+              
+              {/* フィードバック項目のスケルトン */}
+              {[1, 2].map(i => (
+                <div key={i} className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm p-4 border border-white/40 animate-pulse">
+                  <div className="h-5 bg-gray-200 rounded w-1/4 mb-3"></div>
+                  <div className="space-y-2">
+                    <div className="h-8 bg-gray-100 rounded-xl"></div>
+                    <div className="h-8 bg-gray-100 rounded-xl"></div>
+                    <div className="h-8 bg-gray-100 rounded-xl"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <>
+              {/* フィードバック各項目 - エラー状態の表示を追加 */}
+              {error ? (
+                <div className="my-5 p-4 bg-red-50 rounded-xl border border-red-100 text-red-600 text-sm">
+                  <p className="mb-2 font-medium">エラーが発生しました</p>
+                  <p>{error}</p>
+                  <p className="mt-3 text-xs">もう一度試すか、後でやり直してください。</p>
+                </div>
+              ) : (
+                feedbackItems.map((item, index) => (
+                  <div key={index} className="mb-5 bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm p-4 border border-white/40">
+                    <h2 className="text-sm font-semibold mb-3 flex items-center">
+                      <span className="mr-2 p-1.5 rounded-full bg-[#FFF0E8]">{item.icon}</span>
+                      {item.title}
+                    </h2>
+                    <ul className="list-none space-y-3">
+                      {item.points.map((point, i) => (
+                        <li key={i} className="flex items-start bg-[#FAFAFA] rounded-xl py-2.5 px-4 shadow-sm border border-gray-100/50">
+                          <input
+                            type="checkbox"
+                            id={`checkbox-${index}-${i}`}
+                            checked={!!checkboxes[`${index}-${i}`]}
+                            onChange={() => handleCheckboxChange(index, i, point)}
+                            className="mr-3 mt-0.5 h-4 w-4 rounded border-gray-300 text-[#FFAB7D] focus:ring-[#FFAB7D] accent-[#FFAB7D]"
+                          />
+                          <label 
+                            htmlFor={`checkbox-${index}-${i}`}
+                            className="text-sm leading-snug text-gray-700"
+                          >
+                            {point}
+                          </label>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))
+              )}
+
+              {/* 説明文 */}
+              <p className="text-center text-sm text-gray-600 my-4">
+                あとで見直したいフィードバックにチェックを入れよう！
+              </p>
+
+              {/* 選択中の項目数を表示 */}
+              <div className="my-4 text-center">
+                <p className="text-sm text-gray-600">
+                  <span className="font-semibold text-[#FFAB7D]">{checkedItems.length}</span> 件の項目が選択されています
+                </p>
+              </div>
+
+              {/* ボタンエリア */}
+              <div className="flex flex-col gap-3 my-8">
+                <button
+                  onClick={saveToChecklist}
+                  className="bg-gradient-to-r from-[#FF8551] to-[#FFA46D] text-white rounded-full py-3 px-6 shadow-sm hover:opacity-90 transition-all flex items-center justify-center"
+                >
+                  <List className="w-4 h-4 mr-2" />
+                  <span className="text-sm whitespace-nowrap">チェックリストに登録</span>
+                </button>
+                <button
+                  onClick={() => {
+                    // meetingCountに基づいて適切なページに遷移
+                    if (meetingCount === 'first') {
+                      router.push('/conversation/tips-first');
+                    } else {
+                      router.push('/conversation/tips-later');
+                    }
+                  }}
+                  className="bg-white/90 text-[#FF8551] border border-[#FF8551]/70 rounded-full py-3 px-6 shadow-sm hover:bg-[#FFF1E9] transition-colors flex items-center justify-center"
+                >
+                  <BookOpen className="w-4 h-4 mr-2" />
+                  <span className="text-sm whitespace-nowrap">押さえておくべきポイント</span>
+                </button>
+                <button
+                  onClick={() => router.push({
+                    pathname: '/conversation/practice',
+                    query: { partnerId, meetingCount, rallyCount, conversation }
+                  })}
+                  className="bg-white/90 text-[#FF8551] border border-[#FF8551]/70 rounded-full py-3 px-6 shadow-sm hover:bg-[#FFF1E9] transition-colors flex items-center justify-center"
+                >
+                  <span className="text-sm whitespace-nowrap">もう一度練習する</span>
+                </button>
+              </div>
+
+              {/* 会話履歴セクション */}
+              <div className="mt-4 mb-24">
+                <div className="flex items-center mb-4">
+                  <h2 className="text-sm font-semibold flex items-center">
+                    <span className="mr-2 p-1.5 rounded-full bg-[#FFF0E8]">
+                      <BookOpen className="w-5 h-5 text-[#FF8551]" />
+                    </span>
+                    会話履歴
+                  </h2>
                 </div>
                 
-                {/* フィードバック項目のスケルトン */}
-                {[1, 2].map(i => (
-                  <div key={i} className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm p-4 border border-white/40 animate-pulse">
-                    <div className="h-5 bg-gray-200 rounded w-1/4 mb-3"></div>
-                    <div className="space-y-2">
-                      <div className="h-8 bg-gray-100 rounded-xl"></div>
-                      <div className="h-8 bg-gray-100 rounded-xl"></div>
-                      <div className="h-8 bg-gray-100 rounded-xl"></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <>
-                {/* フィードバック各項目 - エラー状態の表示を追加 */}
-                {error ? (
-                  <div className="my-5 p-4 bg-red-50 rounded-xl border border-red-100 text-red-600 text-sm">
-                    <p className="mb-2 font-medium">エラーが発生しました</p>
-                    <p>{error}</p>
-                    <p className="mt-3 text-xs">もう一度試すか、後でやり直してください。</p>
-                  </div>
-                ) : (
-                  feedbackItems.map((item, index) => (
-                    <div key={index} className="mb-5 bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm p-4 border border-white/40">
-                      <h2 className="text-sm font-semibold mb-3 flex items-center">
-                        <span className="mr-2 p-1.5 rounded-full bg-[#FFF0E8]">{item.icon}</span>
-                        {item.title}
-                      </h2>
-                      <ul className="list-none space-y-3">
-                        {item.points.map((point, i) => (
-                          <li key={i} className="flex items-start bg-[#FAFAFA] rounded-xl py-2.5 px-4 shadow-sm border border-gray-100/50">
-                            <input
-                              type="checkbox"
-                              id={`checkbox-${index}-${i}`}
-                              checked={!!checkboxes[`${index}-${i}`]}
-                              onChange={() => handleCheckboxChange(index, i, point)}
-                              className="mr-3 mt-0.5 h-4 w-4 rounded border-gray-300 text-[#FFAB7D] focus:ring-[#FFAB7D] accent-[#FFAB7D]"
-                            />
-                            <label 
-                              htmlFor={`checkbox-${index}-${i}`}
-                              className="text-sm leading-snug text-gray-700"
-                            >
-                              {point}
-                            </label>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))
-                )}
-
-                {/* 説明文 */}
-                <p className="text-center text-sm text-gray-600 my-4">
-                  あとで見直したいフィードバックにチェックを入れよう！
-                </p>
-
-                {/* 選択中の項目数を表示 */}
-                <div className="my-4 text-center">
-                  <p className="text-sm text-gray-600">
-                    <span className="font-semibold text-[#FFAB7D]">{checkedItems.length}</span> 件の項目が選択されています
-                  </p>
-                </div>
-
-                {/* ボタンエリア */}
-                <div className="flex flex-col gap-3 my-8">
-                  <button
-                    onClick={saveToChecklist}
-                    className="bg-gradient-to-r from-[#FF8551] to-[#FFA46D] text-white rounded-full py-3 px-6 shadow-sm hover:opacity-90 transition-all flex items-center justify-center"
-                  >
-                    <List className="w-4 h-4 mr-2" />
-                    <span className="text-sm whitespace-nowrap">チェックリストに登録</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      // meetingCountに基づいて適切なページに遷移
-                      if (meetingCount === 'first') {
-                        router.push('/conversation/tips-first');
-                      } else {
-                        router.push('/conversation/tips-later');
-                      }
-                    }}
-                    className="bg-white/90 text-[#FF8551] border border-[#FF8551]/70 rounded-full py-3 px-6 shadow-sm hover:bg-[#FFF1E9] transition-colors flex items-center justify-center"
-                  >
-                    <BookOpen className="w-4 h-4 mr-2" />
-                    <span className="text-sm whitespace-nowrap">押さえておくべきポイント</span>
-                  </button>
-                  <button
-                    onClick={() => router.push({
-                      pathname: '/conversation/practice',
-                      query: { partnerId, meetingCount, rallyCount, conversation }
-                    })}
-                    className="bg-white/90 text-[#FF8551] border border-[#FF8551]/70 rounded-full py-3 px-6 shadow-sm hover:bg-[#FFF1E9] transition-colors flex items-center justify-center"
-                  >
-                    <span className="text-sm whitespace-nowrap">もう一度練習する</span>
-                  </button>
-                </div>
-
-                {/* 会話履歴セクション */}
-                <div className="mt-4 mb-24">
-                  <div className="flex items-center mb-4">
-                    <h2 className="text-sm font-semibold flex items-center">
-                      <span className="mr-2 p-1.5 rounded-full bg-[#FFF0E8]">
-                        <BookOpen className="w-5 h-5 text-[#FF8551]" />
-                      </span>
-                      会話履歴
-                    </h2>
-                  </div>
-                  
-                  <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm p-4 border border-white/40">
-                    <div className="space-y-4 max-h-96 overflow-y-auto p-2">
-                      {messages.map((message, index) => (
+                <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm p-4 border border-white/40">
+                  <div className="space-y-4 max-h-96 overflow-y-auto p-2">
+                    {messages.map((message, index) => (
+                      <div
+                        key={index}
+                        className={`flex ${
+                          message.sender === 'user' ? 'justify-end' : 'justify-start'
+                        }`}
+                      >
                         <div
-                          key={index}
-                          className={`flex ${
-                            message.sender === 'user' ? 'justify-end' : 'justify-start'
+                          className={`max-w-xs p-3 rounded-lg ${
+                            message.sender === 'user'
+                              ? 'bg-gradient-to-r from-[#FF8551] to-[#FFA46D] text-white'
+                              : message.sender === 'system'
+                                ? 'bg-red-500 text-white'
+                                : 'bg-white/90 border border-white/40 text-gray-800 shadow-sm'
                           }`}
                         >
-                          <div
-                            className={`max-w-xs p-3 rounded-lg ${
-                              message.sender === 'user'
-                                ? 'bg-gradient-to-r from-[#FF8551] to-[#FFA46D] text-white'
-                                : message.sender === 'system'
-                                  ? 'bg-red-500 text-white'
-                                  : 'bg-white/90 border border-white/40 text-gray-800 shadow-sm'
-                            }`}
-                          >
-                            {message.text}
-                          </div>
+                          {message.text}
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              </>
-            )}
-          </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </Layout>

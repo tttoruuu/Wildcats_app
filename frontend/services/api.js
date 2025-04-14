@@ -369,9 +369,9 @@ const getAuthenticatedClient = () => {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`,
       'Accept': 'application/json',
-      'Origin': typeof window !== 'undefined' ? window.location.origin : undefined
     },
-    timeout: 120000, // タイムアウトを120秒に延長
+    withCredentials: false, // CORSリクエストでCredentialsを送信しない
+    timeout: 10000, // タイムアウトを10秒に短縮
     // リダイレクトを追跡しない設定を追加
     maxRedirects: 0, 
     validateStatus: function (status) {
@@ -406,11 +406,6 @@ const getAuthenticatedClient = () => {
         throw new Error('トークンの有効期限が切れています');
       }
       
-      // 確実にOriginヘッダーを設定
-      if (typeof window !== 'undefined' && !config.headers['Origin']) {
-        config.headers['Origin'] = window.location.origin;
-      }
-      
       return config;
     },
     (error) => {
@@ -435,7 +430,6 @@ export const authAPI = {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'Origin': typeof window !== 'undefined' ? window.location.origin : undefined
         }
       });
       return response.data;
@@ -463,7 +457,6 @@ export const authAPI = {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'Origin': typeof window !== 'undefined' ? window.location.origin : undefined
         }
       });
       const { access_token, token_type } = response.data;
@@ -608,7 +601,6 @@ export const partnerAPI = {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
           'Accept': 'application/json',
-          'Origin': typeof window !== 'undefined' ? window.location.origin : undefined
         }
       });
       

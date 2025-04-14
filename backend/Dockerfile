@@ -24,7 +24,7 @@ COPY ./schemas ./schemas
 COPY ./auth ./auth
 COPY ./main.py ./
 COPY ./database.py ./
-
+COPY ./initial_data.py ./
 
 # アプリ起動コマンド (プロキシヘッダー対応)
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers", "--forwarded-allow-ips=\"*\"", "--reload"]

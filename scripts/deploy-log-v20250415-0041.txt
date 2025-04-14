@@ -1,0 +1,406 @@
+🚀 Azure上への完全デプロイを開始します [v20250415-0041]
+
+==> 🔑 Azure CLIにログイン中...
+
+==> 🔑 Azure Container Registry (ACR)にログイン中...
+
+==> 🔧 Azureリソースグループを作成中...
+🚀 Azureリソースグループとコンテナレジストリの作成を開始します...
+リソースグループを作成中: wildcats-resource-group
+{
+  "id": "/subscriptions/2d8cc7a9-24c6-4c3b-9086-d5a7b036937a/resourceGroups/wildcats-resource-group",
+  "location": "japaneast",
+  "managedBy": null,
+  "name": "wildcats-resource-group",
+  "properties": {
+    "provisioningState": "Succeeded"
+  },
+  "tags": null,
+  "type": "Microsoft.Resources/resourceGroups"
+}
+コンテナレジストリを作成中: wildcats9999
+{
+  "adminUserEnabled": false,
+  "anonymousPullEnabled": false,
+  "creationDate": "2025-04-10T00:56:17.305760+00:00",
+  "dataEndpointEnabled": false,
+  "dataEndpointHostNames": [],
+  "encryption": {
+    "keyVaultProperties": null,
+    "status": "disabled"
+  },
+  "id": "/subscriptions/2d8cc7a9-24c6-4c3b-9086-d5a7b036937a/resourceGroups/wildcats-resource-group/providers/Microsoft.ContainerRegistry/registries/wildcats9999",
+  "identity": null,
+  "location": "japaneast",
+  "loginServer": "wildcats9999.azurecr.io",
+  "metadataSearch": "Disabled",
+  "name": "wildcats9999",
+  "networkRuleBypassOptions": "AzureServices",
+  "networkRuleSet": null,
+  "policies": {
+    "azureAdAuthenticationAsArmPolicy": {
+      "status": "enabled"
+    },
+    "exportPolicy": {
+      "status": "enabled"
+    },
+    "quarantinePolicy": {
+      "status": "disabled"
+    },
+    "retentionPolicy": {
+      "days": 7,
+      "lastUpdatedTime": "2025-04-14T15:41:28.208937+00:00",
+      "status": "disabled"
+    },
+    "softDeletePolicy": {
+      "lastUpdatedTime": "2025-04-14T15:41:28.209009+00:00",
+      "retentionDays": 7,
+      "status": "disabled"
+    },
+    "trustPolicy": {
+      "status": "disabled",
+      "type": "Notary"
+    }
+  },
+  "privateEndpointConnections": [],
+  "provisioningState": "Succeeded",
+  "publicNetworkAccess": "Enabled",
+  "resourceGroup": "wildcats-resource-group",
+  "sku": {
+    "name": "Basic",
+    "tier": "Basic"
+  },
+  "status": null,
+  "systemData": {
+    "createdAt": "2025-04-10T00:56:17.305760+00:00",
+    "createdBy": "toru09may@gmail.com",
+    "createdByType": "User",
+    "lastModifiedAt": "2025-04-14T15:41:28.030118+00:00",
+    "lastModifiedBy": "toru09may@gmail.com",
+    "lastModifiedByType": "User"
+  },
+  "tags": {},
+  "type": "Microsoft.ContainerRegistry/registries",
+  "zoneRedundancy": "Disabled"
+}
+コンテナレジストリにログイン中...
+Login Succeeded
+Container Apps環境を作成中: wildcats-environment
+WARNING: The behavior of this command has been altered by the following extension: containerapp
+WARNING: No Log Analytics workspace provided.
+WARNING: Generating a Log Analytics workspace with name "workspace-wildcatsresourcegroupBfyg"
+/ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..[KWARNING: 
+Container Apps environment created. To deploy a container app, use: az containerapp create --help
+
+{
+  "id": "/subscriptions/2d8cc7a9-24c6-4c3b-9086-d5a7b036937a/resourceGroups/wildcats-resource-group/providers/Microsoft.App/managedEnvironments/wildcats-environment",
+  "location": "Japan East",
+  "name": "wildcats-environment",
+  "properties": {
+    "appInsightsConfiguration": null,
+    "appLogsConfiguration": {
+      "destination": "log-analytics",
+      "logAnalyticsConfiguration": {
+        "customerId": "9161a796-9c5c-467e-bcef-1b293d8cb193",
+        "dynamicJsonColumns": false,
+        "sharedKey": null
+      }
+    },
+    "availabilityZones": null,
+    "customDomainConfiguration": {
+      "certificateKeyVaultProperties": null,
+      "certificatePassword": null,
+      "certificateValue": null,
+      "customDomainVerificationId": "9AB9A27993A09C541B2749BA4B0AAAFAD884A6DD26698A6CE576A7CB3AA90CF9",
+      "dnsSuffix": null,
+      "expirationDate": null,
+      "subjectName": null,
+      "thumbprint": null
+    },
+    "daprAIConnectionString": null,
+    "daprAIInstrumentationKey": null,
+    "daprConfiguration": {
+      "version": "1.13.6-msft.2"
+    },
+    "defaultDomain": "wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io",
+    "diskEncryptionConfiguration": null,
+    "eventStreamEndpoint": "https://japaneast.azurecontainerapps.dev/subscriptions/2d8cc7a9-24c6-4c3b-9086-d5a7b036937a/resourceGroups/wildcats-resource-group/managedEnvironments/wildcats-environment/eventstream",
+    "infrastructureResourceGroup": null,
+    "kedaConfiguration": {
+      "version": "2.16.1"
+    },
+    "openTelemetryConfiguration": null,
+    "peerAuthentication": {
+      "mtls": {
+        "enabled": false
+      }
+    },
+    "peerTrafficConfiguration": {
+      "encryption": {
+        "enabled": false
+      }
+    },
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": "Enabled",
+    "staticIp": "135.149.73.160",
+    "vnetConfiguration": null,
+    "workloadProfiles": [
+      {
+        "enableFips": false,
+        "name": "Consumption",
+        "workloadProfileType": "Consumption"
+      }
+    ],
+    "zoneRedundant": false
+  },
+  "resourceGroup": "wildcats-resource-group",
+  "systemData": {
+    "createdAt": "2025-04-10T00:56:46.4080967",
+    "createdBy": "toru09may@gmail.com",
+    "createdByType": "User",
+    "lastModifiedAt": "2025-04-14T15:41:51.5461534",
+    "lastModifiedBy": "toru09may@gmail.com",
+    "lastModifiedByType": "User"
+  },
+  "type": "Microsoft.App/managedEnvironments"
+}
+✅ Azureリソースグループとコンテナレジストリが正常に作成されました！
+
+==> 🐬 Azure Database for MySQLをデプロイ中...
+🐬 Azure Database for MySQL Flexible Serverのデプロイを開始します...
+既存のMySQL Flexible Serverを使用します: wildcats-mysql-server
+既存のデータベースを使用します: testdb
+既存のSSL証明書を使用します
+🔌 データベース接続文字列:
+mysql+pymysql://dbadmin:Password123!@wildcats-mysql-server.mysql.database.azure.com:3306/testdb?ssl_ca=DigiCertGlobalRootCA.crt.pem
+SQLダンプファイルが見つかりましたが、ローカルからのインポートをスキップします。
+バックエンドデプロイ時にマイグレーションが実行されるため、テーブルは自動的に作成されます。
+✅ Azure Database for MySQL Flexible Serverのデプロイが完了しました！
+
+==> 🔧 バックエンドをデプロイ中...
+ローカルの.envファイルを読み込みます
+🚀 Backend deployment [v20250415-0043]
+SSL証明書をbackendディレクトリにコピー中...
+Dockerイメージをビルド中...
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 925B 0.0s done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/python:3.10
+#2 ...
+
+#3 [auth] library/python:pull token for registry-1.docker.io
+#3 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/python:3.10
+#2 DONE 3.6s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 2B done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 4.95kB 0.0s done
+#5 DONE 0.0s
+
+#6 [ 1/11] FROM docker.io/library/python:3.10@sha256:e2c7fb05741c735679b26eda7dd34575151079f8c615875fbefe401972b14d85
+#6 resolve docker.io/library/python:3.10@sha256:e2c7fb05741c735679b26eda7dd34575151079f8c615875fbefe401972b14d85 0.0s done
+#6 DONE 0.0s
+
+#7 [ 8/11] COPY ./schemas ./schemas
+#7 CACHED
+
+#8 [10/11] COPY ./main.py ./
+#8 CACHED
+
+#9 [ 2/11] WORKDIR /app
+#9 CACHED
+
+#10 [ 4/11] RUN pip install --no-cache-dir -r requirements.txt
+#10 CACHED
+
+#11 [ 5/11] COPY DigiCertGlobalRootCA.crt.pem .
+#11 CACHED
+
+#12 [ 7/11] COPY ./routers ./routers
+#12 CACHED
+
+#13 [ 9/11] COPY ./auth ./auth
+#13 CACHED
+
+#14 [ 6/11] COPY ./models ./models
+#14 CACHED
+
+#15 [ 3/11] COPY requirements.txt .
+#15 CACHED
+
+#16 [11/11] COPY ./database.py ./
+#16 CACHED
+
+#17 exporting to image
+#17 exporting layers 0.0s done
+#17 exporting manifest sha256:e437b3fe8410e137b181cb67e556cf92321f0293297f5c4dd960f68158288442 done
+#17 exporting config sha256:371b0611d190d49c92b360bb7b32dbbfe405b0f5445415bd1acf7495ce27ecdb done
+#17 exporting attestation manifest sha256:c61b17c047ddaf9f652506ec9e5bd2693bd58ed68f541a096d838df65c56cc16 0.0s done
+#17 exporting manifest list sha256:e2622b8c6333ac23a50aa47c44ef582acbfbf1956b1d88c73ae7d96936661307 0.0s done
+#17 naming to wildcats9999.azurecr.io/backend:v20250415-0043 done
+#17 unpacking to wildcats9999.azurecr.io/backend:v20250415-0043 0.0s done
+#17 DONE 0.1s
+イメージをACRにプッシュ中...
+The push refers to repository [wildcats9999.azurecr.io/backend]
+489a81e107e7: Waiting
+d877749e7e84: Waiting
+043f19145913: Waiting
+140bd42840a4: Waiting
+23b7d26ef1d2: Waiting
+07d1b5af933d: Waiting
+1eb98adba0eb: Waiting
+f0b76f936c35: Waiting
+b617a119f8a2: Waiting
+0f9c91e7dc1b: Waiting
+e452a109a8a6: Waiting
+bce9fb0dfc10: Waiting
+b35293540a37: Waiting
+af8e3845afdc: Waiting
+918de3ab29f9: Waiting
+35a6ae16d0f0: Waiting
+a3d76e4976bb: Waiting
+a0d095cc7309: Waiting
+043f19145913: Waiting
+140bd42840a4: Waiting
+23b7d26ef1d2: Waiting
+07d1b5af933d: Waiting
+1eb98adba0eb: Waiting
+489a81e107e7: Waiting
+d877749e7e84: Waiting
+f0b76f936c35: Waiting
+b617a119f8a2: Waiting
+0f9c91e7dc1b: Waiting
+e452a109a8a6: Waiting
+bce9fb0dfc10: Waiting
+b35293540a37: Waiting
+af8e3845afdc: Waiting
+918de3ab29f9: Waiting
+35a6ae16d0f0: Waiting
+a3d76e4976bb: Waiting
+a0d095cc7309: Waiting
+1eb98adba0eb: Waiting
+489a81e107e7: Waiting
+d877749e7e84: Waiting
+043f19145913: Waiting
+140bd42840a4: Waiting
+23b7d26ef1d2: Waiting
+07d1b5af933d: Waiting
+f0b76f936c35: Waiting
+b617a119f8a2: Waiting
+0f9c91e7dc1b: Waiting
+918de3ab29f9: Waiting
+e452a109a8a6: Waiting
+bce9fb0dfc10: Waiting
+b35293540a37: Waiting
+af8e3845afdc: Waiting
+35a6ae16d0f0: Waiting
+a3d76e4976bb: Waiting
+a0d095cc7309: Waiting
+f0b76f936c35: Waiting
+b617a119f8a2: Waiting
+0f9c91e7dc1b: Waiting
+918de3ab29f9: Waiting
+e452a109a8a6: Waiting
+bce9fb0dfc10: Waiting
+b35293540a37: Waiting
+af8e3845afdc: Waiting
+35a6ae16d0f0: Waiting
+a3d76e4976bb: Waiting
+a0d095cc7309: Waiting
+1eb98adba0eb: Waiting
+489a81e107e7: Waiting
+d877749e7e84: Waiting
+043f19145913: Waiting
+140bd42840a4: Waiting
+23b7d26ef1d2: Waiting
+07d1b5af933d: Waiting
+35a6ae16d0f0: Waiting
+a3d76e4976bb: Waiting
+a0d095cc7309: Waiting
+07d1b5af933d: Waiting
+1eb98adba0eb: Waiting
+489a81e107e7: Waiting
+d877749e7e84: Waiting
+043f19145913: Waiting
+140bd42840a4: Waiting
+23b7d26ef1d2: Waiting
+f0b76f936c35: Waiting
+b617a119f8a2: Waiting
+0f9c91e7dc1b: Waiting
+af8e3845afdc: Waiting
+918de3ab29f9: Waiting
+e452a109a8a6: Waiting
+bce9fb0dfc10: Waiting
+b35293540a37: Waiting
+140bd42840a4: Waiting
+23b7d26ef1d2: Waiting
+07d1b5af933d: Waiting
+1eb98adba0eb: Waiting
+489a81e107e7: Waiting
+d877749e7e84: Waiting
+043f19145913: Waiting
+b617a119f8a2: Waiting
+0f9c91e7dc1b: Waiting
+f0b76f936c35: Waiting
+bce9fb0dfc10: Waiting
+b35293540a37: Waiting
+af8e3845afdc: Waiting
+918de3ab29f9: Waiting
+e452a109a8a6: Waiting
+a3d76e4976bb: Waiting
+a0d095cc7309: Waiting
+35a6ae16d0f0: Waiting
+f0b76f936c35: Waiting
+b617a119f8a2: Waiting
+0f9c91e7dc1b: Waiting
+e452a109a8a6: Waiting
+bce9fb0dfc10: Layer already exists
+b35293540a37: Waiting
+af8e3845afdc: Waiting
+918de3ab29f9: Waiting
+35a6ae16d0f0: Waiting
+a3d76e4976bb: Waiting
+a0d095cc7309: Layer already exists
+043f19145913: Waiting
+140bd42840a4: Waiting
+23b7d26ef1d2: Waiting
+07d1b5af933d: Waiting
+1eb98adba0eb: Waiting
+489a81e107e7: Waiting
+d877749e7e84: Waiting
+35a6ae16d0f0: Layer already exists
+a3d76e4976bb: Layer already exists
+489a81e107e7: Waiting
+d877749e7e84: Layer already exists
+043f19145913: Waiting
+140bd42840a4: Waiting
+23b7d26ef1d2: Waiting
+07d1b5af933d: Waiting
+1eb98adba0eb: Waiting
+f0b76f936c35: Waiting
+b617a119f8a2: Layer already exists
+0f9c91e7dc1b: Layer already exists
+e452a109a8a6: Layer already exists
+b35293540a37: Waiting
+af8e3845afdc: Layer already exists
+918de3ab29f9: Layer already exists
+f0b76f936c35: Layer already exists
+b35293540a37: Layer already exists
+07d1b5af933d: Layer already exists
+1eb98adba0eb: Layer already exists
+489a81e107e7: Layer already exists
+140bd42840a4: Layer already exists
+23b7d26ef1d2: Layer already exists
+043f19145913: Pushed
+v20250415-0043: digest: sha256:e2622b8c6333ac23a50aa47c44ef582acbfbf1956b1d88c73ae7d96936661307 size: 856
+WARNING: The behavior of this command has been altered by the following extension: containerapp
+🔌 フロントエンドURL検出: https://frontend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+ERROR: Run 'az acr update -n wildcats9999 --admin-enabled true' to enable admin first.

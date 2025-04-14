@@ -24,6 +24,10 @@ az group create --name $RG --location $LOCATION | tee -a $LOGFILE
 echo "コンテナレジストリを作成中: $ACR_NAME" | tee -a $LOGFILE
 az acr create --resource-group $RG --name $ACR_NAME --sku Basic | tee -a $LOGFILE
 
+# ACRの管理者アカウントを有効化
+echo "ACRの管理者アカウントを有効化中..." | tee -a $LOGFILE
+az acr update -n $ACR_NAME --admin-enabled true | tee -a $LOGFILE
+
 # ACRへのログイン
 echo "コンテナレジストリにログイン中..." | tee -a $LOGFILE
 az acr login --name $ACR_NAME | tee -a $LOGFILE
