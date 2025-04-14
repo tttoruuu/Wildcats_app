@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Layout from '../components/Layout';
 import Link from 'next/link';
-import { HomeIcon, User, List, Trash2, Calendar, ArrowLeft, X } from 'lucide-react';
+import { HomeIcon, User, List, Trash2, Calendar, ArrowLeft, X, LightbulbIcon } from 'lucide-react';
 
 export default function Checklist() {
   const router = useRouter();
@@ -30,6 +30,11 @@ export default function Checklist() {
   const confirmDelete = (id) => {
     setItemToDelete(id);
     setShowDeleteModal(true);
+  };
+
+  // 会話のTipsページへ遷移
+  const navigateToTips = () => {
+    router.push('/conversation/tips-selection');
   };
 
   // カテゴリーごとにアイテムをグループ化
@@ -67,7 +72,16 @@ export default function Checklist() {
           </button>
           <div className="mt-8">
             <h1 className="text-xl font-bold text-[#FF8551]">CHECK LIST📋</h1>
-            <p className="text-xs text-gray-500 mt-1">フィードバックを振り返ろう</p>
+            <p className="text-xs text-gray-500 mt-1 mb-3">フィードバックを振り返ろう</p>
+            
+            {/* 会話のTipsボタン */}
+            <button
+              onClick={navigateToTips}
+              className="flex items-center justify-center w-full bg-gradient-to-r from-[#FF8551] to-[#FFA46D] text-white rounded-full py-2 px-4 shadow-sm hover:opacity-90 transition-all"
+            >
+             
+              会話のTips
+            </button>
           </div>
         </div>
 

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import List, Optional
@@ -9,9 +9,9 @@ import uuid
 
 from database import get_db
 from models.user import User
-from models.post import Post
+from models.post import Post, Tag, post_tag
 from models.like import Like
-from schemas.post import PostCreate, PostResponse, PostWithUserResponse, LikeCreate, LikeResponse
+from schemas.post import PostCreate, PostResponse, PostWithUserResponse, LikeCreate, LikeResponse, TagResponse, TagCreate
 from auth.jwt import get_current_user
 
 router = APIRouter(
@@ -20,11 +20,37 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-# 投稿一覧を取得
+# タグ一覧を取得
+@router.get("/tags", response_model=List[TagResponse])
+def get_tags(
+    category: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
+    query = db.query(Tag)
+    if category:
+        query = query.filter(Tag.category == category)
+    return query.order_by(Tag.category, Tag.name).all()
+
+# タグを作成（管理者用）
+@router.post("/tags", response_model=TagResponse, status_code=status.HTTP_201_CREATED)
+def create_tag(
+    tag: TagCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    # ここでは簡単のため、管理者チェックは省略しています
+    db_tag = Tag(name=tag.name, category=tag.category)
+    db.add(db_tag)
+    db.commit()
+    db.refresh(db_tag)
+    return db_tag
+
+# 投稿一覧を取得（タグでフィルタリング機能を追加）
 @router.get("/", response_model=List[PostWithUserResponse])
 def get_posts(
     skip: int = 0, 
-    limit: int = 100, 
+    limit: int = 100,
+    tag_id: Optional[int] = None,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -39,8 +65,8 @@ def get_posts(
         Like.post_id
     ).filter(Like.user_id == current_user.id).subquery()
 
-    # 投稿、投稿者情報、いいね数を結合して取得
-    posts = db.query(
+    # 投稿のベースクエリ
+    post_query = db.query(
         Post, 
         User.username, 
         User.full_name, 
@@ -52,12 +78,24 @@ def get_posts(
         User, Post.user_id == User.id
     ).outerjoin(
         likes_count, Post.id == likes_count.c.post_id
-    ).order_by(
+    )
+    
+    # タグでフィルタリング
+    if tag_id:
+        post_query = post_query.join(
+            post_tag, Post.id == post_tag.c.post_id
+        ).filter(post_tag.c.tag_id == tag_id)
+    
+    # 結果を取得
+    posts = post_query.order_by(
         Post.created_at.desc()
     ).offset(skip).limit(limit).all()
 
     result = []
     for post, username, full_name, profile_image_url, likes_count, is_liked_by_user in posts:
+        # 投稿に関連するタグを取得
+        tags = db.query(Tag).join(post_tag).filter(post_tag.c.post_id == post.id).all()
+        
         post_dict = {
             "id": post.id,
             "user_id": post.user_id,
@@ -69,13 +107,15 @@ def get_posts(
             "is_liked_by_user": is_liked_by_user,
             "username": username,
             "user_full_name": full_name,
-            "user_profile_image_url": profile_image_url
+            "user_profile_image_url": profile_image_url,
+            "tags": tags,
+            "tag_ids": [tag.id for tag in tags]
         }
         result.append(post_dict)
 
     return result
 
-# 投稿を作成
+# 投稿を作成（タグ付け機能を追加）
 @router.post("/", response_model=PostResponse)
 def create_post(
     post: PostCreate,
@@ -91,11 +131,22 @@ def create_post(
     db.commit()
     db.refresh(db_post)
     
-    # いいね数の初期値はゼロ
+    # タグの関連付け
+    if post.tag_ids:
+        for tag_id in post.tag_ids:
+            tag = db.query(Tag).filter(Tag.id == tag_id).first()
+            if tag:
+                db_post.tags.append(tag)
+        db.commit()
+        db.refresh(db_post)
+    
+    # タグ情報を含めて返す
     return {
         **db_post.__dict__,
         "likes_count": 0,
-        "is_liked_by_user": False
+        "is_liked_by_user": False,
+        "tags": db_post.tags,
+        "tag_ids": [tag.id for tag in db_post.tags]
     }
 
 # 投稿画像のアップロード

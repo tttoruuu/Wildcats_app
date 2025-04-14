@@ -1,16 +1,18 @@
 import { useState } from 'react';
 import Image from 'next/image';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, addHours } from 'date-fns';
 import { ja } from 'date-fns/locale';
 import { Heart } from 'lucide-react';
 import { likePostService, unlikePostService } from '../../services/post';
 
-export default function Post({ post, token, onLikeUpdate }) {
+export default function Post({ post, token, onLikeUpdate, onTagClick }) {
   const [isLiked, setIsLiked] = useState(post.is_liked_by_user);
   const [likesCount, setLikesCount] = useState(post.likes_count);
   const [isLoading, setIsLoading] = useState(false);
 
-  const formattedDate = formatDistanceToNow(new Date(post.created_at), {
+  // UTCの時間に9時間加算して日本時間に調整
+  const postDateJST = addHours(new Date(post.created_at), 9);
+  const formattedDate = formatDistanceToNow(postDateJST, {
     addSuffix: true,
     locale: ja
   });
@@ -40,6 +42,12 @@ export default function Post({ post, token, onLikeUpdate }) {
     }
   };
 
+  const handleTagClick = (tagId) => {
+    if (onTagClick) {
+      onTagClick(tagId);
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-sm p-4 mb-4">
       {/* 投稿者情報 */}
@@ -60,6 +68,21 @@ export default function Post({ post, token, onLikeUpdate }) {
 
       {/* 投稿内容 */}
       <p className="text-gray-700 mb-3 whitespace-pre-line">{post.content}</p>
+
+      {/* タグ表示 */}
+      {post.tags && post.tags.length > 0 && (
+        <div className="flex flex-wrap gap-1 mb-3">
+          {post.tags.map(tag => (
+            <button
+              key={tag.id}
+              onClick={() => handleTagClick(tag.id)}
+              className="text-xs py-1 px-2 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200"
+            >
+              #{tag.name}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* 投稿画像（あれば表示） */}
       {post.image_url && (

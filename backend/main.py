@@ -17,6 +17,8 @@ from routers import conversation_partners, posts
 from fastapi.responses import JSONResponse
 import random
 from urllib.parse import urlparse
+from fastapi.staticfiles import StaticFiles
+from initial_data import init_db
 
 # データベースのテーブルを作成
 Base.metadata.create_all(bind=engine)
@@ -109,10 +111,24 @@ async def process_x_forwarded_proto(request: Request, call_next):
     response = await call_next(request)
     return response
 
-# 会話相手APIルーターの追加
-app.include_router(conversation_partners.router)
+# 静的ファイル用のディレクトリを作成
+os.makedirs("uploads/profile_images", exist_ok=True)
+os.makedirs("uploads/posts", exist_ok=True)
 
-# 投稿APIルーターの追加
+# 静的ファイルのルートを設定
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
+# 初期データの作成
+@app.on_event("startup")
+async def startup_event():
+    db = next(get_db())
+    try:
+        init_db(db)
+    finally:
+        db.close()
+
+# ルーターを登録
+app.include_router(conversation_partners.router)
 app.include_router(posts.router)
 
 # データベースセッションの依存関係

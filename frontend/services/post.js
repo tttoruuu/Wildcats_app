@@ -2,9 +2,13 @@ import axios from 'axios';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-export const getPostsService = async (token) => {
+export const getPostsService = async (token, tagId = null) => {
   try {
-    const response = await axios.get(`${API_URL}/posts`, {
+    let url = `${API_URL}/posts`;
+    if (tagId) {
+      url += `?tag_id=${tagId}`;
+    }
+    const response = await axios.get(url, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.data;
@@ -14,11 +18,27 @@ export const getPostsService = async (token) => {
   }
 };
 
-export const createPostService = async (token, content, imageUrl = null) => {
+export const getTagsService = async (token, category = null) => {
+  try {
+    let url = `${API_URL}/posts/tags`;
+    if (category) {
+      url += `?category=${category}`;
+    }
+    const response = await axios.get(url, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('タグ取得エラー:', error);
+    throw error;
+  }
+};
+
+export const createPostService = async (token, content, imageUrl = null, tagIds = []) => {
   try {
     const response = await axios.post(
       `${API_URL}/posts`,
-      { content, image_url: imageUrl },
+      { content, image_url: imageUrl, tag_ids: tagIds },
       { headers: { Authorization: `Bearer ${token}` } }
     );
     return response.data;

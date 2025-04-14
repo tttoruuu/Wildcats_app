@@ -1,7 +1,7 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
-import { ImagePlus, X, Loader2 } from 'lucide-react';
-import { createPostService, uploadPostImageService } from '../../services/post';
+import { ImagePlus, X, Loader2, Tag as TagIcon, ChevronDown } from 'lucide-react';
+import { createPostService, uploadPostImageService, getTagsService } from '../../services/post';
 import Button from '../common/Button';
 
 export default function NewPostForm({ token, onPostCreated }) {
@@ -10,7 +10,51 @@ export default function NewPostForm({ token, onPostCreated }) {
   const [imagePreview, setImagePreview] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [allTags, setAllTags] = useState([]);
+  const [selectedTagIds, setSelectedTagIds] = useState([]);
+  const [isLoadingTags, setIsLoadingTags] = useState(true);
+  const [isTagDropdownOpen, setIsTagDropdownOpen] = useState(false);
   const fileInputRef = useRef(null);
+  const tagDropdownRef = useRef(null);
+
+  // タグの取得
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const tags = await getTagsService(token);
+        setAllTags(tags);
+      } catch (error) {
+        console.error('タグの取得に失敗しました:', error);
+      } finally {
+        setIsLoadingTags(false);
+      }
+    };
+
+    fetchTags();
+  }, [token]);
+
+  // ドロップダウン外のクリックを検知して閉じる
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (tagDropdownRef.current && !tagDropdownRef.current.contains(event.target)) {
+        setIsTagDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // タグをカテゴリーごとにグループ化
+  const tagsByCategory = allTags.reduce((acc, tag) => {
+    if (!acc[tag.category]) {
+      acc[tag.category] = [];
+    }
+    acc[tag.category].push(tag);
+    return acc;
+  }, {});
 
   const handleContentChange = (e) => {
     setContent(e.target.value);
@@ -42,6 +86,18 @@ export default function NewPostForm({ token, onPostCreated }) {
     }
   };
 
+  const handleTagToggle = (tagId) => {
+    setSelectedTagIds(prev => 
+      prev.includes(tagId)
+        ? prev.filter(id => id !== tagId)
+        : [...prev, tagId]
+    );
+  };
+
+  const toggleTagDropdown = () => {
+    setIsTagDropdownOpen(!isTagDropdownOpen);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -64,12 +120,13 @@ export default function NewPostForm({ token, onPostCreated }) {
       }
       
       // 投稿作成
-      const newPost = await createPostService(token, content, imageUrl);
+      const newPost = await createPostService(token, content, imageUrl, selectedTagIds);
       
       // フォームをリセット
       setContent('');
       setImage(null);
       setImagePreview('');
+      setSelectedTagIds([]);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -86,6 +143,13 @@ export default function NewPostForm({ token, onPostCreated }) {
     }
   };
 
+  // 選択されているタグを取得
+  const getSelectedTags = () => {
+    return allTags.filter(tag => selectedTagIds.includes(tag.id));
+  };
+
+  const selectedTags = getSelectedTags();
+
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm p-4 mb-6">
       <textarea
@@ -95,6 +159,81 @@ export default function NewPostForm({ token, onPostCreated }) {
         className="w-full p-3 border border-gray-200 rounded-lg mb-3 focus:outline-none focus:ring-1 focus:ring-[#FF8551] focus:border-[#FF8551]"
         rows={3}
       />
+      
+      {/* タグ選択UI - ドロップダウン形式 */}
+      {isLoadingTags ? (
+        <div className="flex items-center text-gray-500 mb-3">
+          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+          タグを読み込み中...
+        </div>
+      ) : (
+        <div className="mb-3 relative" ref={tagDropdownRef}>
+          {/* ドロップダウントリガーボタン */}
+          <button
+            type="button"
+            onClick={toggleTagDropdown}
+            className="flex items-center justify-between w-full p-2 border border-gray-200 rounded-lg text-gray-700 hover:border-[#FF8551] focus:outline-none"
+          >
+            <div className="flex items-center">
+              <TagIcon className="w-4 h-4 mr-2 text-gray-500" />
+              <span className="text-sm">
+                {selectedTags.length > 0 
+                  ? `選択中のタグ: ${selectedTags.length}個` 
+                  : 'タグを選択'}
+              </span>
+            </div>
+            <ChevronDown className="w-4 h-4 text-gray-500" />
+          </button>
+          
+          {/* 選択したタグの表示 */}
+          {selectedTags.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-2">
+              {selectedTags.map(tag => (
+                <div 
+                  key={tag.id} 
+                  className="flex items-center bg-[#FF8551] text-white text-xs py-1 px-2 rounded-full"
+                >
+                  #{tag.name}
+                  <button
+                    type="button"
+                    onClick={() => handleTagToggle(tag.id)}
+                    className="ml-1 text-white"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          
+          {/* ドロップダウンメニュー */}
+          {isTagDropdownOpen && (
+            <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+              {Object.entries(tagsByCategory).map(([category, tags]) => (
+                <div key={category} className="p-2 border-b last:border-b-0">
+                  <h4 className="text-xs font-medium text-gray-500 mb-1">{category}</h4>
+                  <div className="flex flex-wrap gap-1">
+                    {tags.map(tag => (
+                      <button
+                        key={tag.id}
+                        type="button"
+                        onClick={() => handleTagToggle(tag.id)}
+                        className={`text-xs py-1 px-2 rounded-full ${
+                          selectedTagIds.includes(tag.id)
+                            ? 'bg-[#FF8551] text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        #{tag.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
       
       {imagePreview && (
         <div className="relative w-full h-48 mb-3 rounded-lg overflow-hidden">
