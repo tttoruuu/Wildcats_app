@@ -25,6 +25,10 @@ echo -e "\n==> 🔧 Azureリソースグループを作成中..." | tee -a $LOG_
 echo -e "\n==> 🐬 Azure Database for MySQLをデプロイ中..." | tee -a $LOG_FILE
 ./scripts/deploy-db.sh 2>&1 | tee -a $LOG_FILE
 
+# データベースマイグレーションの実行
+echo -e "\n==> 🔄 データベースマイグレーションを実行中..." | tee -a $LOG_FILE
+./scripts/deploy-db-migration.sh 2>&1 | tee -a $LOG_FILE
+
 # BACKEND
 echo -e "\n==> 🔧 バックエンドをデプロイ中..." | tee -a $LOG_FILE
 ./scripts/deploy-backend.sh "$VERSION" 2>&1 | tee -a $LOG_FILE

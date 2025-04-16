@@ -34,16 +34,40 @@ export const getTagsService = async (token, category = null) => {
   }
 };
 
-export const createPostService = async (token, content, imageUrl = null, tagIds = []) => {
+export const createPostService = async (token, postData) => {
   try {
     const response = await axios.post(
       `${API_URL}/posts`,
-      { content, image_url: imageUrl, tag_ids: tagIds },
+      postData,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     return response.data;
   } catch (error) {
     console.error('投稿作成エラー:', error);
+    throw error;
+  }
+};
+
+export const getPostService = async (token, postId) => {
+  try {
+    const response = await axios.get(`${API_URL}/posts/${postId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('投稿取得エラー:', error);
+    throw error;
+  }
+};
+
+export const getPostRepliesService = async (token, postId) => {
+  try {
+    const response = await axios.get(`${API_URL}/posts/${postId}/replies`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('返信取得エラー:', error);
     throw error;
   }
 };

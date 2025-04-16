@@ -120,7 +120,13 @@ export default function NewPostForm({ token, onPostCreated }) {
       }
       
       // 投稿作成
-      const newPost = await createPostService(token, content, imageUrl, selectedTagIds);
+      const postData = {
+        content: content,
+        image_url: imageUrl,
+        tag_ids: selectedTagIds
+      };
+      
+      const newPost = await createPostService(token, postData);
       
       // フォームをリセット
       setContent('');

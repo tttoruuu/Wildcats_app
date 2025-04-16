@@ -689,7 +689,7 @@ A: カフェ巡りと写真撮影が好きです。特に静かな雰囲気の�
                 client.max_retries = 3  # リトライ回数を増やす
                 
                 response = client.chat.completions.create(
-                    model="gpt-3.5-turbo",
+                    model="gpt-4o",
                     messages=messages,
                     temperature=0.7,
                     max_tokens=150,

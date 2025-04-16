@@ -33,6 +33,7 @@ class Post(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     content = Column(Text, nullable=False)
     image_url = Column(String(255))
+    parent_id = Column(Integer, ForeignKey("posts.id"), nullable=True)
     created_at = Column(TIMESTAMP, server_default=func.now())
     updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
 
@@ -40,6 +41,9 @@ class Post(Base):
     user = relationship("User", back_populates="posts")
     likes = relationship("Like", back_populates="post", cascade="all, delete-orphan")
     tags = relationship("Tag", secondary=post_tag, back_populates="posts")
+    
+    # 返信機能のための親子関係
+    parent = relationship("Post", remote_side=[id], backref="replies")
 
     def __repr__(self):
         return f"<Post {self.id}>" 

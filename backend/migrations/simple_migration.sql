@@ -1,0 +1,2 @@
+ALTER TABLE posts ADD COLUMN IF NOT EXISTS parent_id INT NULL;
+ALTER TABLE posts ADD FOREIGN KEY (parent_id) REFERENCES posts(id); 

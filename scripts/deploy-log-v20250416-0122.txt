@@ -1,0 +1,1355 @@
+🚀 Azure上への完全デプロイを開始します [v20250416-0122]
+
+==> 🔑 Azure CLIにログイン中...
+
+==> 🔑 Azure Container Registry (ACR)にログイン中...
+
+==> 🔧 Azureリソースグループを作成中...
+🚀 Azureリソースグループとコンテナレジストリの作成を開始します...
+リソースグループを作成中: wildcats-resource-group
+{
+  "id": "/subscriptions/2d8cc7a9-24c6-4c3b-9086-d5a7b036937a/resourceGroups/wildcats-resource-group",
+  "location": "japaneast",
+  "managedBy": null,
+  "name": "wildcats-resource-group",
+  "properties": {
+    "provisioningState": "Succeeded"
+  },
+  "tags": null,
+  "type": "Microsoft.Resources/resourceGroups"
+}
+コンテナレジストリを作成中: wildcats9999
+{
+  "adminUserEnabled": false,
+  "anonymousPullEnabled": false,
+  "creationDate": "2025-04-10T00:56:17.305760+00:00",
+  "dataEndpointEnabled": false,
+  "dataEndpointHostNames": [],
+  "encryption": {
+    "keyVaultProperties": null,
+    "status": "disabled"
+  },
+  "id": "/subscriptions/2d8cc7a9-24c6-4c3b-9086-d5a7b036937a/resourceGroups/wildcats-resource-group/providers/Microsoft.ContainerRegistry/registries/wildcats9999",
+  "identity": null,
+  "location": "japaneast",
+  "loginServer": "wildcats9999.azurecr.io",
+  "metadataSearch": "Disabled",
+  "name": "wildcats9999",
+  "networkRuleBypassOptions": "AzureServices",
+  "networkRuleSet": null,
+  "policies": {
+    "azureAdAuthenticationAsArmPolicy": {
+      "status": "enabled"
+    },
+    "exportPolicy": {
+      "status": "enabled"
+    },
+    "quarantinePolicy": {
+      "status": "disabled"
+    },
+    "retentionPolicy": {
+      "days": 7,
+      "lastUpdatedTime": "2025-04-15T16:23:14.097011+00:00",
+      "status": "disabled"
+    },
+    "softDeletePolicy": {
+      "lastUpdatedTime": "2025-04-15T16:23:14.097080+00:00",
+      "retentionDays": 7,
+      "status": "disabled"
+    },
+    "trustPolicy": {
+      "status": "disabled",
+      "type": "Notary"
+    }
+  },
+  "privateEndpointConnections": [],
+  "provisioningState": "Succeeded",
+  "publicNetworkAccess": "Enabled",
+  "resourceGroup": "wildcats-resource-group",
+  "sku": {
+    "name": "Basic",
+    "tier": "Basic"
+  },
+  "status": null,
+  "systemData": {
+    "createdAt": "2025-04-10T00:56:17.305760+00:00",
+    "createdBy": "toru09may@gmail.com",
+    "createdByType": "User",
+    "lastModifiedAt": "2025-04-15T16:23:14.019502+00:00",
+    "lastModifiedBy": "toru09may@gmail.com",
+    "lastModifiedByType": "User"
+  },
+  "tags": {},
+  "type": "Microsoft.ContainerRegistry/registries",
+  "zoneRedundancy": "Disabled"
+}
+ACRの管理者アカウントを有効化中...
+{
+  "adminUserEnabled": true,
+  "anonymousPullEnabled": false,
+  "creationDate": "2025-04-10T00:56:17.305760+00:00",
+  "dataEndpointEnabled": false,
+  "dataEndpointHostNames": [],
+  "encryption": {
+    "keyVaultProperties": null,
+    "status": "disabled"
+  },
+  "id": "/subscriptions/2d8cc7a9-24c6-4c3b-9086-d5a7b036937a/resourceGroups/wildcats-resource-group/providers/Microsoft.ContainerRegistry/registries/wildcats9999",
+  "identity": null,
+  "location": "japaneast",
+  "loginServer": "wildcats9999.azurecr.io",
+  "metadataSearch": "Disabled",
+  "name": "wildcats9999",
+  "networkRuleBypassOptions": "AzureServices",
+  "networkRuleSet": null,
+  "policies": {
+    "azureAdAuthenticationAsArmPolicy": {
+      "status": "enabled"
+    },
+    "exportPolicy": {
+      "status": "enabled"
+    },
+    "quarantinePolicy": {
+      "status": "disabled"
+    },
+    "retentionPolicy": {
+      "days": 7,
+      "lastUpdatedTime": "2025-04-15T16:23:14.097011+00:00",
+      "status": "disabled"
+    },
+    "softDeletePolicy": {
+      "lastUpdatedTime": "2025-04-15T16:23:14.097080+00:00",
+      "retentionDays": 7,
+      "status": "disabled"
+    },
+    "trustPolicy": {
+      "status": "disabled",
+      "type": "Notary"
+    }
+  },
+  "privateEndpointConnections": [],
+  "provisioningState": "Succeeded",
+  "publicNetworkAccess": "Enabled",
+  "resourceGroup": "wildcats-resource-group",
+  "sku": {
+    "name": "Basic",
+    "tier": "Basic"
+  },
+  "status": null,
+  "systemData": {
+    "createdAt": "2025-04-10T00:56:17.305760+00:00",
+    "createdBy": "toru09may@gmail.com",
+    "createdByType": "User",
+    "lastModifiedAt": "2025-04-15T16:23:17.017867+00:00",
+    "lastModifiedBy": "toru09may@gmail.com",
+    "lastModifiedByType": "User"
+  },
+  "tags": {},
+  "type": "Microsoft.ContainerRegistry/registries",
+  "zoneRedundancy": "Disabled"
+}
+コンテナレジストリにログイン中...
+Login Succeeded
+Container Apps環境を作成中: wildcats-environment
+WARNING: The behavior of this command has been altered by the following extension: containerapp
+WARNING: No Log Analytics workspace provided.
+WARNING: Generating a Log Analytics workspace with name "workspace-wildcatsresourcegroup2Xtr"
+/ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..[KWARNING: 
+Container Apps environment created. To deploy a container app, use: az containerapp create --help
+
+{
+  "id": "/subscriptions/2d8cc7a9-24c6-4c3b-9086-d5a7b036937a/resourceGroups/wildcats-resource-group/providers/Microsoft.App/managedEnvironments/wildcats-environment",
+  "location": "Japan East",
+  "name": "wildcats-environment",
+  "properties": {
+    "appInsightsConfiguration": null,
+    "appLogsConfiguration": {
+      "destination": "log-analytics",
+      "logAnalyticsConfiguration": {
+        "customerId": "6aec2339-8699-48e5-9b6a-5ff4620d298f",
+        "dynamicJsonColumns": false,
+        "sharedKey": null
+      }
+    },
+    "availabilityZones": null,
+    "customDomainConfiguration": {
+      "certificateKeyVaultProperties": null,
+      "certificatePassword": null,
+      "certificateValue": null,
+      "customDomainVerificationId": "9AB9A27993A09C541B2749BA4B0AAAFAD884A6DD26698A6CE576A7CB3AA90CF9",
+      "dnsSuffix": null,
+      "expirationDate": null,
+      "subjectName": null,
+      "thumbprint": null
+    },
+    "daprAIConnectionString": null,
+    "daprAIInstrumentationKey": null,
+    "daprConfiguration": {
+      "version": "1.13.6-msft.2"
+    },
+    "defaultDomain": "wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io",
+    "diskEncryptionConfiguration": null,
+    "eventStreamEndpoint": "https://japaneast.azurecontainerapps.dev/subscriptions/2d8cc7a9-24c6-4c3b-9086-d5a7b036937a/resourceGroups/wildcats-resource-group/managedEnvironments/wildcats-environment/eventstream",
+    "infrastructureResourceGroup": null,
+    "kedaConfiguration": {
+      "version": "2.16.1"
+    },
+    "openTelemetryConfiguration": null,
+    "peerAuthentication": {
+      "mtls": {
+        "enabled": false
+      }
+    },
+    "peerTrafficConfiguration": {
+      "encryption": {
+        "enabled": false
+      }
+    },
+    "provisioningState": "Succeeded",
+    "publicNetworkAccess": "Enabled",
+    "staticIp": "135.149.73.160",
+    "vnetConfiguration": null,
+    "workloadProfiles": [
+      {
+        "enableFips": false,
+        "name": "Consumption",
+        "workloadProfileType": "Consumption"
+      }
+    ],
+    "zoneRedundant": false
+  },
+  "resourceGroup": "wildcats-resource-group",
+  "systemData": {
+    "createdAt": "2025-04-10T00:56:46.4080967",
+    "createdBy": "toru09may@gmail.com",
+    "createdByType": "User",
+    "lastModifiedAt": "2025-04-15T16:23:24.2002167",
+    "lastModifiedBy": "toru09may@gmail.com",
+    "lastModifiedByType": "User"
+  },
+  "type": "Microsoft.App/managedEnvironments"
+}
+✅ Azureリソースグループとコンテナレジストリが正常に作成されました！
+
+==> 🐬 Azure Database for MySQLをデプロイ中...
+🐬 Azure Database for MySQL Flexible Serverのデプロイを開始します...
+既存のMySQL Flexible Serverを使用します: wildcats-mysql-server
+既存のデータベースを使用します: testdb
+既存のSSL証明書を使用します
+🔌 データベース接続文字列:
+mysql+pymysql://dbadmin:Password123!@wildcats-mysql-server.mysql.database.azure.com:3306/testdb?ssl_ca=DigiCertGlobalRootCA.crt.pem
+SQLダンプファイルが見つかりましたが、ローカルからのインポートをスキップします。
+バックエンドデプロイ時にマイグレーションが実行されるため、テーブルは自動的に作成されます。
+✅ Azure Database for MySQL Flexible Serverのデプロイが完了しました！
+
+==> 🔄 データベースマイグレーションを実行中...
+🔄 データベースマイグレーションを開始します...
+SSL証明書パス: /Users/toru/Desktop/Tech0/STEP3/docker-next-fastapi-mysql/DigiCertGlobalRootCA.crt.pem
+📝 マイグレーションSQLファイルを作成: /Users/toru/Desktop/Tech0/STEP3/docker-next-fastapi-mysql/backend/migrations/add_parent_id_migration.sql
+⚙️ マイグレーションスクリプトを実行中...
+Docker MySQLクライアントを使用してマイグレーションを実行します
+mysql: [Warning] Using a password on the command line interface can be insecure.
+✅ データベースマイグレーションが正常に完了しました！
+
+==> 🔧 バックエンドをデプロイ中...
+ローカルの.envファイルを読み込みます
+🚀 Backend deployment [v20250416-0125]
+SSL証明書をbackendディレクトリにコピー中...
+Dockerイメージをビルド中...
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 950B 0.0s done
+#1 DONE 0.1s
+
+#2 [internal] load metadata for docker.io/library/python:3.10
+#2 ...
+
+#3 [auth] library/python:pull token for registry-1.docker.io
+#3 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/python:3.10
+#2 DONE 1.8s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 2B 0.0s done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 5.03kB 0.1s done
+#5 DONE 0.1s
+
+#6 [ 1/12] FROM docker.io/library/python:3.10@sha256:e2c7fb05741c735679b26eda7dd34575151079f8c615875fbefe401972b14d85
+#6 resolve docker.io/library/python:3.10@sha256:e2c7fb05741c735679b26eda7dd34575151079f8c615875fbefe401972b14d85 0.1s done
+#6 DONE 0.1s
+
+#7 [ 4/12] RUN pip install --no-cache-dir -r requirements.txt
+#7 CACHED
+
+#8 [ 6/12] COPY ./models ./models
+#8 CACHED
+
+#9 [ 7/12] COPY ./routers ./routers
+#9 CACHED
+
+#10 [11/12] COPY ./database.py ./
+#10 CACHED
+
+#11 [ 9/12] COPY ./auth ./auth
+#11 CACHED
+
+#12 [10/12] COPY ./main.py ./
+#12 CACHED
+
+#13 [ 3/12] COPY requirements.txt .
+#13 CACHED
+
+#14 [ 8/12] COPY ./schemas ./schemas
+#14 CACHED
+
+#15 [ 2/12] WORKDIR /app
+#15 CACHED
+
+#16 [ 5/12] COPY DigiCertGlobalRootCA.crt.pem .
+#16 CACHED
+
+#17 [12/12] COPY ./initial_data.py ./
+#17 CACHED
+
+#18 exporting to image
+#18 exporting layers 0.0s done
+#18 exporting manifest sha256:4c74e2eb5ab16895baf8975ee2be49a136e6b117092de4356d20e136231a9384 0.0s done
+#18 exporting config sha256:9470204d3a758053f0aba947b833c9536e710fdb4f2ffd42cb9f3f56ceb09f79 0.0s done
+#18 exporting attestation manifest sha256:1c6efa95b6fe09a6ab7d72ad9dd3b691a7a0b74e20deb5bb4c9a3100a74b4e61
+#18 exporting attestation manifest sha256:1c6efa95b6fe09a6ab7d72ad9dd3b691a7a0b74e20deb5bb4c9a3100a74b4e61 0.0s done
+#18 exporting manifest list sha256:f3b2b9279eb4a2ecc123c25acf20223e86b4cfa10841b312732a6e5201e760a4 0.0s done
+#18 naming to wildcats9999.azurecr.io/backend:v20250416-0125 done
+#18 unpacking to wildcats9999.azurecr.io/backend:v20250416-0125 0.0s done
+#18 DONE 0.3s
+イメージをACRにプッシュ中...
+The push refers to repository [wildcats9999.azurecr.io/backend]
+a995149dde13: Waiting
+07d1b5af933d: Waiting
+fec1893569aa: Waiting
+af8e3845afdc: Waiting
+d877749e7e84: Waiting
+1eb98adba0eb: Waiting
+e452a109a8a6: Waiting
+b7292c514d47: Waiting
+b35293540a37: Waiting
+b617a119f8a2: Waiting
+167d2d8ca7e1: Waiting
+d643bff427fe: Waiting
+b882cbe8b151: Waiting
+27e5edace566: Waiting
+23b7d26ef1d2: Waiting
+bce9fb0dfc10: Waiting
+3fed26512275: Waiting
+35a6ae16d0f0: Waiting
+140bd42840a4: Waiting
+bce9fb0dfc10: Waiting
+3fed26512275: Waiting
+35a6ae16d0f0: Waiting
+140bd42840a4: Waiting
+27e5edace566: Waiting
+23b7d26ef1d2: Waiting
+a995149dde13: Waiting
+07d1b5af933d: Waiting
+fec1893569aa: Waiting
+af8e3845afdc: Waiting
+d877749e7e84: Waiting
+1eb98adba0eb: Waiting
+b35293540a37: Waiting
+b617a119f8a2: Waiting
+167d2d8ca7e1: Waiting
+d643bff427fe: Waiting
+b882cbe8b151: Waiting
+e452a109a8a6: Waiting
+b7292c514d47: Waiting
+3fed26512275: Waiting
+35a6ae16d0f0: Layer already exists
+140bd42840a4: Layer already exists
+27e5edace566: Waiting
+23b7d26ef1d2: Waiting
+bce9fb0dfc10: Waiting
+a995149dde13: Waiting
+07d1b5af933d: Waiting
+fec1893569aa: Waiting
+af8e3845afdc: Layer already exists
+d877749e7e84: Layer already exists
+1eb98adba0eb: Layer already exists
+167d2d8ca7e1: Waiting
+d643bff427fe: Waiting
+b882cbe8b151: Waiting
+e452a109a8a6: Layer already exists
+b35293540a37: Waiting
+b617a119f8a2: Layer already exists
+07d1b5af933d: Waiting
+b35293540a37: Layer already exists
+27e5edace566: Waiting
+23b7d26ef1d2: Layer already exists
+bce9fb0dfc10: Layer already exists
+a995149dde13: Pushed
+07d1b5af933d: Waiting
+fec1893569aa: Pushed
+b7292c514d47: Pushed
+167d2d8ca7e1: Pushed
+b882cbe8b151: Pushed
+3fed26512275: Pushed
+07d1b5af933d: Waiting
+d643bff427fe: Pushed
+27e5edace566: Pushed
+07d1b5af933d: Waiting
+07d1b5af933d: Waiting
+07d1b5af933d: Waiting
+07d1b5af933d: Waiting
+07d1b5af933d: Waiting
+07d1b5af933d: Waiting
+07d1b5af933d: Waiting
+07d1b5af933d: Waiting
+07d1b5af933d: Waiting
+07d1b5af933d: Waiting
+07d1b5af933d: Waiting
+07d1b5af933d: Waiting
+07d1b5af933d: Waiting
+07d1b5af933d: Waiting
+07d1b5af933d: Waiting
+07d1b5af933d: Waiting
+07d1b5af933d: Waiting
+07d1b5af933d: Waiting
+07d1b5af933d: Waiting
+07d1b5af933d: Waiting
+07d1b5af933d: Waiting
+07d1b5af933d: Waiting
+07d1b5af933d: Waiting
+07d1b5af933d: Waiting
+07d1b5af933d: Waiting
+07d1b5af933d: Waiting
+07d1b5af933d: Waiting
+07d1b5af933d: Waiting
+07d1b5af933d: Waiting
+07d1b5af933d: Waiting
+07d1b5af933d: Waiting
+07d1b5af933d: Waiting
+07d1b5af933d: Waiting
+07d1b5af933d: Waiting
+07d1b5af933d: Waiting
+07d1b5af933d: Waiting
+07d1b5af933d: Layer already exists
+v20250416-0125: digest: sha256:f3b2b9279eb4a2ecc123c25acf20223e86b4cfa10841b312732a6e5201e760a4 size: 856
+WARNING: The behavior of this command has been altered by the following extension: containerapp
+🔌 フロントエンドURL検出: https://frontend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+✅ OPENAI_API_KEYが設定されました
+既存のバックエンドコンテナアプリを削除中...
+WARNING: The behavior of this command has been altered by the following extension: containerapp
+/ Running ..| Running ..[KWARNING: Containerapp successfully deleted
+新しいバックエンドコンテナアプリを作成中...
+WARNING: The behavior of this command has been altered by the following extension: containerapp
+WARNING: Adding registry password as a secret with name "wildcats9999azurecrio-wildcats9999"
+/ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..[KWARNING: 
+Container app created. Access your app at https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io/
+
+{
+  "id": "/subscriptions/2d8cc7a9-24c6-4c3b-9086-d5a7b036937a/resourceGroups/wildcats-resource-group/providers/Microsoft.App/containerapps/backend-container",
+  "identity": {
+    "type": "None"
+  },
+  "location": "Japan East",
+  "name": "backend-container",
+  "properties": {
+    "configuration": {
+      "activeRevisionsMode": "Single",
+      "dapr": null,
+      "identitySettings": [],
+      "ingress": {
+        "additionalPortMappings": null,
+        "allowInsecure": false,
+        "clientCertificateMode": null,
+        "corsPolicy": null,
+        "customDomains": null,
+        "exposedPort": 0,
+        "external": true,
+        "fqdn": "backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io",
+        "ipSecurityRestrictions": null,
+        "stickySessions": null,
+        "targetPort": 8000,
+        "targetPortHttpScheme": null,
+        "traffic": [
+          {
+            "latestRevision": true,
+            "weight": 100
+          }
+        ],
+        "transport": "Auto"
+      },
+      "maxInactiveRevisions": 100,
+      "registries": [
+        {
+          "identity": "",
+          "passwordSecretRef": "wildcats9999azurecrio-wildcats9999",
+          "server": "wildcats9999.azurecr.io",
+          "username": "wildcats9999"
+        }
+      ],
+      "revisionTransitionThreshold": null,
+      "runtime": null,
+      "secrets": [
+        {
+          "name": "wildcats9999azurecrio-wildcats9999"
+        }
+      ],
+      "service": null,
+      "targetLabel": ""
+    },
+    "customDomainVerificationId": "9AB9A27993A09C541B2749BA4B0AAAFAD884A6DD26698A6CE576A7CB3AA90CF9",
+    "delegatedIdentities": [],
+    "environmentId": "/subscriptions/2d8cc7a9-24c6-4c3b-9086-d5a7b036937a/resourceGroups/wildcats-resource-group/providers/Microsoft.App/managedEnvironments/wildcats-environment",
+    "eventStreamEndpoint": "https://japaneast.azurecontainerapps.dev/subscriptions/2d8cc7a9-24c6-4c3b-9086-d5a7b036937a/resourceGroups/wildcats-resource-group/containerApps/backend-container/eventstream",
+    "latestReadyRevisionName": "backend-container--vjm8lai",
+    "latestRevisionFqdn": "backend-container--vjm8lai.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io",
+    "latestRevisionName": "backend-container--vjm8lai",
+    "managedEnvironmentId": "/subscriptions/2d8cc7a9-24c6-4c3b-9086-d5a7b036937a/resourceGroups/wildcats-resource-group/providers/Microsoft.App/managedEnvironments/wildcats-environment",
+    "outboundIpAddresses": [
+      "20.210.72.88",
+      "20.210.72.103",
+      "20.210.72.109",
+      "20.210.72.73",
+      "48.218.158.62",
+      "48.218.158.84",
+      "48.218.158.83",
+      "48.218.158.66",
+      "48.218.158.55",
+      "48.218.158.81",
+      "20.48.86.170",
+      "20.48.86.160",
+      "20.48.86.154",
+      "20.48.86.165",
+      "48.218.81.17",
+      "48.218.80.248",
+      "48.218.80.238",
+      "48.218.81.11",
+      "48.218.81.1",
+      "48.218.80.246",
+      "20.18.118.34",
+      "20.18.117.222",
+      "20.18.118.37",
+      "20.18.118.36",
+      "20.18.118.32",
+      "20.18.116.214",
+      "20.18.118.33",
+      "20.18.117.223",
+      "20.18.118.35",
+      "20.18.232.213",
+      "4.216.133.30",
+      "20.243.233.234",
+      "20.243.233.244",
+      "20.243.233.253",
+      "20.243.234.117",
+      "20.243.234.1",
+      "20.243.234.5",
+      "20.243.234.50",
+      "20.243.233.204",
+      "20.243.235.3",
+      "135.149.73.137"
+    ],
+    "patchingMode": "Automatic",
+    "provisioningState": "Succeeded",
+    "runningStatus": "Running",
+    "template": {
+      "containers": [
+        {
+          "env": [
+            {
+              "name": "DATABASE_URL"
+            },
+            {
+              "name": "FRONTEND_ORIGIN"
+            },
+            {
+              "name": "ENV"
+            },
+            {
+              "name": "OPENAI_API_KEY"
+            }
+          ],
+          "image": "wildcats9999.azurecr.io/backend:v20250416-0125",
+          "imageType": "ContainerImage",
+          "name": "backend-container",
+          "resources": {
+            "cpu": 0.5,
+            "ephemeralStorage": "2Gi",
+            "memory": "1Gi"
+          }
+        }
+      ],
+      "initContainers": null,
+      "revisionSuffix": "",
+      "scale": {
+        "cooldownPeriod": 300,
+        "maxReplicas": 10,
+        "minReplicas": null,
+        "pollingInterval": 30,
+        "rules": null
+      },
+      "serviceBinds": null,
+      "terminationGracePeriodSeconds": null,
+      "volumes": null
+    },
+    "workloadProfileName": "Consumption"
+  },
+  "resourceGroup": "wildcats-resource-group",
+  "systemData": {
+    "createdAt": "2025-04-15T16:26:04.191132",
+    "createdBy": "toru09may@gmail.com",
+    "createdByType": "User",
+    "lastModifiedAt": "2025-04-15T16:26:04.191132",
+    "lastModifiedBy": "toru09may@gmail.com",
+    "lastModifiedByType": "User"
+  },
+  "type": "Microsoft.App/containerApps"
+}
+WARNING: The behavior of this command has been altered by the following extension: containerapp
+✅ バックエンド更新が完了しました！
+🔗 バックエンドURL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+
+==> 🔧 フロントエンドをデプロイ中...
+🚀 Frontend deployment [v20250416-0126]
+🔌 API URL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+更新した環境変数: NEXT_PUBLIC_API_URL=https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+Dockerイメージをビルド中...
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 1.05kB 0.1s done
+#1 DONE 0.2s
+
+#2 [internal] load metadata for docker.io/library/node:18-alpine
+#2 ...
+
+#3 [auth] library/node:pull token for registry-1.docker.io
+#3 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node:18-alpine
+#2 DONE 2.4s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 2B 0.0s done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 DONE 0.0s
+
+#6 [builder 1/6] FROM docker.io/library/node:18-alpine@sha256:8d6421d663b4c28fd3ebc498332f249011d118945588d0a35cb9bc4b8ca09d9e
+#6 resolve docker.io/library/node:18-alpine@sha256:8d6421d663b4c28fd3ebc498332f249011d118945588d0a35cb9bc4b8ca09d9e 0.1s done
+#6 DONE 0.1s
+
+#5 [internal] load build context
+#5 transferring context: 54.04MB 4.8s
+#5 transferring context: 55.78MB 9.8s
+#5 transferring context: 57.94MB 14.9s
+#5 transferring context: 58.08MB 15.4s done
+#5 DONE 15.8s
+
+#7 [builder 2/6] WORKDIR /app
+#7 CACHED
+
+#8 [builder 3/6] COPY package*.json ./
+#8 CACHED
+
+#9 [builder 4/6] RUN npm install
+#9 CACHED
+
+#10 [builder 5/6] COPY . .
+#10 DONE 55.5s
+
+#11 [builder 6/6] RUN npm run build
+#11 6.077 
+#11 6.077 > frontend@0.1.0 build
+#11 6.077 > next build
+#11 6.077 
+#11 9.317 Attention: Next.js now collects completely anonymous telemetry regarding usage.
+#11 9.317 This information is used to shape Next.js' roadmap and prioritize features.
+#11 9.317 You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+#11 9.317 https://nextjs.org/telemetry
+#11 9.317 
+#11 9.532    ▲ Next.js 15.2.4
+#11 9.532    - Environments: .env.local, .env.production
+#11 9.532 
+#11 9.916    Linting and checking validity of types ...
+#11 10.46    Creating an optimized production build ...
+#11 48.24  ✓ Compiled successfully
+#11 48.25    Collecting page data ...
+#11 50.27 [Server] Using API URL: http://backend:8000
+#11 50.30 [API URL初期化] {
+#11 50.30   original: 'http://backend:8000',
+#11 50.30   isProduction: true,
+#11 50.30   isBrowser: false,
+#11 50.30   isHttpsPage: false,
+#11 50.30   isLocalhost: false
+#11 50.30 }
+#11 50.30 [Security] HTTPをHTTPSに変換: https://backend:8000
+#11 50.30 [最終API URL] https://backend:8000
+#11 50.30 Final API URL setting: https://backend:8000
+#11 50.30 UI変更を確認中
+#11 50.31 [Server] Using API URL: http://backend:8000
+#11 50.31 [API URL初期化] {
+#11 50.31   original: 'http://backend:8000',
+#11 50.31   isProduction: true,
+#11 50.31   isBrowser: false,
+#11 50.31   isHttpsPage: false,
+#11 50.31   isLocalhost: false
+#11 50.31 }
+#11 50.31 [Security] HTTPをHTTPSに変換: https://backend:8000
+#11 50.31 [最終API URL] https://backend:8000
+#11 50.31 Final API URL setting: https://backend:8000
+#11 50.31 [Server] Using API URL: http://backend:8000
+#11 50.31 [API URL初期化] {
+#11 50.31   original: 'http://backend:8000',
+#11 50.31   isProduction: true,
+#11 50.31   isBrowser: false,
+#11 50.31   isHttpsPage: false,
+#11 50.31   isLocalhost: false
+#11 50.31 }
+#11 50.31 [Security] HTTPをHTTPSに変換: https://backend:8000
+#11 50.31 [最終API URL] https://backend:8000
+#11 50.31 Final API URL setting: https://backend:8000
+#11 50.35 [Server] Using API URL: http://backend:8000
+#11 50.36 [API URL初期化] {
+#11 50.36   original: 'http://backend:8000',
+#11 50.36   isProduction: true,
+#11 50.36   isBrowser: false,
+#11 50.36   isHttpsPage: false,
+#11 50.36   isLocalhost: false
+#11 50.36 }
+#11 50.36 [Security] HTTPをHTTPSに変換: https://backend:8000
+#11 50.36 [最終API URL] https://backend:8000
+#11 50.36 Final API URL setting: https://backend:8000
+#11 50.42 [Server] Using API URL: http://backend:8000
+#11 50.42 [API URL初期化] {
+#11 50.42   original: 'http://backend:8000',
+#11 50.42   isProduction: true,
+#11 50.42   isBrowser: false,
+#11 50.42   isHttpsPage: false,
+#11 50.42   isLocalhost: false
+#11 50.42 }
+#11 50.42 [Security] HTTPをHTTPSに変換: https://backend:8000
+#11 50.42 [最終API URL] https://backend:8000
+#11 50.42 Final API URL setting: https://backend:8000
+#11 50.43 [Server] Using API URL: http://backend:8000
+#11 50.43 [API URL初期化] {
+#11 50.43   original: 'http://backend:8000',
+#11 50.43   isProduction: true,
+#11 50.43   isBrowser: false,
+#11 50.43   isHttpsPage: false,
+#11 50.43   isLocalhost: false
+#11 50.43 }
+#11 50.43 [Security] HTTPをHTTPSに変換: https://backend:8000
+#11 50.43 [最終API URL] https://backend:8000
+#11 50.43 Final API URL setting: https://backend:8000
+#11 50.46 [Server] Using API URL: http://backend:8000
+#11 50.47 [API URL初期化] {
+#11 50.47   original: 'http://backend:8000',
+#11 50.47   isProduction: true,
+#11 50.47   isBrowser: false,
+#11 50.47   isHttpsPage: false,
+#11 50.47   isLocalhost: false
+#11 50.47 }
+#11 50.47 [Security] HTTPをHTTPSに変換: https://backend:8000
+#11 50.47 [最終API URL] https://backend:8000
+#11 50.47 Final API URL setting: https://backend:8000
+#11 52.95    Generating static pages (0/38) ...
+#11 54.90 環境情報: {
+#11 54.90   NODE_ENV: 'production',
+#11 54.90   envApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io',
+#11 54.90   configApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io'
+#11 54.90 }
+#11 54.90 本番環境を使用します
+#11 54.90 本番APIのURL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+#11 54.97 環境情報: {
+#11 54.97   NODE_ENV: 'production',
+#11 54.97   envApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io',
+#11 54.97   configApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io'
+#11 54.97 }
+#11 54.97 本番環境を使用します
+#11 54.97 本番APIのURL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+#11 55.04 環境情報: {
+#11 55.04   NODE_ENV: 'production',
+#11 55.04   envApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io',
+#11 55.04   configApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io'
+#11 55.04 }
+#11 55.04 本番環境を使用します
+#11 55.04 本番APIのURL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+#11 55.04 環境情報: {
+#11 55.04   NODE_ENV: 'production',
+#11 55.04   envApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io',
+#11 55.04   configApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io'
+#11 55.04 }
+#11 55.04 本番環境を使用します
+#11 55.04 本番APIのURL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+#11 55.04 環境情報: {
+#11 55.04   NODE_ENV: 'production',
+#11 55.04   envApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io',
+#11 55.04   configApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io'
+#11 55.04 }
+#11 55.04 本番環境を使用します
+#11 55.04 本番APIのURL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+#11 55.04 環境情報: {
+#11 55.04   NODE_ENV: 'production',
+#11 55.04   envApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io',
+#11 55.04   configApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io'
+#11 55.04 }
+#11 55.18 本番環境を使用します
+#11 55.18 本番APIのURL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+#11 55.35 [Server] Using API URL: http://backend:8000
+#11 55.35 [API URL初期化] {
+#11 55.35   original: 'http://backend:8000',
+#11 55.35   isProduction: true,
+#11 55.35   isBrowser: false,
+#11 55.35   isHttpsPage: false,
+#11 55.35   isLocalhost: false
+#11 55.35 }
+#11 55.35 [Security] HTTPをHTTPSに変換: https://backend:8000
+#11 55.35 [最終API URL] https://backend:8000
+#11 55.35 Final API URL setting: https://backend:8000
+#11 55.35 UI変更を確認中
+#11 55.35 環境情報: {
+#11 55.35   NODE_ENV: 'production',
+#11 55.35   envApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io',
+#11 55.35   configApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io'
+#11 55.35 }
+#11 55.35 本番環境を使用します
+#11 55.35 本番APIのURL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+#11 55.35 環境情報: {
+#11 55.35   NODE_ENV: 'production',
+#11 55.35   envApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io',
+#11 55.35   configApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io'
+#11 55.35 }
+#11 55.35 本番環境を使用します
+#11 55.35 本番APIのURL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+#11 55.35 環境情報: {
+#11 55.35   NODE_ENV: 'production',
+#11 55.35   envApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io',
+#11 55.35   configApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io'
+#11 55.35 }
+#11 55.35 本番環境を使用します
+#11 55.35 本番APIのURL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+#11 55.35 環境情報: {
+#11 55.35   NODE_ENV: 'production',
+#11 55.35   envApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io',
+#11 55.35   configApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io'
+#11 55.35 }
+#11 55.35 本番環境を使用します
+#11 55.35 本番APIのURL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+#11 55.35 環境情報: {
+#11 55.35   NODE_ENV: 'production',
+#11 55.35   envApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io',
+#11 55.35   configApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io'
+#11 55.35 }
+#11 55.35 本番環境を使用します
+#11 55.35 本番APIのURL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+#11 55.35 [Server] Using API URL: http://backend:8000
+#11 55.35 [API URL初期化] {
+#11 55.35   original: 'http://backend:8000',
+#11 55.35   isProduction: true,
+#11 55.35   isBrowser: false,
+#11 55.35   isHttpsPage: false,
+#11 55.35   isLocalhost: false
+#11 55.35 }
+#11 55.35 [Security] HTTPをHTTPSに変換: https://backend:8000
+#11 55.35 [最終API URL] https://backend:8000
+#11 55.35 Final API URL setting: https://backend:8000
+#11 55.35 UI変更を確認中
+#11 55.35 環境情報: {
+#11 55.35   NODE_ENV: 'production',
+#11 55.35   envApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io',
+#11 55.35   configApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io'
+#11 55.35 }
+#11 55.35 本番環境を使用します
+#11 55.35 本番APIのURL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+#11 55.35 環境情報: {
+#11 55.35   NODE_ENV: 'production',
+#11 55.35   envApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io',
+#11 55.35   configApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io'
+#11 55.35 }
+#11 55.35 本番環境を使用します
+#11 55.35 本番APIのURL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+#11 55.35 環境情報: {
+#11 55.35   NODE_ENV: 'production',
+#11 55.35   envApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io',
+#11 55.35   configApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io'
+#11 55.35 }
+#11 55.35 本番環境を使用します
+#11 55.35 本番APIのURL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+#11 55.35 環境情報: {
+#11 55.35   NODE_ENV: 'production',
+#11 55.35   envApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io',
+#11 55.35   configApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io'
+#11 55.35 }
+#11 55.35 本番環境を使用します
+#11 55.35 本番APIのURL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+#11 55.35 環境情報: {
+#11 55.35   NODE_ENV: 'production',
+#11 55.35   envApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io',
+#11 55.35   configApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io'
+#11 55.35 }
+#11 55.35 本番環境を使用します
+#11 55.35 本番APIのURL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+#11 55.41    Generating static pages (9/38) 
+#11 55.41 環境情報: {
+#11 55.41   NODE_ENV: 'production',
+#11 55.41   envApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io',
+#11 55.41   configApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io'
+#11 55.41 }
+#11 55.41 本番環境を使用します
+#11 55.41 本番APIのURL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+#11 55.41 環境情報: {
+#11 55.41   NODE_ENV: 'production',
+#11 55.41   envApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io',
+#11 55.41   configApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io'
+#11 55.41 }
+#11 55.41 本番環境を使用します
+#11 55.41 本番APIのURL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+#11 55.50 環境情報: {
+#11 55.50   NODE_ENV: 'production',
+#11 55.50   envApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io',
+#11 55.50   configApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io'
+#11 55.50 }
+#11 55.50 本番環境を使用します
+#11 55.50 本番APIのURL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+#11 55.50 環境情報: {
+#11 55.50   NODE_ENV: 'production',
+#11 55.50   envApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io',
+#11 55.50   configApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io'
+#11 55.50 }
+#11 55.50 本番環境を使用します
+#11 55.50 本番APIのURL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+#11 55.50 環境情報: {
+#11 55.50   NODE_ENV: 'production',
+#11 55.50   envApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io',
+#11 55.50   configApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io'
+#11 55.50 }
+#11 55.50 本番環境を使用します
+#11 55.50 本番APIのURL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+#11 55.50 環境情報: {
+#11 55.50   NODE_ENV: 'production',
+#11 55.50   envApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io',
+#11 55.50   configApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io'
+#11 55.50 }
+#11 55.50 本番環境を使用します
+#11 55.50 本番APIのURL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+#11 55.50 環境情報: {
+#11 55.50   NODE_ENV: 'production',
+#11 55.50   envApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io',
+#11 55.50   configApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io'
+#11 55.50 }
+#11 55.50 本番環境を使用します
+#11 55.50 本番APIのURL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+#11 55.50 環境情報: {
+#11 55.50   NODE_ENV: 'production',
+#11 55.50   envApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io',
+#11 55.50   configApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io'
+#11 55.50 }
+#11 55.50 本番環境を使用します
+#11 55.50 本番APIのURL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+#11 55.51 環境情報: {
+#11 55.51   NODE_ENV: 'production',
+#11 55.51   envApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io',
+#11 55.51   configApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io'
+#11 55.51 }
+#11 55.51 本番環境を使用します
+#11 55.51 本番APIのURL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+#11 55.51 環境情報: {
+#11 55.51   NODE_ENV: 'production',
+#11 55.51   envApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io',
+#11 55.51   configApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io'
+#11 55.51 }
+#11 55.51 本番環境を使用します
+#11 55.51 本番APIのURL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+#11 55.51 環境情報: {
+#11 55.51   NODE_ENV: 'production',
+#11 55.51   envApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io',
+#11 55.51   configApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io'
+#11 55.51 }
+#11 55.51 本番環境を使用します
+#11 55.51 本番APIのURL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+#11 55.51 環境情報: {
+#11 55.51   NODE_ENV: 'production',
+#11 55.51   envApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io',
+#11 55.51   configApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io'
+#11 55.51 }
+#11 55.51 本番環境を使用します
+#11 55.51 本番APIのURL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+#11 55.54 環境情報: {
+#11 55.54   NODE_ENV: 'production',
+#11 55.54   envApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io',
+#11 55.54   configApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io'
+#11 55.54 }
+#11 55.54 本番環境を使用します
+#11 55.54 本番APIのURL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+#11 55.72 環境情報: {
+#11 55.72   NODE_ENV: 'production',
+#11 55.72   envApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io',
+#11 55.72   configApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io'
+#11 55.72 }
+#11 55.72 本番環境を使用します
+#11 55.72 本番APIのURL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+#11 55.72 環境情報: {
+#11 55.72   NODE_ENV: 'production',
+#11 55.72   envApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io',
+#11 55.72   configApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io'
+#11 55.72 }
+#11 55.72 本番環境を使用します
+#11 55.72 本番APIのURL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+#11 55.72 環境情報: {
+#11 55.72   NODE_ENV: 'production',
+#11 55.72   envApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io',
+#11 55.72   configApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io'
+#11 55.72 }
+#11 55.72 本番環境を使用します
+#11 55.72 本番APIのURL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+#11 55.72 環境情報: {
+#11 55.72   NODE_ENV: 'production',
+#11 55.72   envApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io',
+#11 55.72   configApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io'
+#11 55.72 }
+#11 55.72 本番環境を使用します
+#11 55.72 本番APIのURL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+#11 55.75    Generating static pages (18/38) 
+#11 55.75 環境情報: {
+#11 55.75   NODE_ENV: 'production',
+#11 55.75   envApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io',
+#11 55.75   configApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io'
+#11 55.75 }
+#11 55.75 本番環境を使用します
+#11 55.75 本番APIのURL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+#11 55.75 環境情報: {
+#11 55.75   NODE_ENV: 'production',
+#11 55.75   envApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io',
+#11 55.75   configApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io'
+#11 55.75 }
+#11 55.75 本番環境を使用します
+#11 55.75 本番APIのURL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+#11 55.75 環境情報: {
+#11 55.75   NODE_ENV: 'production',
+#11 55.75   envApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io',
+#11 55.75   configApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io'
+#11 55.75 }
+#11 55.75 本番環境を使用します
+#11 55.75 本番APIのURL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+#11 55.75 環境情報: {
+#11 55.75   NODE_ENV: 'production',
+#11 55.75   envApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io',
+#11 55.75   configApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io'
+#11 55.75 }
+#11 55.75 本番環境を使用します
+#11 55.75 本番APIのURL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+#11 55.75 環境情報: {
+#11 55.75   NODE_ENV: 'production',
+#11 55.75   envApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io',
+#11 55.75   configApiUrl: 'https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io'
+#11 55.75 }
+#11 55.75 本番環境を使用します
+#11 55.75 本番APIのURL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+#11 55.75    Generating static pages (28/38) 
+#11 55.76  ✓ Generating static pages (38/38)
+#11 62.31    Finalizing page optimization ...
+#11 62.31    Collecting build traces ...
+#11 73.15 
+#11 73.16 Route (pages)                                 Size  First Load JS
+#11 73.16 ┌ ○ /                                      2.03 kB         115 kB
+#11 73.16 ├   /_app                                      0 B        80.7 kB
+#11 73.16 ├ ○ /404                                     190 B        80.9 kB
+#11 73.16 ├ ƒ /api/chat                                  0 B        80.7 kB
+#11 73.16 ├ ○ /auth/login                            1.98 kB         123 kB
+#11 73.16 ├ ○ /auth/register                         2.53 kB         123 kB
+#11 73.16 ├ ○ /checklist (396 ms)                    2.89 kB        86.7 kB
+#11 73.16 ├ ○ /community (720 ms)                    11.5 kB         119 kB
+#11 73.16 ├ ○ /conversation (723 ms)                 2.72 kB         111 kB
+#11 73.16 ├ ○ /conversation/feedback (720 ms)           4 kB         113 kB
+#11 73.16 ├ ○ /conversation/partners (722 ms)        2.18 kB         111 kB
+#11 73.16 ├ ○ /conversation/practice                 3.93 kB         113 kB
+#11 73.16 ├ ○ /conversation/register (721 ms)        2.71 kB         111 kB
+#11 73.16 ├ ○ /conversation/setup                    2.33 kB         115 kB
+#11 73.16 ├ ○ /conversation/tips-first (380 ms)       3.1 kB        86.9 kB
+#11 73.16 ├ ○ /conversation/tips-later               2.79 kB        86.6 kB
+#11 73.16 ├ ○ /conversation/tips-selection (381 ms)  1.43 kB        85.2 kB
+#11 73.16 ├ ○ /profile                               1.43 kB         110 kB
+#11 73.16 ├ ○ /profile/edit                          1.87 kB         111 kB
+#11 73.16 └ ○ /profile/user-info                     2.16 kB         106 kB
+#11 73.16 + First Load JS shared by all              85.8 kB
+#11 73.16   ├ chunks/framework-ee17a4c43a44d3e2.js   44.7 kB
+#11 73.16   ├ chunks/main-0c3fb5f381195567.js        34.6 kB
+#11 73.16   └ other shared chunks (total)            6.51 kB
+#11 73.16 
+#11 73.16 ○  (Static)   prerendered as static content
+#11 73.16 ƒ  (Dynamic)  server-rendered on demand
+#11 73.16 
+#11 DONE 73.4s
+
+#12 [stage-1  3/12] COPY --from=builder /app/package*.json ./
+#12 CACHED
+
+#13 [stage-1  4/12] COPY --from=builder /app/.next ./.next
+#13 DONE 0.8s
+
+#14 [stage-1  5/12] COPY --from=builder /app/public ./public
+#14 DONE 0.1s
+
+#15 [stage-1  6/12] COPY --from=builder /app/node_modules ./node_modules
+#15 DONE 24.0s
+
+#16 [stage-1  7/12] COPY --from=builder /app/styles ./styles
+#16 DONE 0.4s
+
+#17 [stage-1  8/12] COPY --from=builder /app/pages ./pages
+#17 DONE 0.1s
+
+#18 [stage-1  9/12] COPY --from=builder /app/components ./components
+#18 DONE 0.1s
+
+#19 [stage-1 10/12] COPY --from=builder /app/services ./services
+#19 DONE 0.1s
+
+#20 [stage-1 11/12] COPY --from=builder /app/next.config.js ./next.config.js
+#20 DONE 0.1s
+
+#21 [stage-1 12/12] COPY --from=builder /app/.env* ./
+#21 DONE 1.7s
+
+#22 exporting to image
+#22 exporting layers
+#22 exporting layers 94.2s done
+#22 exporting manifest sha256:9eff3f6c20260e39c95a6ad8c40389c0a22cd78877c77c2e20134ce757f6927a 0.0s done
+#22 exporting config sha256:4a52cfd99c24f817ef3c0926bc5209e7f2e4b2d2b04ee3285cfa4d2d6d3b4d85 0.0s done
+#22 exporting attestation manifest sha256:fc4cf6ad81d33d484a61eb30895a564295a64cd6ae36f2d8dcc35588fa5290d9
+#22 exporting attestation manifest sha256:fc4cf6ad81d33d484a61eb30895a564295a64cd6ae36f2d8dcc35588fa5290d9 0.1s done
+#22 exporting manifest list sha256:effb26f5a9ec88bd163a371cf164787939eb56e4f027d595252f543aaa3605fb 0.1s done
+#22 naming to wildcats9999.azurecr.io/frontend:v20250416-0126
+#22 naming to wildcats9999.azurecr.io/frontend:v20250416-0126 0.0s done
+#22 unpacking to wildcats9999.azurecr.io/frontend:v20250416-0126
+#22 unpacking to wildcats9999.azurecr.io/frontend:v20250416-0126 36.9s done
+#22 DONE 131.5s
+イメージをACRにプッシュ中...
+The push refers to repository [wildcats9999.azurecr.io/frontend]
+091982dadf13: Waiting
+944ef9ab9aa2: Waiting
+4c1b4cc6e7de: Waiting
+fedb6ebe7107: Waiting
+9a0bb8484191: Waiting
+7652015ba5f9: Waiting
+81b11b455329: Waiting
+25ff2da83641: Waiting
+ac703668fe86: Waiting
+dd71dde834b5: Waiting
+345f4f8b9a89: Waiting
+087fbe29f47a: Waiting
+1e5a4c89cee5: Waiting
+070b941ab56d: Waiting
+091982dadf13: Waiting
+19eeafa20384: Waiting
+f18232174bc9: Waiting
+25ff2da83641: Layer already exists
+ac703668fe86: Waiting
+7652015ba5f9: Waiting
+81b11b455329: Waiting
+345f4f8b9a89: Waiting
+087fbe29f47a: Waiting
+dd71dde834b5: Waiting
+19eeafa20384: Waiting
+f18232174bc9: Waiting
+1e5a4c89cee5: Waiting
+070b941ab56d: Waiting
+091982dadf13: Waiting
+fedb6ebe7107: Waiting
+9a0bb8484191: Waiting
+944ef9ab9aa2: Waiting
+4c1b4cc6e7de: Waiting
+dd71dde834b5: Layer already exists
+345f4f8b9a89: Layer already exists
+19eeafa20384: Layer already exists
+f18232174bc9: Waiting
+1e5a4c89cee5: Layer already exists
+070b941ab56d: Waiting
+f18232174bc9: Layer already exists
+944ef9ab9aa2: Pushed
+81b11b455329: Pushed
+7652015ba5f9: Pushed
+087fbe29f47a: Pushed
+091982dadf13: Pushed
+9a0bb8484191: Pushed
+ac703668fe86: Pushed
+4c1b4cc6e7de: Pushed
+070b941ab56d: Pushed
+fedb6ebe7107: Pushed
+v20250416-0126: digest: sha256:effb26f5a9ec88bd163a371cf164787939eb56e4f027d595252f543aaa3605fb size: 856
+既存のフロントエンドコンテナアプリを削除中...
+WARNING: The behavior of this command has been altered by the following extension: containerapp
+/ Running ..| Running ..[KWARNING: Containerapp successfully deleted
+新しいフロントエンドコンテナアプリを作成中...
+WARNING: The behavior of this command has been altered by the following extension: containerapp
+WARNING: Adding registry password as a secret with name "wildcats9999azurecrio-wildcats9999"
+/ Running ..| Running ..\ Running ..- Running ../ Running ..| Running ..\ Running ..[KWARNING: 
+Container app created. Access your app at https://frontend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io/
+
+{
+  "id": "/subscriptions/2d8cc7a9-24c6-4c3b-9086-d5a7b036937a/resourceGroups/wildcats-resource-group/providers/Microsoft.App/containerapps/frontend-container",
+  "identity": {
+    "type": "None"
+  },
+  "location": "Japan East",
+  "name": "frontend-container",
+  "properties": {
+    "configuration": {
+      "activeRevisionsMode": "Single",
+      "dapr": null,
+      "identitySettings": [],
+      "ingress": {
+        "additionalPortMappings": null,
+        "allowInsecure": false,
+        "clientCertificateMode": null,
+        "corsPolicy": null,
+        "customDomains": null,
+        "exposedPort": 0,
+        "external": true,
+        "fqdn": "frontend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io",
+        "ipSecurityRestrictions": null,
+        "stickySessions": null,
+        "targetPort": 3000,
+        "targetPortHttpScheme": null,
+        "traffic": [
+          {
+            "latestRevision": true,
+            "weight": 100
+          }
+        ],
+        "transport": "Auto"
+      },
+      "maxInactiveRevisions": 100,
+      "registries": [
+        {
+          "identity": "",
+          "passwordSecretRef": "wildcats9999azurecrio-wildcats9999",
+          "server": "wildcats9999.azurecr.io",
+          "username": "wildcats9999"
+        }
+      ],
+      "revisionTransitionThreshold": null,
+      "runtime": null,
+      "secrets": [
+        {
+          "name": "wildcats9999azurecrio-wildcats9999"
+        }
+      ],
+      "service": null,
+      "targetLabel": ""
+    },
+    "customDomainVerificationId": "9AB9A27993A09C541B2749BA4B0AAAFAD884A6DD26698A6CE576A7CB3AA90CF9",
+    "delegatedIdentities": [],
+    "environmentId": "/subscriptions/2d8cc7a9-24c6-4c3b-9086-d5a7b036937a/resourceGroups/wildcats-resource-group/providers/Microsoft.App/managedEnvironments/wildcats-environment",
+    "eventStreamEndpoint": "https://japaneast.azurecontainerapps.dev/subscriptions/2d8cc7a9-24c6-4c3b-9086-d5a7b036937a/resourceGroups/wildcats-resource-group/containerApps/frontend-container/eventstream",
+    "latestReadyRevisionName": "frontend-container--wi9hzng",
+    "latestRevisionFqdn": "frontend-container--wi9hzng.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io",
+    "latestRevisionName": "frontend-container--wi9hzng",
+    "managedEnvironmentId": "/subscriptions/2d8cc7a9-24c6-4c3b-9086-d5a7b036937a/resourceGroups/wildcats-resource-group/providers/Microsoft.App/managedEnvironments/wildcats-environment",
+    "outboundIpAddresses": [
+      "20.210.72.88",
+      "20.210.72.103",
+      "20.210.72.109",
+      "20.210.72.73",
+      "48.218.158.62",
+      "48.218.158.84",
+      "48.218.158.83",
+      "48.218.158.66",
+      "48.218.158.55",
+      "48.218.158.81",
+      "20.48.86.170",
+      "20.48.86.160",
+      "20.48.86.154",
+      "20.48.86.165",
+      "48.218.81.17",
+      "48.218.80.248",
+      "48.218.80.238",
+      "48.218.81.11",
+      "48.218.81.1",
+      "48.218.80.246",
+      "20.18.118.34",
+      "20.18.117.222",
+      "20.18.118.37",
+      "20.18.118.36",
+      "20.18.118.32",
+      "20.18.116.214",
+      "20.18.118.33",
+      "20.18.117.223",
+      "20.18.118.35",
+      "20.18.232.213",
+      "4.216.133.30",
+      "20.243.233.234",
+      "20.243.233.244",
+      "20.243.233.253",
+      "20.243.234.117",
+      "20.243.234.1",
+      "20.243.234.5",
+      "20.243.234.50",
+      "20.243.233.204",
+      "20.243.235.3",
+      "135.149.73.137"
+    ],
+    "patchingMode": "Automatic",
+    "provisioningState": "Succeeded",
+    "runningStatus": "Running",
+    "template": {
+      "containers": [
+        {
+          "env": [
+            {
+              "name": "NEXT_PUBLIC_API_URL"
+            }
+          ],
+          "image": "wildcats9999.azurecr.io/frontend:v20250416-0126",
+          "imageType": "ContainerImage",
+          "name": "frontend-container",
+          "resources": {
+            "cpu": 0.5,
+            "ephemeralStorage": "2Gi",
+            "memory": "1Gi"
+          }
+        }
+      ],
+      "initContainers": null,
+      "revisionSuffix": "",
+      "scale": {
+        "cooldownPeriod": 300,
+        "maxReplicas": 10,
+        "minReplicas": null,
+        "pollingInterval": 30,
+        "rules": null
+      },
+      "serviceBinds": null,
+      "terminationGracePeriodSeconds": null,
+      "volumes": null
+    },
+    "workloadProfileName": "Consumption"
+  },
+  "resourceGroup": "wildcats-resource-group",
+  "systemData": {
+    "createdAt": "2025-04-15T16:32:44.4164285",
+    "createdBy": "toru09may@gmail.com",
+    "createdByType": "User",
+    "lastModifiedAt": "2025-04-15T16:32:44.4164285",
+    "lastModifiedBy": "toru09may@gmail.com",
+    "lastModifiedByType": "User"
+  },
+  "type": "Microsoft.App/containerApps"
+}
+WARNING: The behavior of this command has been altered by the following extension: containerapp
+✅ フロントエンド更新が完了しました！
+🌐 フロントエンドURL: https://frontend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+
+==> 🔍 デプロイされたURLを取得中...
+
+==================================================
+✅ 完全デプロイが完了しました！ [v20250416-0122]
+🔗 バックエンドURL: https://backend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+🔗 フロントエンドURL: https://frontend-container.wonderfulbeach-7a1caae1.japaneast.azurecontainerapps.io
+==================================================
+

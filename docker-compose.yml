@@ -12,6 +12,7 @@ services:
       - INTERNAL_API_URL=http://backend:8000
     depends_on:
       - backend
+    command: npm run dev
 
   backend:
     build: ./backend
